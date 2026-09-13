@@ -1,0 +1,138 @@
+<div class="sidebar">
+    <app-sidebar></app-sidebar>
+</div>
+
+<div class="body">
+    <div class="manage-card">
+        <div class="overlay" *ngIf="updatePopUp">
+            <div class="popup">
+                <div class="popup-header">
+                    <h2>Edit User:</h2>
+                    <span id="usernameID">{{user.username}}</span>
+                </div>
+                <a class="close-popup" (click)="editUserPopUpToggle()">&times;</a>
+                <div class="popup-content">
+                    <div class="editUserPassword">
+                        <span style="color: #ccc;">Password</span>
+                        <div class="password-checker-container">
+
+                            <mat-form-field appearance="fill">
+                                <input style="color: #ccc;" matInput id="passwordTextbox" type="password" required=""
+                                    autocomplete="off" [formControl]="selectPassword" [(ngModel)]="selectPassword.value"
+                                    name="txtName">
+                                <mat-label>New Password</mat-label>
+                                <mat-error *ngIf="selectPassword.invalid">{{selectPasswordError()}}</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="fill">
+                                <input style="color: #ccc;" matInput id="passwordTextbox" type="password" required=""
+                                    autocomplete="off" [formControl]="confirmPassword"
+                                    [(ngModel)]="confirmPassword.value" name="txtName">
+                                <mat-label>Confirm Password</mat-label>
+                                <mat-error *ngIf="confirmPassword.invalid">{{confirmPasswordError()}}</mat-error>
+                            </mat-form-field>
+
+                            <span *ngIf="!isPasswordMatch" style="color: red;">Passwords Does Not Match</span>
+
+                            <!-- <input [formControl]="selectPassword" class="passwordInput" type="password"
+                                autocomplete="off" style="width: 15rem;" [(ngModel)]="selectPassword.value"
+                                placeholder="New Password">
+
+                            <input [formControl]="confirmPassword" class="passwordInput" type="password"
+                                autocomplete="off" style="width: 15rem;margin-top: 20px;"
+                                [(ngModel)]="confirmPassword.value" placeholder="Confirm Password">
+                            <label *ngIf="selectPassword.invalid" [ngClass]="'error'"> New Password is Not Valid</label>
+                            <label *ngIf="confirmPassword.invalid && !selectPassword.invalid" [ngClass]="'error'">
+                                Confirmation Password is Not
+                                Valid</label>
+                            <label *ngIf="!isPasswordMatch && !selectPassword.invalid && !confirmPassword.invalid"
+                                [ngClass]="'error'" style="padding: 5px;"> Passwords Does
+                                Not Match</label> -->
+
+
+                            <!-- <input [formControl]="confirmPassword">
+                            <label *ngIf="confirmPassword.invalid" [ngClass]="'error'"> Password required with max 20
+                                character.
+                            </label> -->
+                        </div>
+                    </div>
+                    <div class="editUserRole">
+                        <span style="color: #ccc;">Role</span>
+                        <mat-form-field class="mat-form-field" appearance="outline">
+                            <mat-label style="color: #ccc;">current role: {{user.role}}</mat-label>
+                            <mat-select style="color:black" [(ngModel)]="selectRole" name="selector"
+                                [disabled]="user.username===adminUsername">
+                                <div>
+                                    <mat-option style="color:#ccc;background-color: rgb(27, 26, 26)"
+                                        *ngFor="let select of selects" value="{{select.type}}"> {{select.name}}
+                                    </mat-option>
+                                </div>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="popup-bottom">
+                    <button class="popup-btn" id="confirm-edit-btn" style="outline: none;"
+                        (click)="updateUser()">Confirm</button>
+                </div>
+            </div>
+        </div>
+        <div class="overlay" *ngIf="deletePopUp">
+            <div class="delete-popup">
+                <a class="close-popup" (click)="deleteUserPopUpToggle()">&times;</a>
+                <div class="delete-popup-header">
+                    <h2>Delete User:</h2>
+                    <span id="usernameID">{{user.username}}</span>
+                </div>
+                <div class="delete-popup-content">
+                    <div class="delete-alert-icon">
+                        <mat-icon
+                            style="font-size: 3rem;height: fit-content;width: fit-content;">error_outline</mat-icon>
+                    </div>
+                </div>
+                <div class="delete-popup-bottom">
+                    <div class="delete-buttons">
+                        <button class="delete-popup-btn" id="cancel-btn"
+                            (click)="deleteUserPopUpToggle()">Cancel</button>
+                        <button class="delete-popup-btn" id="confirm-btn" (click)="deleteUser()">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table mat-table [dataSource]="dataSource" class="mat-table">
+
+            <!-- User Name Column -->
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef> Name </th>
+                <td mat-cell *matCellDef="let element"> {{element.username}}
+                </td>
+            </ng-container>
+
+            <!-- User Role Column -->
+            <ng-container matColumnDef="role">
+                <th mat-header-cell *matHeaderCellDef> Role </th>
+                <td mat-cell *matCellDef="let element"> {{element.role}} </td>
+            </ng-container>
+
+            <!-- User Delete Column -->
+            <ng-container matColumnDef="deleteUser">
+                <th id="delete-user-header" mat-header-cell *matHeaderCellDef></th>
+                <td id="delete-user-row" mat-cell *matCellDef="let element">
+                    <div class="user-delete-edit">
+                        <button mat-icon-button>
+                            <mat-icon style="cursor: pointer;" (click)="editUserPopUpToggle(element)">edit</mat-icon>
+                        </button>
+                        <button mat-icon-button [disabled]="element.username===adminUsername"
+                            (click)="deleteUserPopUpToggle(element)">
+                            <mat-icon>delete_outline</mat-icon>
+                        </button>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr style="padding-bottom: 1.5rem;padding-top: 1.5rem;" mat-header-row *matHeaderRowDef="displayedColumns">
+            </tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+    </div>
+</div>

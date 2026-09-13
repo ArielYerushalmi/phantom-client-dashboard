@@ -1,0 +1,19 @@
+<ngx-charts-line-chart class="graph" 
+    style="fill: white"
+    [results]="graphValues"
+
+    [scheme]="colorScheme"
+    [gradient]="gradient"
+    [xAxis]="showXAxis"
+    [yAxis]="showYAxis"
+    [legend]="showLegend"
+    [showXAxisLabel]="showXAxisLabel"
+    [showYAxisLabel]="showYAxisLabel"
+    [xAxisLabel]="'Time'"
+    [yAxisLabel]="entity.parameter.units"
+    [legendTitle]="false"
+
+    [autoScale]="true"
+    [animations]="true"
+    [xAxisTickFormatting]="formatTime">
+</ngx-charts-line-chart>

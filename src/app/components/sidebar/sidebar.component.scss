@@ -1,0 +1,78 @@
+.logo {
+    height: 50px !important;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    width: 100%;
+}
+
+.phantom-title {
+    width: 100%;
+    height: 5%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+}
+
+.phantom-logo-container {
+    bottom: 0;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+}
+
+#phantom-logo {
+    border-radius: 50%;
+    width: 50%;
+}
+
+.sidebar-wrapper {
+    overflow: hidden;
+    position: relative;
+    height: calc(100% - 50px);
+    width: 100%;
+    max-height: 95%;
+    z-index: 4;
+    min-height: unset !important;
+}
+
+.current-item {
+    display: flex;
+    padding-left: 5px;
+}
+
+.other-items {
+    display: flex;
+}
+
+.menu-item {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-content: center !important;
+}
+
+#current-sidebar-tittle {
+    padding-left: 0.6rem;
+    font-size: larger;
+    color: white !important;
+}
+
+#other-sidebar-tittle {
+    padding-left: 0.6rem;
+    font-size: larger;
+    color: grey !important;
+}
+
+#current-icon {
+    color: white;
+}
+
+#other-icon {
+    color: grey;
+}

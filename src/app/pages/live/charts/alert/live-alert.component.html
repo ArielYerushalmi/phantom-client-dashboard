@@ -1,0 +1,9 @@
+<div class="alerts-container">
+    <div [ngClass]="i==0 ? 'first-element label card' : 'label-card'" *ngFor="let alertItem of alerts; let i=index">
+        <mat-icon class="alert-icon">error_outline</mat-icon>
+        <div class="alert-container">
+            <span class="value">{{alertItem.time | date:"MM/dd/yyyy h:mma"}}
+                {{alertItem.value}} {{entity.parameter.units}}</span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,67 @@
+<div class="login-box">
+    <img src="assets/img/phantom-og.png" style="width: 30%;">
+    <br>
+    <h2>Register</h2>
+    <form>
+        <!-- <div class="user-box"> -->
+        <mat-form-field appearance="fill">
+            <input matInput id="usernameTextbox" type="text" required="" autocomplete="off" [formControl]="username"
+                [(ngModel)]="inputUsernameTxt" name="txtName">
+            <mat-label>Username</mat-label>
+            <mat-error *ngIf="username.invalid">{{getUserNameError()}}</mat-error>
+        </mat-form-field>
+        <!-- </div> -->
+        <!-- <div class="user-box"> -->
+        <mat-form-field appearance="fill">
+            <input matInput id="passwordTextbox" type="password" required="" autocomplete="off" [formControl]="password"
+                [(ngModel)]="inputPasswordTxt" name="txtName">
+            <mat-label>Password</mat-label>
+            <mat-error *ngIf="password.invalid">{{getPasswordError()}}</mat-error>
+        </mat-form-field>
+        <!-- </div> -->
+        <!-- <div class="user-box"> -->
+        <mat-form-field appearance="fill">
+            <input matInput id="emailTextbox" type="text" required="" autocomplete="off" [formControl]="email"
+                [(ngModel)]="inputEmaildTxt" name="txtName">
+            <mat-label>E-Mail</mat-label>
+            <mat-error *ngIf="email.invalid">{{getEmailError()}}</mat-error>
+        </mat-form-field>
+        <!-- </div> -->
+        <!-- <div class="user-box">
+            <input id="ageTextbox" type="number" required="" autocomplete="off" [(ngModel)]="inputAgeTxt"
+                name="txtName">
+            <label>Age</label>
+        </div> -->
+        <div class="select-box">
+            <mat-form-field appearance="fill">
+                <mat-label>Select Type</mat-label>
+                <mat-select style="color:black" [formControl]="type" [(ngModel)]="selectRole" required name="selector">
+                    <div>
+                        <mat-option style="color:#ccc;background-color: rgb(27, 26, 26)" *ngFor="let select of selects"
+                            value="{{select.type}}"> {{select.name}} </mat-option>
+                    </div>
+                </mat-select>
+                <mat-error *ngIf="type.hasError('required')">Required</mat-error>
+            </mat-form-field>
+        </div>
+
+        <span id="alert" *ngIf="allInfoAlert">Fill all required info</span>
+        <span id="alert" *ngIf="wrongUserAlert">Username Or Password Is Incorrect</span>
+        <span id="alert" *ngIf="serverDownAlert">User Service Is Down</span>
+
+        <a class=" activeButton" (click)="onSubmitCreate()" style="color: white;">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            Submit
+        </a>
+        <a class=" activeButton" (click)="switchToLogin()" style="margin-left: 25%;color: white;">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            Login
+        </a>
+    </form>
+</div>

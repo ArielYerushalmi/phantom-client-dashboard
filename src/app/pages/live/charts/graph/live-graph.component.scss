@@ -1,0 +1,20 @@
+::ng-deep .ngx-charts text {
+    fill: white;
+}
+
+::ng-deep .ngx-charts .line-highlight {
+    display: block !important;
+}
+
+::ng-deep .ngx-charts .gridline-path {
+    stroke: #dddddd17 !important;
+}
+
+.graph {
+    text-align: center;
+    width: 100%;
+    flex: 1 1 auto;
+    display: flex;
+    position: relative;
+    flex-wrap: wrap;
+}

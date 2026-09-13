@@ -1,0 +1,94 @@
+<div class="archive-dashboard-container" *ngIf="dashboard===null">
+    <app-preset-manager [IsLive]="false" (presetEvent)="onGetPreset($event)" (createPresetEvent)="createPreset($event)"
+        (goToFilterPage)="onGotoFilterPage()">
+    </app-preset-manager>
+</div>
+
+<div class="archive-dashboard-container" *ngIf="dashboard">
+    <div class="dashboard-container">
+        <div class="overlay" *ngIf="isUpdatePopup">
+            <div class="confirm-popup">
+                <div class="confirm-popup-header">
+                    <h2>Dashboard Updated</h2>
+                </div>
+                <div class="popup-content">
+                    <mat-icon class="alert-icon">check_circle_outline</mat-icon>
+                </div>
+                <div class="popup-bottom">
+                    <button class="popup-btn" id="confirm-btn" (click)="updatePopupToggle()">Confirm</button>
+                </div>
+            </div>
+        </div>
+        <div class=" dashboard-container-head">
+            <div class="headline-content">
+                <div class="headline-content-left">
+                    <mat-icon style="cursor: pointer;" (click)="onGotoFilterPage()">keyboard_backspace</mat-icon>
+                    <mat-icon style="cursor: pointer;" (click)="onGotoPresetManager()">apps</mat-icon>
+                </div>
+                <mat-paginator #paginator class="paginator" (page)="handlePageEvent($event)"
+                    [length]="lengthForPaginator" [pageSize]="pageSize" [pageSizeOptions]=" pageSizeOptions"
+                    showFirstLastButtons>
+                </mat-paginator>
+                <div class="headline-content-right">
+                    <mat-icon style="cursor: pointer; margin: 0 0.25rem;" (click)="updateDashboard()">save</mat-icon>
+                    <mat-icon style="cursor: pointer; margin: 0 0.25rem;"
+                        (click)="parametersDrawer.toggle()">menu</mat-icon>
+                </div>
+            </div>
+        </div>
+        <div class="dashboard-container-body">
+            <mat-drawer-container class="mat-drawer-container" [hasBackdrop]="true">
+                <mat-drawer #parametersDrawer mode="'over'" class="mat-drawer-right" position="end">
+                    <div *ngFor="let parameter of parameters; let i = index" class="mat-drawer-parameters">
+                        <span [ngClass]="isParameterUsed(parameter) ? 'usedParameter' : 'notUsedParameter'"
+                            (click)="onParameterSelected(parameter)">
+                            {{parameter.parameterName}}
+                        </span>
+                    </div>
+                </mat-drawer>
+                <mat-drawer-content class="mat-darawer-content">
+                    <div class="gridster-container">
+                        <gridster [options]="options" class="gridster">
+                            <gridster-item class="gridster-item" [item]="gridsterItem"
+                                *ngFor="let gridsterItem of gridsterItemsList; let itemId = index">
+                                <div class="chart-gridster-header">
+                                    <span class="gridster-item-header-name">
+                                        {{gridsterItem.chart.parameter.parameterName}}
+                                    </span>
+                                    <ng-container *ngIf="menuArray[itemId]==true; then menuOpen else menuClose">
+                                    </ng-container>
+                                    <ng-template #menuClose>
+                                        <mat-icon style="cursor: pointer;" (click)="menuToggle(itemId)">menu</mat-icon>
+                                    </ng-template>
+                                    <ng-template #menuOpen>
+                                        <span class="extended-menu-icons">
+                                            <mat-icon style="cursor: pointer;"
+                                                (click)="matSelect.toggle()">bar_chart</mat-icon>
+                                            <mat-icon style="cursor: pointer;"
+                                                (click)="menuToggle(itemId); onRemove(gridsterItem.chart.parameter)">delete_outline</mat-icon>
+                                            <p class="close-popup" style="cursor: pointer;"
+                                                (click)="menuToggle(itemId)">
+                                                &times;</p>
+                                        </span>
+                                        <mat-select #matSelect name="chartSelect" class="mat-select">
+                                            <mat-option *ngFor="let chartType of chartTypes " value="chartType"
+                                                (click)="onChangeChartType(itemId, chartType)">
+                                                {{getType(chartType)}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </ng-template>
+                                </div>
+                                <div class="chart-gridster-container">
+                                    <div class="chart" id="{{gridsterItem.chart.parameter.parameterName}}">
+                                        <app-archive-chart class="app-archive-chart" [entity]="gridsterItem.chart">
+                                        </app-archive-chart>
+                                    </div>
+                                </div>
+                            </gridster-item>
+                        </gridster>
+                    </div>
+                </mat-drawer-content>
+            </mat-drawer-container>
+        </div>
+    </div>
+</div>

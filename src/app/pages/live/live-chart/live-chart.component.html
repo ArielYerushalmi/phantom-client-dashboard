@@ -1,0 +1,24 @@
+<div class="gauge-case" *ngIf="entity.chartType===0">
+    <app-live-gauge [entity]="entity">
+    </app-live-gauge>
+</div>
+<div class="entity" *ngIf="entity.chartType===1">
+    <app-live-graph class="entity" [entity]="entity">
+    </app-live-graph>
+</div>
+<div class="entity" *ngIf="entity.chartType===2">
+    <app-live-pie class="entity" [entity]="entity">
+    </app-live-pie>
+</div>
+<div class="entity" *ngIf="entity.chartType===3">
+    <app-live-label class="entity" [entity]="entity">
+    </app-live-label>
+</div>
+<div class="entity" *ngIf="entity.chartType===4">
+    <app-live-alert class="entity" [entity]="entity">
+    </app-live-alert>
+</div>
+<div class="entity" *ngIf="entity.chartType===5">
+    <app-live-status class="entity" [entity]="entity">
+    </app-live-status>
+</div>

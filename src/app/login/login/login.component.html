@@ -1,0 +1,42 @@
+<div class="login-box">
+    <img src="assets/img/phantom-og.png" style="width: 30%;">
+    <br>
+    <h2>Login</h2>
+    <form>
+        <!-- <div class="user-box"> -->
+        <mat-form-field appearance="fill">
+            <input matInput id="usernameTextbox" type="text" required="" autocomplete="off" [formControl]="username"
+                [(ngModel)]="inputUsernameTxt" name="txtName">
+            <mat-label>Username</mat-label>
+            <!-- <label>Username</label> -->
+            <mat-error *ngIf="username.invalid">{{getUserNameError()}}</mat-error>
+        </mat-form-field>
+        <!-- </div> -->
+        <!-- <div class="user-box"> -->
+        <mat-form-field appearance="fill">
+            <input matInput id="passwordTextbox" type="password" required="" autocomplete="off" [formControl]="password"
+                [(ngModel)]="inputPasswordTxt" name="txtName">
+            <mat-label>Password</mat-label>
+            <mat-error *ngIf="password.invalid">{{getPasswordError()}}</mat-error>
+        </mat-form-field>
+        
+        <span id="alert" *ngIf="allInfoAlert">Fill all required info</span>
+        <span id="alert" *ngIf="wrongUserAlert">Username Or Password Is Incorrect</span>
+        <span id="alert" *ngIf="serverDownAlert">User Service Is Down</span>
+        <!-- </div> -->
+        <a class="activeButton" (click)="onSubmitCreate()" style="color: white;">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            Submit
+        </a>
+        <a class="activeButton" (click)="switchToRegister()" style="margin-left: 10%; color: white;">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            Register
+        </a>
+    </form>
+</div>

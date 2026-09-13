@@ -1,0 +1,30 @@
+<div class="logo">
+  <!-- <a class="simple-text logo-mini"> -->
+  <div class="phantom-title">
+    <a class="simple-text logo-normal" style="width: fit-content;">
+      PHANTOM
+    </a>
+  </div>
+  <!-- </a> -->
+</div>
+<div class="sidebar-wrapper">
+  <ul class="nav">
+    <li routerLinkActive="active" *ngFor="let menuItem of menuItems" class="{{ menuItem.class }} nav-item">
+      <a class="menu-item" [routerLink]="[menuItem.path]">
+
+        <div *ngIf="menuItem.path == currentUrl" class="current-item">
+          <mat-icon id="current-icon">{{ menuItem.icon }}</mat-icon>
+          <p id="current-sidebar-tittle">{{ menuItem.title }}</p>
+        </div>
+
+        <div *ngIf="menuItem.path != currentUrl" class="other-items">
+          <mat-icon id="other-icon">{{ menuItem.icon }}</mat-icon>
+          <p id="other-sidebar-tittle">{{ menuItem.title }}</p>
+        </div>
+      </a>
+    </li>
+  </ul>
+  <div class="phantom-logo-container">
+    <img id="phantom-logo" src="./assets/img/Logo2.png" />
+  </div>
+</div>

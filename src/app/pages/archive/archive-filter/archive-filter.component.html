@@ -1,0 +1,58 @@
+<!-- <div class="sidebar">
+    <app-sidebar></app-sidebar>
+</div> -->
+<div class="archive-filter-container">
+    <div class="archive-entering-room-container">
+        <div class="archive-entering-room">
+            <div class="time-select-side">
+                <mat-form-field>
+                    <mat-label>Start Time</mat-label>
+                    <input matInput type="datetime-local" style="color: white;" [(ngModel)]="inputStartTime">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>End Time</mat-label>
+                    <input matInput type="datetime-local" style="color: white;" [(ngModel)]="inputEndTime">
+                </mat-form-field>
+                <span *ngIf="!isTimeValid" style="color: red;">Time Entered Is Not Valid</span>
+                <button id="confirm-btn" (click)="onGetLength()">Confirm</button>
+            </div>
+            <div class="presets-container-side">
+                <div class="preset-container-body">
+                    <div *ngFor=" let dashboard of dashboards; let i = index" class="preset-item">
+                        <div class="preset-item-container">
+                            <div class="preset-top">
+                                <span class="preset-name">{{dashboard.name}}</span>
+                            </div>
+                            <div class="border-line"></div>
+                            <div class="preset-body-container">
+                                <div class="preset-body">
+                                    <ng-container *ngFor="let item of dashboard.items; let itemId = index">
+                                        <span *ngIf="5>itemId" class="parameter">
+                                            {{item.parameter.parameterName}}
+                                        </span>
+                                        <span *ngIf="itemId>=5 && toggledDashboards[i]" class="parameter">
+                                            {{item.parameter.parameterName}}
+                                        </span>
+
+                                    </ng-container>
+
+                                    <!-- <div class="expandCollapseContent" *ngIf="toggledDashboards[i]">
+                                        <div>
+                                            <h5>Toggled</h5>
+                                        </div>
+                                    </div> -->
+                                    <div class="expandCollapse" *ngIf="dashboard.items.length>5">
+                                        <span class="show-more-button" (click)="toggle(i)">
+                                            {{!toggledDashboards[i] ? 'more...' : 'less'}}
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

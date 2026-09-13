@@ -1,0 +1,529 @@
+.archive-container {
+    height: 100%;
+    width: 100%;
+}
+
+
+
+.body {
+    width: 90%;
+    display: flex;
+    right: 0;
+    float: right;
+    /* margin-right: 0; */
+    top: 50px;
+    position: fixed;
+    height: calc(100% - 50px);
+    overflow: auto;
+    background-color: #14161c;
+}
+
+.archive-dashboard-container {
+    width: 100%;
+    display: flex;
+    height: 100%;
+    overflow: auto;
+    background-color: #14161c;
+}
+
+.dashboard-container {
+    background-color: #14161c;
+    height: 100%;
+    width: 100%;
+}
+
+.dashboard-container-head {
+    height: 10%;
+    width: 100%;
+}
+
+.headline-content {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.headline-content-right {
+    display: flex;
+    align-items: center;
+    margin: 0 0.5rem;
+}
+
+.headline-content-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+}
+
+.dashboard-container-body {
+    height: calc(100% - 10%);
+    width: 100%;
+}
+
+::ng-deep .mat-form-field-infix {
+    display: flex !important;
+    flex-direction: row !important;
+    width: fit-content !important;
+    width: 60%;
+    margin: 5%;
+}
+
+::ng-deep .mat-form-field-wrapper {
+    padding-bottom: 5px !important;
+}
+
+::ng-deep button:focus {
+    outline: unset !important;
+}
+
+// .mat-paginator {
+//     width: 50%;
+// }
+
+.headline-date-select {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+
+.headline-paginator {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: fit-content;
+}
+
+.open-side-parameters-icon {
+    position: initial !important;
+    display: inline-block;
+    position: absolute;
+    right: 10px;
+    padding: 10px;
+}
+
+.refresh-icon {
+    font-weight: bold;
+    cursor: pointer;
+    // margin-right: 5px !important;
+    font-size: larger;
+    width: 20px;
+    height: 20px;
+    padding: 2px;
+    background: #3d388a;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.20);
+    border: 0;
+    border-radius: 4px;
+    margin: 0 auto;
+    display: block;
+}
+
+#confirm-btn {
+    margin: 5%;
+    background-color: #7b1fa2;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    border-radius: 5px;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 0.875;
+    border: none;
+    color: white;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    outline: unset;
+}
+
+.options-button {
+    width: 90%;
+    background-color: #7b1fa2;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    border-radius: 5px;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 0.875;
+    border: none;
+    color: white;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+#confirm-btn:hover {
+    background-color: #8e2cb8;
+}
+
+.mat-drawer-container {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+}
+
+::ng-deep .mat-drawer-backdrop.mat-drawer-shown {
+    background-color: rgb(12 11 24 / 60%);
+}
+
+.mat-drawer-left {
+    /* -webkit-transition: right 1s ease-in-out 0s; */
+    left: 0;
+    background-color: #14161c;
+    width: 15%;
+}
+
+.mat-drawer-right {
+    right: 0;
+    background-color: #14161c;
+    width: 15%;
+}
+
+::ng-deep .mat-drawer-inner-container {
+    height: 100% !important;
+    overflow: unset !important;
+}
+
+.mat-drawer-parameters {
+    padding: 15px;
+    position: relative;
+}
+
+.notUsedParameter {
+    color: white;
+    text-shadow: white 0 0 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: default;
+}
+
+.usedParameter {
+    color: rgb(75, 75, 75);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: default;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+.mat-darawer-content {
+    background-color: transparent;
+}
+
+.chart-gridster-container {
+    color: white;
+    width: 100%;
+    height: calc(100% - 25px);
+}
+
+:host ::ng-deep .gridster-row,
+:host ::ng-deep .gridster-column {
+    border-color: gainsboro;
+}
+
+::ng-deep .gridster .gridster-preview {
+    background-color: transparent;
+}
+
+::ng-deep .gridster-item:hover .gridster-item-resizable-handler.handle-se {
+    border-color: transparent;
+}
+
+.gridster-item {
+    border: 1px solid #3d388a;
+    background-color: #0e0e3e33;
+    border-radius: 5px;
+    display: flex !important;
+    flex-flow: column;
+}
+
+.gridster {
+    background-color: transparent;
+}
+
+.gridster-container {
+    background-color: transparent;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.chart-gridster-header {
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    width: 100%;
+    height: 25px;
+    align-items: center;
+}
+
+.extended-menu-icons .close-popup {
+    font-size: 30px;
+    text-decoration: none;
+    color: #ccc;
+    margin-bottom: unset;
+}
+
+.gridster-item-header-name {
+    margin-left: 5px;
+    margin-right: auto;
+    display: inline-flex;
+    flex-direction: initial;
+}
+
+.extended-menu-icons {
+    margin-left: auto;
+    margin-right: 5px;
+    margin-top: 3px;
+    display: inline-flex;
+    flex-direction: initial;
+    position: absolute;
+    right: 0;
+    z-index: 2;
+}
+
+.not-open-feather-icon {
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    height: 19px;
+    width: 19px;
+    margin-left: auto;
+    margin-right: 5px;
+}
+
+.open-feather-icon {
+    cursor: pointer;
+    float: right;
+    height: 19px;
+    width: 19px;
+    margin-left: auto;
+    margin-right: 5px;
+}
+
+.tim-icons {
+    color: white;
+    display: flex;
+    align-items: center;
+    font-size: larger;
+    width: 19px;
+    margin: 0px 2px;
+    flex-wrap: wrap;
+    align-content: flex-end;
+}
+
+.mat-select {
+    transform-origin: left top;
+    min-width: 112px;
+    max-width: 280px;
+    overflow: auto;
+    border-radius: 2px;
+    outline: 0;
+    visibility: hidden;
+    background: #424242;
+}
+
+.chart {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.app-archive-chart {
+    width: 100%;
+    height: 100%;
+}
+
+
+::ng-deep .mat-paginator-container {
+    justify-content: center !important;
+}
+
+.paginator {
+    background-color: #24252a;
+    color: white;
+}
+
+::ng-deep .mat-select-panel {
+    background-color: #24252a;
+}
+
+::ng-deep .mat-paginator-page-size.ng-star-inserted {
+    display: flex;
+    align-items: center;
+}
+
+::ng-deep .mat-select#mat-select-0 {
+    padding: 5px;
+}
+
+::ng-deep span.mat-option-text {
+    color: white;
+}
+
+.dashboard-options-buttom {
+    position: relative;
+    height: 20%;
+    color: white;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+}
+
+.archive-entering-room-container {
+    width: 100%;
+    height: 100%;
+}
+
+.archive-entering-room {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+.time-select-side {
+    width: 30%;
+    height: 92%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    padding-bottom: 5%;
+}
+
+.presets-container-side {
+    width: 70%;
+    height: 100%;
+    right: 0;
+    position: absolute;
+}
+
+app-preset-manager {
+    display: flex;
+    width: 100%;
+    height: fit-content;
+}
+
+mat-icon {
+    color: #ccc;
+}
+
+.overlay {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-wrap: wrap;
+    z-index: 2;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+    visibility: visible;
+    opacity: 1;
+}
+
+.confirm-popup {
+    background: #24252a;
+    border-radius: 5px;
+    width: 25%;
+    height: 30%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.confirm-popup-header {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    flex-direction: row;
+    align-content: center;
+    flex-wrap: wrap;
+}
+
+.confirm-popup h2 {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    justify-content: center;
+    flex-wrap: wrap;
+    color: #ccc;
+    align-content: flex-end;
+}
+
+.confirm-popup .popup-content {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.alert-icon {
+    font-size: 3rem;
+    height: fit-content;
+    width: fit-content;
+}
+
+.popup-bottom {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.confirm-popup-button {
+    width: 20%;
+}
+
+.popup-btn {
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    border-radius: 5px;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    font-size: 0.875;
+    border: none;
+    color: white;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+#confirm-btn {
+    background-color: #3d388a !important;
+    outline: unset;
+}
+
+#confirm-btn:hover {
+    background-color: #464092 !important;
+}
+
+
+.sidebar {
+    height: 100%;
+    width: 10%;
+    box-shadow: none;
+    margin-top: 0;
+    margin-left: 0;
+}
+
+/* to change arrow when focused */
+::ng-deep .mat-form-field.mat-focused.mat-primary .mat-select-arrow {
+    color: #3f51b5 !important;
+}

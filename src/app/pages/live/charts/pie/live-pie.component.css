@@ -1,0 +1,25 @@
+.pie-size {
+    width: 100% !important;
+}
+
+::ng-deep .ngx-charts {
+    float: right !important;
+}
+
+::ng-deep .chart-legend .legend-labels {
+    background-color: transparent !important;
+    position: absolute;
+    width: unset !important;
+}
+
+::ng-deep .legend-labels::-webkit-scrollbar {
+    display: none;
+}
+
+::ng-deep span.legend-label-text {
+    color: grey;
+}
+
+::ng-deep .chart-legend .legend-label .active .legend-label-text {
+    color: white !important;
+}

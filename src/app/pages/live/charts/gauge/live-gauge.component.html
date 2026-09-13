@@ -1,0 +1,12 @@
+<ngx-gauge id="{{entity.parameter.parameterName}}" class="gauge-size"
+    [min]="entity.parameter.minimum"
+    [max]="entity.parameter.maximum"
+
+    [type]="gaugeType"
+    [cap]="gaugeStyle"
+    
+    [thresholds]="thresholdConfig"
+    [value]="gaugeValue"
+    [append]="gaugeAppendText"
+    [size]="size">
+</ngx-gauge>

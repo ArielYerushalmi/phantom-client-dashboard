@@ -1,0 +1,23 @@
+.sidebar {
+    height: 100%;
+    width: 10%;
+    box-shadow: none;
+    margin-top: 0;
+    margin-left: 0;
+}
+
+::ng-deep .logo {
+    background-color: #24252a !important;
+}
+
+::ng-deep .sidebar-wrapper {
+    background-color: #24252a !important;
+}
+
+app-navbar {
+    width: 90%;
+    display: block;
+    height: 50px;
+    right: 0;
+    position: fixed;
+}

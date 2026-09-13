@@ -1,0 +1,11 @@
+<div class="status-container">
+    <div *ngIf="status===true then status_on else status_off"></div>
+
+    <ng-template #status_on>
+        <span class="status-design on-status-design"> <span class="blinker-dot">&bull;</span>ON</span>
+    </ng-template>
+
+    <ng-template #status_off>
+        <span class="status-design off-status-design"> <span class="blinker-dot">&bull;</span>OFF</span>
+    </ng-template>
+</div>

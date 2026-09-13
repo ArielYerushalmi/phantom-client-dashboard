@@ -1,0 +1,24 @@
+.entity {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.gauge-case {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-self: center;
+    justify-content: center;
+    height: 100% !important;
+}
+
+app-live-gauge {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex;
+    align-items: center;
+}

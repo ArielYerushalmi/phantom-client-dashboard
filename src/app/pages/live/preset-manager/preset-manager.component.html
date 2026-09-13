@@ -1,0 +1,116 @@
+<div class="body">
+    <div class="empty-preset-container" *ngIf="dashboards.length == 0">
+        <img id="empty-camera-icon" src="./assets/img/new-empty-presets.png">
+    </div>
+
+    <div class="overlay" *ngIf="presetPopUp">
+        <div class="update-popup">
+            <a class="close-popup" (click)="onPresetPopUpClick()">&times;</a>
+            <div class="update-popup-header">
+                <h2>Change Description Of Preset</h2>
+            </div>
+            <div class="update-popup-content">
+                <div class="popup-content">
+                    <mat-form-field appearance="fill">
+                        <input matInput type="text" required="" autocomplete="off" [formControl]="description"
+                            [(ngModel)]="presetDescription">
+                        <mat-label>New Description</mat-label>
+                        <mat-error *ngIf="description.hasError('required')">You Didn't Enter a
+                            Description</mat-error>
+                    </mat-form-field>
+                    <!-- <div class="user-box"> -->
+                    <!-- <input [(ngModel)]="presetDescription"> -->
+
+                    <!-- </div> -->
+                </div>
+            </div>
+            <div class="update-popup-bottom">
+                <div class="update-buttons">
+                    <button class="delete-popup-btn" id="confirm-btn"
+                        (click)="updateDescription(); onPresetPopUpClick()">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="overlay" *ngIf="deletePopUp">
+        <div class="delete-popup">
+            <a class="close-popup" (click)="ondeletePopUpClick()">&times;</a>
+            <div class="delete-popup-header">
+                <h2>Delete Preset:</h2>
+                <h2 style="padding-left: 0.5rem;">{{this.dashboard.name}}</h2>
+                <!-- <span id="usernameID">{{this.dashboard.name}}</span> -->
+            </div>
+            <div class="delete-popup-content">
+                <div class="delete-alert-icon">
+                    <mat-icon style="font-size: 3rem;height: fit-content;width: fit-content;">error_outline</mat-icon>
+                </div>
+            </div>
+            <div class="delete-popup-bottom">
+                <div class="delete-buttons">
+                    <button class="delete-popup-btn" id="cancel-btn" (click)="ondeletePopUpClick()">Cancel</button>
+                    <button class="delete-popup-btn" id="confirm-btn"
+                        (click)="ondeletePopUpClick(); deletePreset()">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <mat-icon id="back-to-filter-icon" *ngIf="!IsLive" style="cursor: pointer;" (click)="onGotoFilterPage()">keyboard_backspace</mat-icon>
+    <div class="preset-container-body">
+        <div *ngFor=" let dashboard of dashboards let i=index" class="preset-item">
+            <div class="preset-item-container">
+                <div class="preset-top">
+                    <mat-icon style="cursor: pointer;"
+                        (click)="ondeletePopUpClick(dashboard);">delete_outline</mat-icon>
+                    <span class="preset-name">{{dashboard.name}}</span>
+                    <mat-icon style="cursor: pointer;"
+                        (click)="getPresetDescription(dashboard); onPresetPopUpClick()">error_outline</mat-icon>
+                </div>
+                <div class="border-line"></div>
+                <div class="preset-body-container">
+                    <div class="preset-body">
+                        <ng-container *ngFor="let item of dashboard.items; let itemId = index">
+                            <span *ngIf="5>itemId" class="parameter">
+                                {{item.parameter.parameterName}}
+                            </span>
+                            <span *ngIf="itemId>=5 && toggledDashboards[i]" class="parameter">
+                                {{item.parameter.parameterName}}
+                            </span>
+
+                        </ng-container>
+
+                        <!-- <div class="expandCollapseContent" *ngIf="toggledDashboards[i]">
+                            <div>
+                                <h5>Toggled</h5>
+                            </div>
+                        </div> -->
+                        <div class="expandCollapse" *ngIf="dashboard.items.length>5">
+                            <span class="show-more-button" (click)="toggle(i)">
+                                {{!toggledDashboards[i] ? 'more...' : 'less'}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="preset-bottom">
+                    <span class="bottom-text" (click)="goToPreset(dashboard)"> Go to
+                        preset</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="create-preset-container-body">
+        <div class="create-preset-container">
+            <div class="create-preset-top">
+                <span class="preset-name">Create Preset</span>
+            </div>
+            <div class="create-preset-body">
+                <input id="creat-preset-input" type="text" required="" autocomplete="off" [(ngModel)]="presetName"
+                    name="create-preset">
+                <mat-icon class="btn-add" style="color: #ccc;" (click)="createPreset()">add</mat-icon>
+            </div>
+            <span class="create-preset-error" *ngIf="!isCreatePresetValid">Name Is Not Valid</span>
+            <!-- <div class="create-preset-bottom">
+                <button mat-raised-button color="primary" (click)="createPreset()">Create</button>
+            </div> -->
+        </div>
+    </div>
+</div>

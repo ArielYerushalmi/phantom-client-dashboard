@@ -1,0 +1,47 @@
+.status-container {
+    font-size: 150%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.status-design {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    border-radius: 10px;
+    font-size: medium;
+    padding: 0px 0.35rem;
+}
+.on-status-design {
+    border: 3px solid green;
+    background-color: green;
+}
+
+.off-status-design {
+    border: 3px solid red;
+    background-color: red;
+}
+
+.blinker-dot {
+    font-size: 150%;
+    animation-name: blinker;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    margin-right: 0.1rem;
+}
+
+@keyframes blinker {
+    0% {
+        opacity: 1.0;
+    }
+
+    50% {
+        opacity: 0.0;
+    }
+
+    100% {
+        opacity: 1.0;
+    }
+}
