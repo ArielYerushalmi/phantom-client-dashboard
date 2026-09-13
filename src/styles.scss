@@ -16,3 +16,14 @@ body {
     margin: 0;
     font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+
+// Terminal/HUD readout treatment for live telemetry numbers only - labels, nav,
+// buttons and body copy keep the default font. Applied explicitly via
+// .telemetry-value in templates, and directly to the two chart-library
+// elements (ngx-gauge's reading, ngx-charts' point tooltip value) that render
+// their own markup and can't be wrapped with a class from a component template.
+.telemetry-value,
+.ngx-gauge-meter .reading-block,
+.tooltip-val {
+    font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+}

@@ -3,7 +3,7 @@
         <mat-icon class="alert-icon">error_outline</mat-icon>
         <div class="alert-container">
             <span class="value">{{alertItem.time | date:"MM/dd/yyyy h:mma"}}
-                {{alertItem.value}} {{entity.parameter.units}}</span>
+                <span class="telemetry-value">{{alertItem.value}}</span> {{entity.parameter.units}}</span>
         </div>
     </div>
 </div>
