@@ -86,7 +86,7 @@
 
 .preset-item-container {
     height: 250px;
-    border: 1px solid #3d388a;
+    border: 1px solid #22d3ee;
     border-radius: 10px;
 }
 
@@ -146,8 +146,8 @@
 
 .parameter {
     display: inline-flex;
-    background-color: #0e0e3e33;
-    border: 1px solid #3d388a;
+    background-color: #0e2e3e33;
+    border: 1px solid #22d3ee;
     border-radius: 20px;
     max-width: fit-content;
     padding: 4px;
@@ -244,7 +244,7 @@
 .create-preset-container {
     width: 33%;
     height: 150px;
-    border: 1px solid #3d388a;
+    border: 1px solid #22d3ee;
     border-radius: 10px;
 }
 
@@ -257,13 +257,13 @@
 }
 
 .btn-add {
-    background: #3d388a;
+    background: #22d3ee;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
 }
 
 .btn-add:hover {
-    background: #4a449c;
+    background: #1fbed6;
 }
 
 .create-preset-button {
@@ -328,7 +328,7 @@
 }
 
 .delete-popup .close-popup:hover {
-    color: #3d388a;
+    color: #22d3ee;
     cursor: pointer;
 }
 
@@ -433,12 +433,12 @@
 }
 
 .update-popup .close-popup:hover {
-    color: #3d388a;
+    color: #22d3ee;
     cursor: pointer;
 }
 
 #confirm-btn {
-    background-color: #3d388a !important;
+    background-color: #22d3ee !important;
     transition: all 400ms;
     outline: unset;
 }
@@ -450,12 +450,12 @@
 // The description-update "Confirm" (a non-destructive save) is a separate button/id
 // from the delete-preset "Confirm" above, so it doesn't inherit the red delete-hover.
 #confirm-edit-btn {
-    background-color: #3d388a !important;
+    background-color: #22d3ee !important;
     outline: unset;
 }
 
 #confirm-edit-btn:hover {
-    background-color: #464092 !important;
+    background-color: #1fbed6 !important;
 }
 
 #cancel-btn {
@@ -525,7 +525,7 @@
 }
 
 .mat-raised-button {
-    background-color: #3d388a !important;
+    background-color: #22d3ee !important;
 }
 
 
@@ -576,15 +576,15 @@ mat-form-field {
 }
 
 ::ng-deep .mat-focused .mat-form-field-label {
-    color: #3d388a !important;
+    color: #22d3ee !important;
 }
 
 ::ng-deep.mat-form-field-ripple {
-    background-color: #3d388a;
+    background-color: #22d3ee;
 }
 
 ::ng-deep .mat-form-field.mat-focused .mat-form-field-ripple {
-    background-color: #3d388a;
+    background-color: #22d3ee;
 }
 
 #back-to-filter-icon {

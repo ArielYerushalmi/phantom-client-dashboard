@@ -78,7 +78,7 @@
 .mat-header-row {
     justify-content: space-between;
     background-color: #24252a;
-    border-bottom: 2px solid #3d388a;
+    border-bottom: 2px solid #22d3ee;
     display: flex;
     align-content: center;
     flex-wrap: wrap;
@@ -176,7 +176,7 @@
 }
 
 .popup .close-popup:hover {
-    color: #3d388a;
+    color: #22d3ee;
     cursor: pointer;
 }
 
@@ -235,7 +235,7 @@
 }
 
 .delete-popup .close-popup:hover {
-    color: #3d388a;
+    color: #22d3ee;
     cursor: pointer;
 }
 
@@ -260,7 +260,7 @@
 
 //mat-input focused color
 ::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
-    color: #3d388a !important;
+    color: #22d3ee !important;
 }
 
 .error {
@@ -356,15 +356,15 @@
 }
 
 #confirm-edit-btn {
-    background-color: #3d388a !important;
+    background-color: #22d3ee !important;
 }
 
 #confirm-edit-btn:hover {
-    background-color: #464092 !important;
+    background-color: #1fbed6 !important;
 }
 
 #confirm-btn {
-    background-color: #3d388a !important;
+    background-color: #22d3ee !important;
     transition: all 400ms;
     outline: unset;
 }
@@ -394,13 +394,13 @@
 }
 
 ::ng-deep .mat-focused .mat-form-field-label {
-    color: #3d388a !important;
+    color: #22d3ee !important;
 }
 
 ::ng-deep.mat-form-field-ripple {
-    background-color: #3d388a;
+    background-color: #22d3ee;
 }
 
 ::ng-deep .mat-form-field.mat-focused .mat-form-field-ripple {
-    background-color: #3d388a;
+    background-color: #22d3ee;
 }

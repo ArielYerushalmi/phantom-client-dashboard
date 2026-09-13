@@ -26,7 +26,7 @@
 }
 
 #confirm-btn {
-    border: 2px solid #3d388a !important;
+    border: 2px solid #22d3ee !important;
     width: 60%;
     margin: 5%;
     background-color: #2e2f35;
@@ -61,7 +61,7 @@
 
 .preset-item-container {
     height: 250px;
-    border: 1px solid #3d388a;
+    border: 1px solid #22d3ee;
     border-radius: 10px;
 }
 
@@ -120,8 +120,8 @@
 
 .parameter {
     display: inline-flex;
-    background-color: #0e0e3e33;
-    border: 1px solid #3d388a;
+    background-color: #0e2e3e33;
+    border: 1px solid #22d3ee;
     border-radius: 20px;
     max-width: fit-content;
     padding: 4px;
@@ -164,10 +164,10 @@
 
 ::ng-deep.mat-form-field-ripple {
     /*change color of underline when focused*/
-    background-color: #3d388a !important;
+    background-color: #22d3ee !important;
 }
 
 ::ng-deep .mat-focused .mat-form-field-label {
     /*change color of label*/
-    color: #3d388a !important;
+    color: #22d3ee !important;
 }
