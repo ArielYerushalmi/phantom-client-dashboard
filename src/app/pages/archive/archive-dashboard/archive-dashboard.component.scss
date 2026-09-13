@@ -24,6 +24,12 @@
     height: 100%;
     overflow: auto;
     background-color: #14161c;
+
+    // Faint HUD grid texture, matching the live dashboard.
+    background-image:
+        linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
 }
 
 .dashboard-container {
@@ -112,7 +118,7 @@
     width: 20px;
     height: 20px;
     padding: 2px;
-    background: #3d388a;
+    background: #22d3ee;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.20);
     border: 0;
     border-radius: 4px;
@@ -203,8 +209,8 @@
 }
 
 .gridster-item {
-    border: 1px solid #3d388a;
-    background-color: #0e0e3e33;
+    border: 1px solid #22d3ee;
+    background-color: #0e2e3e33;
     border-radius: 5px;
     display: flex !important;
     flex-flow: column;
@@ -474,12 +480,12 @@ mat-icon {
 }
 
 #confirm-btn {
-    background-color: #3d388a !important;
+    background-color: #22d3ee !important;
     outline: unset;
 }
 
 #confirm-btn:hover {
-    background-color: #464092 !important;
+    background-color: #1fbed6 !important;
 }
 
 

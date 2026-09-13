@@ -31,6 +31,9 @@
                 <div class="headline-content">
                     <div class="headline-content-left">
                         <mat-icon style="cursor: pointer;" (click)="onGotoPresetManager()">apps</mat-icon>
+                        <span class="live-indicator" *ngIf="!wsDisconnected">
+                            <span class="live-dot"></span>LIVE
+                        </span>
                     </div>
                     <div class="headline-content-right">
                         <mat-icon style="cursor: pointer;" (click)="updateDashboard()">save</mat-icon>
