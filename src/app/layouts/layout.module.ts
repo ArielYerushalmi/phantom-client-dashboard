@@ -4,7 +4,6 @@ import { BrowserModule } from "@angular/platform-browser";
 import { Routes, RouterModule, ActivatedRouteSnapshot, RouterStateSnapshot, CanActivate, UrlTree, Router } from "@angular/router";
 
 import { AdminLayoutComponent } from "./admin-layout/admin-layout.component";
-import { AuthLayoutComponent } from './auth-layout/auth-layout.component';
 
 import { FormsModule } from "@angular/forms";
 import { ComponentsModule } from "../components/components.module";
@@ -39,17 +38,6 @@ const routes: Routes = [
     path: "",
     redirectTo: "login"
   },
-  // {
-  //   path: "",
-  //   component: AuthLayoutComponent,
-  //   canActivate: [AuthGuardService],
-  //   children: [
-  //     {
-  //       path: "",
-  //       loadChildren: () => import("./auth-layout/auth-layout.module").then(m => m.AuthLayoutModule)
-  //     }
-  //   ]
-  // },
 ];
 
 @NgModule({

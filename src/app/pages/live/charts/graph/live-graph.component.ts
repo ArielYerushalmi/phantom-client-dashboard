@@ -1,14 +1,16 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { IChartEntity } from 'src/app/common/interfaces/gridster/entity.interface';
 import { LiveData } from 'src/app/common/interfaces/gridster/live-data.interface';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-live-graph',
   templateUrl: './live-graph.component.html',
   styleUrls: ['./live-graph.component.scss']
 })
-export class ChartsTryComponent implements OnInit {
+export class ChartsTryComponent implements OnInit, OnDestroy {
   @Input() entity: IChartEntity;
+  private dataSubscription: Subscription;
 
   graphValues: any[] = [];
   showXAxis: boolean = true;
@@ -32,11 +34,15 @@ export class ChartsTryComponent implements OnInit {
       }
     ]
 
-    this.entity.dataEvent.subscribe((value: LiveData) => {
+    this.dataSubscription = this.entity.dataEvent.subscribe((value: LiveData) => {
       if (value) {
         this.apllyChart(value);
       }
     })
+  }
+
+  ngOnDestroy(): void {
+    this.dataSubscription?.unsubscribe();
   }
 
 

@@ -18,6 +18,12 @@
             </div>
             <div class="presets-container-side">
                 <div class="preset-container-body">
+                    <div class="drawer-empty-state" *ngIf="dashboardsLoadError">
+                        Dashboard service is unavailable. Try again later.
+                    </div>
+                    <div class="drawer-empty-state" *ngIf="!dashboardsLoadError && dashboards.length===0">
+                        No saved presets yet.
+                    </div>
                     <div *ngFor=" let dashboard of dashboards; let i = index" class="preset-item">
                         <div class="preset-item-container">
                             <div class="preset-top">

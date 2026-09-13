@@ -1,16 +1,18 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { IChartEntity } from 'src/app/common/interfaces/gridster/entity.interface';
 import { LiveData } from 'src/app/common/interfaces/gridster/live-data.interface';
 import { PieData } from 'src/app/common/interfaces/gridster/pie-data.interface';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-live-pie',
   templateUrl: './live-pie.component.html',
   styleUrls: ['./live-pie.component.css']
 })
-export class LivePieComponent implements OnInit {
+export class LivePieComponent implements OnInit, OnDestroy {
   @Input() entity: IChartEntity;
   pieChartData: PieData[] = [];
+  private dataSubscription: Subscription;
 
   showLegend: boolean = true;
   isDoughnut: boolean = false;
@@ -23,9 +25,13 @@ export class LivePieComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    this.entity.dataEvent.subscribe((value: LiveData) => {
+    this.dataSubscription = this.entity.dataEvent.subscribe((value: LiveData) => {
       this.incrementNumberCount(value.value);
     })
+  }
+
+  ngOnDestroy(): void {
+    this.dataSubscription?.unsubscribe();
   }
 
   incrementNumberCount(value: number): void {

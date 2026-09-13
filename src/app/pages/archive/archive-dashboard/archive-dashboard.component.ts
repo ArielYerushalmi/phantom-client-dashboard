@@ -1,8 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { GridsterConfig } from 'angular-gridster2';
+import { Subscription } from 'rxjs';
 import { createDashboardDTO } from 'src/app/common/dtos/dashboard/create-dashboard.dto';
 import { DashboardRO } from 'src/app/common/dtos/dashboard/dashboard.ro';
 import { updateDashboardDTO } from 'src/app/common/dtos/dashboard/update-dashboard.dto';
@@ -20,11 +21,16 @@ import { PresetsUtilsService } from 'src/app/common/services/presets-utils-servi
   templateUrl: './archive-dashboard.component.html',
   styleUrls: ['./archive-dashboard.component.scss']
 })
-export class ArchiveDashboardComponent implements OnInit {
+export class ArchiveDashboardComponent implements OnInit, OnDestroy {
   @Output() backToFiltering: boolean;
   @Input() lengthForPaginator: number;
   @Input() startTime: Date;
   @Input() endTime: Date;
+
+  parametersLoadError: boolean = false;
+
+  private getLengthSubscription: Subscription;
+  private archiveDataSubscription: Subscription;
 
   pageSize: number = 5;
   pageIndex: number = 0;
@@ -51,24 +57,26 @@ export class ArchiveDashboardComponent implements OnInit {
   constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly archiveService: ArchiveService) { }
 
   ngOnInit(): void {
+    this.parametersLoadError = false;
     this.dashboardservice.getParameters().then((parameters: ParameterRO[]) => {
       this.parameters = parameters;
     }).catch((error: HttpErrorResponse) => {
-      if (error.error.message != undefined) {
+      if (error.error?.message != undefined) {
         console.log(error.error.message);
       } else {
         console.log("dashboard service is down!");
       }
+      this.parametersLoadError = true;
     });
 
-    this.archiveService._getLengthSubscription.subscribe((message: number) => {
+    this.getLengthSubscription = this.archiveService._getLengthSubscription.subscribe((message: number) => {
       if (message) {
         console.log("got length from archive server: ", message);
         this.lengthForPaginator = message
       }
     });
 
-    this.archiveService._subscription.subscribe((message: IArchiveSettings) => {
+    this.archiveDataSubscription = this.archiveService._subscription.subscribe((message: IArchiveSettings) => {
       if (message)
         this.handleMessage(message);
     });
@@ -94,7 +102,7 @@ export class ArchiveDashboardComponent implements OnInit {
       this.isUpdatePopup = true;
     },
       (error: HttpErrorResponse) => {
-        if (error.error.message != undefined) {
+        if (error.error?.message != undefined) {
           console.log(error.error.message);
         } else {
           console.log("dashboard service is down!");
@@ -114,7 +122,7 @@ export class ArchiveDashboardComponent implements OnInit {
         this.dashboards.push(createdDashboard);
       });
     }, (error: HttpErrorResponse) => {
-      if (error.error.message != undefined) {
+      if (error.error?.message != undefined) {
         console.log(error.error.message);
       } else {
         console.log("dashboard service is down!");
@@ -139,7 +147,13 @@ export class ArchiveDashboardComponent implements OnInit {
   onGotoPresetManager() {
     this.dashboard = null;
     this.gridsterItemsList = [];
+    this.dashboardItemMap.clear();
   };
+
+  ngOnDestroy(): void {
+    this.getLengthSubscription?.unsubscribe();
+    this.archiveDataSubscription?.unsubscribe();
+  }
 
   onGotoFilterPage() {
     this.goToFilterPage.emit();
@@ -193,7 +207,7 @@ export class ArchiveDashboardComponent implements OnInit {
   };
 
   onAdd(parameter: ParameterRO, chartType: ChartType,
-    { cols = 1, rows = 1, x = 0, y = 0 }: { cols?: number, rows?: number, x?: number, y?: number }): Promise<void> {
+    { cols = 1, rows = 1, x = 0, y = 0 }: { cols?: number, rows?: number, x?: number, y?: number }): void {
     if (this.gridsterItemsList.length >= this.options.maxCols * this.options.maxRows)
       return;
 
@@ -210,7 +224,10 @@ export class ArchiveDashboardComponent implements OnInit {
     if (index != -1) {
       this.onRemove(parameter);
     } else {
-      if (this.startTime != undefined || this.endTime != undefined || length > 0) {
+      // Bug fix: this used to reference the global `length` (always 0 in this context)
+      // instead of the paginator length input, so the "Set Correct First" branch below
+      // was effectively unreachable whenever startTime/endTime were also unset.
+      if (this.startTime != undefined || this.endTime != undefined || this.lengthForPaginator > 0) {
         this.onAdd(parameter, ChartType.TABLE, {});
         this.onSubscribeParameter(parameter.parameterName);
       } else {
@@ -234,6 +251,7 @@ export class ArchiveDashboardComponent implements OnInit {
     if (index != -1) {
       this.gridsterItemsList.splice(index, 1);
     };
+    this.dashboardItemMap.delete(parameter.parameterName);
   };
 
   onChangeChartType(index: number, chartType: ChartType): void {

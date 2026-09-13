@@ -2,6 +2,10 @@
     <app-sidebar></app-sidebar>
 </div>
 <div class="body">
+    <div class="status-banner status-banner-warning" *ngIf="wsDisconnected">
+        <mat-icon class="status-banner-icon">wifi_off</mat-icon>
+        Live data connection lost - trying to reconnect...
+    </div>
     <div class="live-dashboard-container" *ngIf="dashboard===null">
         <app-preset-manager class="live-preset-continer" [IsLive]="IsLive" (presetEvent)="onGetPreset($event)"
             (createPresetEvent)="createPreset($event)"></app-preset-manager>
@@ -37,6 +41,12 @@
             <div class="dashboard-container-body">
                 <mat-drawer-container class="mat-drawer-container" [hasBackdrop]="true">
                     <mat-drawer #drawer mode="'over'" class="mat-drawer" position="end">
+                        <div class="drawer-empty-state" *ngIf="parametersLoadError">
+                            Parameter service is unavailable. Try again later.
+                        </div>
+                        <div class="drawer-empty-state" *ngIf="!parametersLoadError && parameters.length===0">
+                            No parameters available.
+                        </div>
                         <div *ngFor="let parameter of parameters; let i = index" class="mat-drawer-parameters">
                             <span class="parameterText"
                                 [ngClass]="isParameterUsed(parameter) ? 'usedParameter' : 'notUsedParameter'"

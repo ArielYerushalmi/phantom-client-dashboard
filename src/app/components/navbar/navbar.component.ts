@@ -3,6 +3,7 @@ import { ROUTES } from "../sidebar/sidebar.component";
 import { Location } from "@angular/common";
 import { Router } from "@angular/router";
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: "app-navbar",
@@ -19,6 +20,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   public isCollapsed = true;
 
   closeResult: string;
+  private routerEventsSubscription: Subscription;
 
   constructor(
     location: Location,
@@ -45,7 +47,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.listTitles = ROUTES.filter(listTitle => listTitle);
     const navbar: HTMLElement = this.element.nativeElement;
     this.toggleButton = navbar.getElementsByClassName("navbar-toggler")[0];
-    this.router.events.subscribe(event => {
+    this.routerEventsSubscription = this.router.events.subscribe(event => {
       this.sidebarClose();
       var $layer: any = document.getElementsByClassName("close-layer")[0];
       if ($layer) {
@@ -192,5 +194,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
   ngOnDestroy() {
     window.removeEventListener("resize", this.updateColor);
+    this.routerEventsSubscription?.unsubscribe();
   }
 }

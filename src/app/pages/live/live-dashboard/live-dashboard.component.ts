@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { IUser } from 'src/app/common/interfaces/user/user.intefrace';
 import { updateDashboardDTO } from 'src/app/common/dtos/dashboard/update-dashboard.dto';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-live-dashboard',
@@ -37,19 +38,26 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
 
   user: any;
 
+  /** Surfaced in the template so a downed parameters service isn't just a silent, empty drawer. */
+  parametersLoadError: boolean = false;
+  /** True while the live websocket is disconnected (initial connect, drop, or reconnect attempt). */
+  wsDisconnected: boolean = false;
+
+  private liveMessageSubscription: Subscription;
+  private connectionStateSubscription: Subscription;
+
   constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly liveDataWebSocket: LtsService) { }
 
   async ngOnInit() {
-    this.dashboardservice.getParameters().then((parameters: ParameterRO[]) => {
-      this.parameters = parameters;
-    }).catch((error: any) => {
-      console.error('Error occurred while fetching parameters:', error);
-    });
+    this.loadParameters();
 
     this.liveDataWebSocket.start()
-    this.liveDataWebSocket._subscription.subscribe((message: MessageEvent) => {
+    this.liveMessageSubscription = this.liveDataWebSocket._subscription.subscribe((message: MessageEvent) => {
       let liveData: FrameParameter[] = JSON.parse(message.data);
       this.handleLiveMessage(liveData);
+    });
+    this.connectionStateSubscription = this.liveDataWebSocket.connectionState.subscribe((isOpen: boolean) => {
+      this.wsDisconnected = !isOpen;
     });
 
     this.options = {
@@ -77,7 +85,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   };
 
   onAdd(parameter: ParameterRO, chartType: ChartType,
-    { cols = 1, rows = 1, x = 0, y = 0 }: { cols?: number, rows?: number, x?: number, y?: number }): Promise<void> {
+    { cols = 1, rows = 1, x = 0, y = 0 }: { cols?: number, rows?: number, x?: number, y?: number }): void {
     if (this.gridsterItemsList.length >= this.options.maxCols * this.options.maxRows)
       return;
 
@@ -94,6 +102,9 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     if (index != -1) {
       this.gridsterItemsList.splice(index, 1);
     };
+    // Without this, the map keeps a growing set of stale EventEmitters for parameters
+    // that are no longer on the dashboard, and handleLiveMessage keeps emitting into them.
+    this.dashboardItemMap.delete(parameter.parameterName);
     await this.syncSubscription();
   };
 
@@ -149,6 +160,16 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     await this.liveDataWebSocket.subscribe(strArrayToSubscribe);
   };
 
+  loadParameters() {
+    this.parametersLoadError = false;
+    this.dashboardservice.getParameters().then((parameters: ParameterRO[]) => {
+      this.parameters = parameters;
+    }).catch((error: any) => {
+      console.error('Error occurred while fetching parameters:', error);
+      this.parametersLoadError = true;
+    });
+  };
+
   createPreset(presetName: string) {
     let preset: createDashboardDTO = this.presetsUtils.setDashboard(presetName, this.IsLive);
     this.dashboardservice.createDashboard(preset).subscribe((dashboard: DashboardRO) => {
@@ -157,7 +178,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
         this.dashboards.push(createdDashboard);
       });
     }, (error: HttpErrorResponse) => {
-      if (error.error.message != undefined) {
+      if (error.error?.message != undefined) {
         console.log(error.error.message);
       } else {
         console.log("dashboard service is down!");
@@ -170,6 +191,12 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     this.dashboardservice.updateDashboard(this.dashboard.id, updatedDashboard).subscribe((newDashboard: DashboardRO) => {
       this.dashboard = newDashboard;
       this.isUpdatePopup = true;
+    }, (error: HttpErrorResponse) => {
+      if (error.error?.message != undefined) {
+        console.log(error.error.message);
+      } else {
+        console.log("dashboard service is down!");
+      }
     });
   };
 
@@ -185,11 +212,13 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   onGotoPresetManager() {
     this.dashboard = null;
     this.gridsterItemsList = [];
-    console.log("gridsterList: ", this.gridsterItemsList);
+    this.dashboardItemMap.clear();
     this.liveDataWebSocket.clearSubscription();
   };
 
   ngOnDestroy(): void {
+    this.liveMessageSubscription?.unsubscribe();
+    this.connectionStateSubscription?.unsubscribe();
     this.liveDataWebSocket.unsubscribe();
   }
 };

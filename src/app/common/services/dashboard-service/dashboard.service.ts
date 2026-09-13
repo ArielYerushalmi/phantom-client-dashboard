@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { createDashboardDTO } from '../../dtos/dashboard/create-dashboard.dto';
@@ -40,12 +40,22 @@ export class DashboardService {
 
   getParameters(): Promise<ParameterRO[]> {
     return new Promise<ParameterRO[]>((res, rej) => {
+      // Bug fix: without an error callback here, a downed parameter service (or any
+      // HTTP error) would leave this promise pending forever instead of rejecting -
+      // callers' .catch() handlers were never actually reachable.
       this.httpClient.get<ParameterRO[]>(this.parameterURL).subscribe((parameters: ParameterRO[]) => {
         if (parameters != null) {
           res(parameters);
         } else {
           rej("Promise is rejected!");
         }
+      }, (error: HttpErrorResponse) => {
+        if (error.error?.message != undefined) {
+          console.log(error.error.message);
+        } else {
+          console.log("parameter service is down!");
+        }
+        rej(error);
       });
     })
   }

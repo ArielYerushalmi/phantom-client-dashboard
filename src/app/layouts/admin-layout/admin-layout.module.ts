@@ -14,14 +14,12 @@ import { UserComponent } from "../../pages/user/user.component";
 import { AdminLayoutRoutes } from "./admin-layout.routing";
 
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
-// import { IconMinusCircle, IconEdit, IconPlus, IconPlusSquare, IconGithub, IconZap, IconCheck, IconCheckSquare, IconLogIn, IconArrowLeft, IconGrid, IconFilePlus, IconDelete, IconMenu, IconCornerDownLeft, IconEye, IconList, IconX, IconXCircle, IconTrash2 } from 'angular-feather';
 import { NgxGaugeModule } from "ngx-gauge";
 import { NgxChartsModule } from "@swimlane/ngx-charts";
 
 import { LiveGaugeComponent } from "../../pages/live/charts/gauge/live-gauge.component";
 import { ChartsTryComponent } from "../../pages/live/charts/graph/live-graph.component";
 import { GridsterModule } from "angular-gridster2";
-// import { IconFeather } from "angular-feather";
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { LiveDashboardComponent } from "../../pages/live/live-dashboard/live-dashboard.component";
@@ -45,31 +43,6 @@ import { AuthGuardService } from "src/app/common/services/authGuard-service/auth
 import { AdminManagmentComponent } from '../../pages/admin-managment/admin-managment/admin-managment.component';
 import { MatButtonModule } from "@angular/material/button";
 import { MatIconModule } from "@angular/material/icon"
-
-
-
-// const icons = [
-//   IconMinusCircle,
-//   IconEdit,
-//   IconPlus,
-//   IconPlusSquare,
-//   IconGithub,
-//   IconZap,
-//   IconCheck,
-//   IconLogIn,
-//   IconArrowLeft,
-//   IconCheckSquare,
-//   IconGrid,
-//   IconFilePlus,
-//   IconDelete,
-//   IconMenu,
-//   IconCornerDownLeft,
-//   IconEye,
-//   IconList,
-//   IconX,
-//   IconXCircle,
-//   IconTrash2
-// ];
 
 @NgModule({
   imports: [

@@ -4,6 +4,10 @@
 
 <div class="body">
     <div class="manage-card">
+        <div class="status-banner status-banner-warning" *ngIf="usersServiceDown">
+            <mat-icon class="status-banner-icon">error_outline</mat-icon>
+            User service is unavailable. Changes may not be saved.
+        </div>
         <div class="overlay" *ngIf="updatePopUp">
             <div class="popup">
                 <div class="popup-header">

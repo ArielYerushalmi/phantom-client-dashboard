@@ -192,6 +192,13 @@
     position: relative;
 }
 
+.drawer-empty-state {
+    padding: 15px;
+    color: #ccc;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
 .notUsedParameter {
     color: white;
     text-shadow: white 0 0 1px;

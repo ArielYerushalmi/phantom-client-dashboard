@@ -4,7 +4,6 @@ import { BrowserModule } from "@angular/platform-browser";
 import { Routes, RouterModule } from "@angular/router";
 
 import { AdminLayoutComponent } from "./layouts/admin-layout/admin-layout.component";
-import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
 import { LoginComponent } from "./login/login/login.component";
 import { RegisterComponent } from "./login/register/register.component";
 import { AuthGuardService } from "./common/services/authGuard-service/auth-guard.service";
@@ -23,16 +22,6 @@ const routes: Routes = [
       }
     ]
   },
-  // {
-  //   path: "",
-  //   component: AuthLayoutComponent,
-  //   children: [
-  //     {
-  //       path: "",
-  //       loadChildren: () => import("./layouts/auth-layout/auth-layout.module").then(m => m.AuthLayoutModule)
-  //     }
-  //   ]
-  // },
 ];
 
 @NgModule({

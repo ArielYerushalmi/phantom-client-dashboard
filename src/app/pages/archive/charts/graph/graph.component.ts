@@ -1,14 +1,17 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { IFrame } from 'src/app/common/interfaces/archive/archive-frame';
 import { IChartEntity } from 'src/app/common/interfaces/gridster/entity.interface';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-graph',
   templateUrl: './graph.component.html',
   styleUrls: ['./graph.component.scss']
 })
-export class GraphComponent implements OnInit {
+export class GraphComponent implements OnInit, OnDestroy {
   @Input() entity: IChartEntity;
+  private dataSubscription: Subscription;
+  private resizeObserver: ResizeObserver;
 
   graphValues: any[] = [];
   showXAxis: boolean = true;
@@ -24,8 +27,6 @@ export class GraphComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    console.log("in graph no value");
-
     this.graphValues = [
       {
         name: this.entity.parameter.parameterName,
@@ -33,9 +34,7 @@ export class GraphComponent implements OnInit {
       }
     ]
 
-    this.entity.dataEvent.subscribe((value: IFrame[]) => {
-      console.log("in graph", value);
-
+    this.dataSubscription = this.entity.dataEvent.subscribe((value: IFrame[]) => {
       if (value) {
         this.graphValues[0].series.splice(0);
         this.apllyChart(value);
@@ -43,11 +42,19 @@ export class GraphComponent implements OnInit {
     })
 
     setTimeout(() => {
-      const resizeObserver = new ResizeObserver((entries) => {
+      this.resizeObserver = new ResizeObserver((entries) => {
         this.graphValues = [...this.graphValues];
       })
-      resizeObserver.observe(document.getElementById(this.entity.parameter.parameterName))
+      const target = document.getElementById(this.entity.parameter.parameterName);
+      if (target) {
+        this.resizeObserver.observe(target);
+      }
     }, 20);
+  }
+
+  ngOnDestroy(): void {
+    this.dataSubscription?.unsubscribe();
+    this.resizeObserver?.disconnect();
   }
 
   apllyChart(arrayOfFrames: IFrame[]) {

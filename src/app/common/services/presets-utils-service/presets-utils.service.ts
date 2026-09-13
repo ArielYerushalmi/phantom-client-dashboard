@@ -7,8 +7,6 @@ import { LiveData } from '../../interfaces/gridster/live-data.interface';
 import { DashboardRO } from '../../dtos/dashboard/dashboard.ro';
 import { createDashboardDTO } from '../../dtos/dashboard/create-dashboard.dto';
 import { CreateDashboardItemDTO } from '../../dtos/dashboard/create-dashboard-item.dto';
-import { IArchiveSettings } from '../../interfaces/archive/telemetry-archive-settings';
-import { IFrame } from '../../interfaces/archive/archive-frame';
 import { updateDashboardDTO } from '../../dtos/dashboard/update-dashboard.dto';
 
 @Injectable({

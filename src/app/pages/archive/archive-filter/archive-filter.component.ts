@@ -1,15 +1,16 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { DashboardRO } from 'src/app/common/dtos/dashboard/dashboard.ro';
 import { ArchiveService } from 'src/app/common/services/archive-service/archive.service';
 import { DashboardService } from 'src/app/common/services/dashboard-service/dashboard.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-archive-filter',
   templateUrl: './archive-filter.component.html',
   styleUrls: ['./archive-filter.component.scss']
 })
-export class ArchiveFilterComponent implements OnInit {
+export class ArchiveFilterComponent implements OnInit, OnDestroy {
 
   @Output() submitMetadataEvent = new EventEmitter<any>();
 
@@ -20,13 +21,16 @@ export class ArchiveFilterComponent implements OnInit {
   inputStartTime: Date;
   inputEndTime: Date;
   isTimeValid: boolean = true;
+  dashboardsLoadError: boolean = false;
+
+  private getLengthSubscription: Subscription;
 
   constructor(private readonly dashboardservice: DashboardService, private readonly archiveService: ArchiveService) { }
 
   ngOnInit(): void {
     this.onGetAllDashboards();
 
-    this.archiveService._getLengthSubscription.subscribe((length: number) => {
+    this.getLengthSubscription = this.archiveService._getLengthSubscription.subscribe((length: number) => {
       if (length) {
         console.log("got length from archive server: ", length);
         let message = { length, startTime: this.inputStartTime, endTime: this.inputEndTime }
@@ -35,16 +39,22 @@ export class ArchiveFilterComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.getLengthSubscription?.unsubscribe();
+  }
+
   onGetAllDashboards() {
+    this.dashboardsLoadError = false;
     this.dashboardservice.getAllDashboards(this.IsLive).subscribe((dashboards: DashboardRO[]) => {
       this.dashboards = dashboards;
       console.log(this.dashboards);
     }, (error: HttpErrorResponse) => {
-      if (error.error.message != undefined) {
+      if (error.error?.message != undefined) {
         console.log(error.error.message);
       } else {
         console.log("dashboard service is down!");
       }
+      this.dashboardsLoadError = true;
     });
   }
 

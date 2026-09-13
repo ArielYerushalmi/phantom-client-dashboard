@@ -1,12 +1,13 @@
-import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { IChartEntity } from 'src/app/common/interfaces/gridster/entity.interface';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-live-gauge',
   templateUrl: './live-gauge.component.html',
   styleUrls: ['./live-gauge.component.css']
 })
-export class LiveGaugeComponent implements OnInit {
+export class LiveGaugeComponent implements OnInit, OnDestroy {
   @Input() entity: IChartEntity;
 
   gaugeType: string = "arch";
@@ -16,23 +17,34 @@ export class LiveGaugeComponent implements OnInit {
   thresholdConfig: any;
   size: number = 200;
 
+  private dataSubscription: Subscription;
+  private resizeObserver: ResizeObserver;
+
   constructor() { }
 
   ngOnInit() {
     this.setGaugeSettings();
-    this.entity.dataEvent.subscribe((value: number) => {
+    this.dataSubscription = this.entity.dataEvent.subscribe((value: number) => {
       if (value) {
         this.gaugeValue = value;
       }
     });
 
     setTimeout(() => {
-      const resizeObserver = new ResizeObserver((entries) => {
+      this.resizeObserver = new ResizeObserver((entries) => {
         // console.log('Resize');
         this.resizeGauge();
       })
-      resizeObserver.observe(document.getElementById(this.entity.parameter.parameterName))
+      const target = document.getElementById(this.entity.parameter.parameterName);
+      if (target) {
+        this.resizeObserver.observe(target);
+      }
     }, 20);
+  }
+
+  ngOnDestroy(): void {
+    this.dataSubscription?.unsubscribe();
+    this.resizeObserver?.disconnect();
   }
 
   public resizeGauge(): void {

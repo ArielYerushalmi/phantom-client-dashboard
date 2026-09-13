@@ -39,6 +39,12 @@
         <div class="dashboard-container-body">
             <mat-drawer-container class="mat-drawer-container" [hasBackdrop]="true">
                 <mat-drawer #parametersDrawer mode="'over'" class="mat-drawer-right" position="end">
+                    <div class="drawer-empty-state" *ngIf="parametersLoadError">
+                        Parameter service is unavailable. Try again later.
+                    </div>
+                    <div class="drawer-empty-state" *ngIf="!parametersLoadError && parameters.length===0">
+                        No parameters available.
+                    </div>
                     <div *ngFor="let parameter of parameters; let i = index" class="mat-drawer-parameters">
                         <span [ngClass]="isParameterUsed(parameter) ? 'usedParameter' : 'notUsedParameter'"
                             (click)="onParameterSelected(parameter)">

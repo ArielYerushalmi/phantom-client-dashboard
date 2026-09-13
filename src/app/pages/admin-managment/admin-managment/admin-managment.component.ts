@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
@@ -43,10 +43,19 @@ export class AdminManagmentComponent implements OnInit {
   confirmPassword = new FormControl('', [Validators.required]);
   passwordToSend: string;
   isPasswordMatch: boolean = true;
+  usersServiceDown: boolean = false;
 
   ngOnInit(): void {
     this.adminUsername = window.localStorage.getItem('UserName');
     this.getAllUsers()
+  }
+
+  private logUserServiceError(error: HttpErrorResponse) {
+    if (error.error?.message != undefined) {
+      console.log(error.error.message);
+    } else {
+      console.log("user service is down!");
+    }
   }
 
   selectPasswordError() {
@@ -64,8 +73,12 @@ export class AdminManagmentComponent implements OnInit {
   }
 
   getAllUsers() {
+    this.usersServiceDown = false;
     this.httpClient.get<IUser[]>(this.userURL).subscribe((users: IUser[]) => {
       this.dataSource.data = users
+    }, (error: HttpErrorResponse) => {
+      this.logUserServiceError(error);
+      this.usersServiceDown = true;
     })
   }
 
@@ -93,9 +106,11 @@ export class AdminManagmentComponent implements OnInit {
       this.isPasswordMatch = true;
       let userToUpdate: updateUserDTO = new updateUserDTO(this.passwordToSend, this.selectRole);
       this.httpClient.patch(`${this.userURL}/${this.user.username}`, userToUpdate).subscribe(data => {
-        console.log("updated user: ", data);
         this.getAllUsers()
         this.editUserPopUpToggle()
+      }, (error: HttpErrorResponse) => {
+        this.logUserServiceError(error);
+        this.usersServiceDown = true;
       })
     } else {
       this.isPasswordMatch = false;
@@ -112,6 +127,10 @@ export class AdminManagmentComponent implements OnInit {
   deleteUser() {
     this.httpClient.delete(`${this.userURL}/${this.user.username}`).subscribe(data => {
       this.getAllUsers()
+      this.deleteUserPopUpToggle()
+    }, (error: HttpErrorResponse) => {
+      this.logUserServiceError(error);
+      this.usersServiceDown = true;
       this.deleteUserPopUpToggle()
     })
   }
