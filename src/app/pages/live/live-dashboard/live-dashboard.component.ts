@@ -15,6 +15,7 @@ import { IUser } from 'src/app/common/interfaces/user/user.intefrace';
 import { updateDashboardDTO } from 'src/app/common/dtos/dashboard/update-dashboard.dto';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-live-dashboard',
@@ -46,7 +47,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   private liveMessageSubscription: Subscription;
   private connectionStateSubscription: Subscription;
 
-  constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly liveDataWebSocket: LtsService) { }
+  constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly liveDataWebSocket: LtsService, private readonly toastr: ToastrService) { }
 
   async ngOnInit() {
     this.loadParameters();
@@ -86,8 +87,10 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
 
   onAdd(parameter: ParameterRO, chartType: ChartType,
     { cols = 1, rows = 1, x = 0, y = 0 }: { cols?: number, rows?: number, x?: number, y?: number }): void {
-    if (this.gridsterItemsList.length >= this.options.maxCols * this.options.maxRows)
+    if (this.gridsterItemsList.length >= this.options.maxCols * this.options.maxRows) {
+      this.toastr.warning('Remove a chart before adding another.', 'Dashboard is full');
       return;
+    }
 
     let itemToAdd: IChartEntity = this.presetsUtils.initGridsterItem(parameter, chartType);
 

@@ -15,6 +15,7 @@ import { IChartEntity } from 'src/app/common/interfaces/gridster/entity.interfac
 import { ArchiveService } from 'src/app/common/services/archive-service/archive.service';
 import { DashboardService } from 'src/app/common/services/dashboard-service/dashboard.service';
 import { PresetsUtilsService } from 'src/app/common/services/presets-utils-service/presets-utils.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-archive-dashboard',
@@ -54,7 +55,7 @@ export class ArchiveDashboardComponent implements OnInit, OnDestroy {
   @Output() goToFilterPage: EventEmitter<void> = new EventEmitter<void>();
   @ViewChild('paginator') paginator: MatPaginator;
 
-  constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly archiveService: ArchiveService) { }
+  constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly archiveService: ArchiveService, private readonly toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.parametersLoadError = false;
@@ -208,8 +209,10 @@ export class ArchiveDashboardComponent implements OnInit, OnDestroy {
 
   onAdd(parameter: ParameterRO, chartType: ChartType,
     { cols = 1, rows = 1, x = 0, y = 0 }: { cols?: number, rows?: number, x?: number, y?: number }): void {
-    if (this.gridsterItemsList.length >= this.options.maxCols * this.options.maxRows)
+    if (this.gridsterItemsList.length >= this.options.maxCols * this.options.maxRows) {
+      this.toastr.warning('Remove a chart before adding another.', 'Dashboard is full');
       return;
+    }
 
     let itemToAdd: IChartEntity = this.presetsUtils.initGridsterItem(parameter, chartType);
 
@@ -231,7 +234,7 @@ export class ArchiveDashboardComponent implements OnInit, OnDestroy {
         this.onAdd(parameter, ChartType.TABLE, {});
         this.onSubscribeParameter(parameter.parameterName);
       } else {
-        console.log("Set Correct First");
+        this.toastr.warning('Set a valid time range before adding a parameter.', 'Set Correct Time First');
       }
     }
   };

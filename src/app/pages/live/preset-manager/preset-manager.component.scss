@@ -347,15 +347,6 @@
 }
 
 
-.delete-popup {
-    padding: 20px;
-    background: #24252a;
-    border-radius: 5px;
-    width: 30%;
-    height: 35%;
-    position: relative;
-}
-
 .delete-popup .close-popup {
     position: absolute;
     top: 20px;
@@ -456,6 +447,16 @@
     background-color: #ed0707 !important;
 }
 
+// The description-update "Confirm" (a non-destructive save) is a separate button/id
+// from the delete-preset "Confirm" above, so it doesn't inherit the red delete-hover.
+#confirm-edit-btn {
+    background-color: #3d388a !important;
+    outline: unset;
+}
+
+#confirm-edit-btn:hover {
+    background-color: #464092 !important;
+}
 
 #cancel-btn {
     background-color: #505050 !important;
@@ -466,85 +467,6 @@
     background-color: #5c5b5b !important;
 }
 
-
-
-
-
-
-// .confirm-popup {
-//     padding: 20px;
-//     background: #24252a;
-//     border-radius: 5px;
-//     width: 30%;
-//     height: 35%;
-//     position: relative;
-// }
-
-// .confirm-popup-header {
-//     display: flex;
-//     height: 30%;
-//     width: 100%;
-//     justify-content: center;
-//     flex-direction: row;
-//     align-content: center;
-//     flex-wrap: wrap;
-// }
-
-// .confirm-popup h2 {
-//     display: flex;
-//     width: 100%;
-//     height: 100%;
-//     position: relative;
-//     justify-content: center;
-//     flex-wrap: wrap;
-//     color: #333;
-//     align-content: flex-end;
-// }
-
-// .confirm-popup .popup-content {
-//     display: flex;
-//     flex-direction: row;
-//     height: 80%;
-//     flex-wrap: wrap;
-//     align-content: space-around;
-//     justify-content: space-evenly;
-//     overflow: auto;
-// }
-
-// .confirm-popup-button {
-//     width: 20%;
-// }
-
-// .popup-btn {
-//     min-width: 2.25rem;
-//     min-height: 2.25rem;
-//     border-radius: 9999px;
-//     font-family: "Poppins", sans-serif;
-//     font-weight: 600;
-//     font-size: 0.875;
-//     border: none;
-//     color: white;
-//     box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-//     cursor: pointer;
-//     padding-left: 1rem;
-//     padding-right: 1rem;
-// }
-
-// #confirm-btn {
-//     background-color: #009ada !important;
-// }
-
-// #confirm-btn:hover {
-//     background-color: #0ba5e5 !important;
-// }
-
-// #cancel-btn {
-//     background-color: #ec164c;
-// }
-
-// #cancel-btn:hover {
-//     background-color: #f44572;
-// }
 
 .switch-button-container {
     position: absolute;
@@ -580,43 +502,6 @@
     flex-wrap: wrap;
     align-content: center;
     justify-content: center;
-}
-
-// #confirm-btn {
-//     background-color: #7b1fa2;
-//     min-width: 2.25rem;
-//     min-height: 2.25rem;
-//     border-radius: 9999px;
-//     font-family: "Poppins", sans-serif;
-//     font-weight: 600;
-//     font-size: 0.875;
-//     border: none;
-//     color: white;
-//     box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-//     cursor: pointer;
-//     padding-left: 1rem;
-//     padding-right: 1rem;
-// }
-
-// #confirm-btn:hover {
-//     background-color: #8e2cb8;
-// }
-
-.options-button {
-    width: 90%;
-    background-color: #7b1fa2;
-    min-width: 2.25rem;
-    min-height: 2.25rem;
-    border-radius: 5px;
-    font-family: "Poppins", sans-serif;
-    font-weight: 600;
-    font-size: 0.875;
-    border: none;
-    color: white;
-    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    padding-left: 1rem;
-    padding-right: 1rem;
 }
 
 .mat-drawer-container {
