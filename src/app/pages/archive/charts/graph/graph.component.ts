@@ -21,7 +21,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   showXAxisLabel: boolean = false;
   showYAxisLabel: boolean = false;
   colorScheme = {
-    domain: ['#5950e8']
+    domain: ['#22d3ee']
   }
 
   constructor() { }
