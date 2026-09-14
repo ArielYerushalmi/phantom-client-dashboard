@@ -1,12 +1,10 @@
 @mixin btn-styles($btn-color, $btn-states-color) {
-  @include diagonal-gradient($btn-color, $btn-states-color);
+    // Flat fill + hairline border instead of the diagonal gradient sheen.
     background-color: $btn-color;
-    transition: all 0.15s ease;
+    background-image: none;
+    border: $border-thin solid $btn-states-color;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
     box-shadow: none;
-    &.animation-on-hover:hover{
-      background-position: bottom left;
-      transition:0.3s ease-in-out;
-    }
 
     &:hover,
     &:focus,
@@ -18,25 +16,18 @@
     &.active:hover
      {
         background-color: $btn-states-color !important;
-        background-image: linear-gradient(to bottom left, $btn-color, $btn-states-color, $btn-color) !important;
-        background-image: -webkit-linear-gradient(to bottom left, $btn-color, $btn-states-color, $btn-color) !important;
-        background-image: -o-linear-gradient(to bottom left, $btn-color, $btn-states-color, $btn-color) !important;
-        background-image: -moz-linear-gradient(to bottom left, $btn-color, $btn-states-color, $btn-color) !important;
+        background-image: none !important;
         color: $white;
         box-shadow: none;
     }
 
     &:active{
       box-shadow: none !important;
-      transform: translateY(1px) !important;
-      transition: all .15s ease;
+      transition: background-color .15s ease;
     }
 
     &:not([data-action]):hover{
-
-        box-shadow:  2px 2px 6px rgba(0,0,0,0.4);
-        transform: translateY(-1px);
-        -webkit-transform: translateY(-1px);
+        box-shadow: none;
     }
 
     &.disabled,
@@ -165,10 +156,7 @@
           &:not(:disabled):not(.disabled):active{
               color: $white;
               border-color: $btn-color;
-              background-image: linear-gradient(to bottom left, $btn-color, $btn-states-color, $btn-color) !important;
-              background-image: -webkit-linear-gradient(to bottom left, $btn-color, $btn-states-color, $btn-color) !important;
-              background-image: -o-linear-gradient(to bottom left, $btn-color, $btn-states-color, $btn-color) !important;
-              background-image: -moz-linear-gradient(to bottom left, $btn-color, $btn-states-color, $btn-color) !important;
+              background-image: none !important;
               background-color: $btn-states-color !important;
               box-shadow: none;
           }

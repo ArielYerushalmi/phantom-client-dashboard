@@ -1,14 +1,15 @@
 .card{
     background: $card-black-background;
-    border: 0;
+    border: $border-thin solid $hairline-border;
+    border-radius: $card-border-radius;
     position: relative;
     width: 100%;
     margin-bottom: 30px;
-    box-shadow: $box-shadow;
+    box-shadow: none;
 
 
     label{
-      color: rgba($white, 0.6);
+      color: rgba($text-primary, 0.6);
     }
 
     .card-title {
@@ -24,14 +25,14 @@
       }
 
       .card-title{
-        color: $white;
+        color: $text-primary;
         text-transform: inherit;
         font-weight: $font-weight-light;
         margin-bottom: .75rem;
       }
 
       .card-description, .card-category{
-        color: rgba($white, 0.6);
+        color: rgba($text-primary, 0.6);
       }
 
     }
@@ -42,10 +43,10 @@
       }
       padding: 15px 15px 0;
       border: 0;
-      color: rgba($white,0.8);
+      color: rgba($text-primary,0.8);
 
       .card-title{
-          color: $white;
+          color: $text-primary;
           font-weight: 100;
       }
 
