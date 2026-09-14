@@ -26,19 +26,17 @@
 }
 
 #confirm-btn {
-    border: 2px solid #22d3ee !important;
     width: 60%;
     margin: 5%;
-    background-color: #2e2f35;
+    background-color: #181c1f;
     min-width: 2.25rem;
     min-height: 2.25rem;
-    border-radius: 5px;
+    border-radius: 2px;
     font-family: "IBM Plex Sans", sans-serif;
     font-weight: 600;
     font-size: 0.875;
-    border: none;
-    color: white;
-    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #5b8a8f;
+    color: #e8e6e1;
     cursor: pointer;
     padding-left: 1rem;
     padding-right: 1rem;
@@ -46,7 +44,7 @@
 }
 
 #confirm-btn:hover {
-    background-color: #373840;
+    background-color: #232830;
 }
 
 .presets-container-side {
@@ -61,8 +59,8 @@
 
 .preset-item-container {
     height: 250px;
-    border: 1px solid #22d3ee;
-    border-radius: 10px;
+    border: 1px solid #2a3134;
+    border-radius: 2px;
 }
 
 .preset-top {
@@ -120,9 +118,9 @@
 
 .parameter {
     display: inline-flex;
-    background-color: #0e2e3e33;
-    border: 1px solid #22d3ee;
-    border-radius: 20px;
+    background-color: #181c1f;
+    border: 1px solid #2a3134;
+    border-radius: 2px;
     max-width: fit-content;
     padding: 4px;
     margin: 5px;
@@ -136,7 +134,7 @@
     width: 100%;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    background-color: #14161c;
+    background-color: #0f1214;
     gap: 10px;
     padding: 15px;
 }
@@ -164,10 +162,10 @@
 
 ::ng-deep.mat-form-field-ripple {
     /*change color of underline when focused*/
-    background-color: #22d3ee !important;
+    background-color: #5b8a8f !important;
 }
 
 ::ng-deep .mat-focused .mat-form-field-label {
     /*change color of label*/
-    color: #22d3ee !important;
+    color: #5b8a8f !important;
 }

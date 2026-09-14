@@ -14,7 +14,7 @@
     // position: fixed;
     // height: 89%;
     overflow: auto;
-    background-color: #14161c;
+    background-color: #0f1214;
     justify-content: center;
     align-content: center;
     padding: 1%;
@@ -53,7 +53,7 @@
     width: 100%;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    background-color: #14161c;
+    background-color: #0f1214;
     gap: 10px;
     padding: 3%;
 }
@@ -86,8 +86,8 @@
 
 .preset-item-container {
     height: 250px;
-    border: 1px solid #22d3ee;
-    border-radius: 10px;
+    border: 1px solid #2a3134;
+    border-radius: 2px;
 }
 
 .preset-top {
@@ -146,9 +146,9 @@
 
 .parameter {
     display: inline-flex;
-    background-color: #0e2e3e33;
-    border: 1px solid #22d3ee;
-    border-radius: 20px;
+    background-color: #181c1f;
+    border: 1px solid #2a3134;
+    border-radius: 2px;
     max-width: fit-content;
     padding: 4px;
     margin: 5px;
@@ -238,14 +238,14 @@
     display: flex;
     justify-content: center;
     margin-top: 0.5rem;
-    color: red;
+    color: #d64545;
 }
 
 .create-preset-container {
     width: 33%;
     height: 150px;
-    border: 1px solid #22d3ee;
-    border-radius: 10px;
+    border: 1px solid #2a3134;
+    border-radius: 2px;
 }
 
 #creat-preset-input {
@@ -257,13 +257,13 @@
 }
 
 .btn-add {
-    background: #22d3ee;
+    background: #5b8a8f;
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
 }
 
 .btn-add:hover {
-    background: #1fbed6;
+    background: #4b7276;
 }
 
 .create-preset-button {
@@ -294,7 +294,7 @@
 
 .delete-popup {
     padding: 20px;
-    background: #24252a;
+    background: #181c1f;
     border-radius: 5px;
     width: 30%;
     height: 35%;
@@ -328,7 +328,7 @@
 }
 
 .delete-popup .close-popup:hover {
-    color: #22d3ee;
+    color: #5b8a8f;
     cursor: pointer;
 }
 
@@ -405,7 +405,7 @@
 
 .update-popup {
     padding: 20px;
-    background: #24252a;
+    background: #181c1f;
     border-radius: 5px;
     width: 30%;
     height: 35%;
@@ -433,29 +433,29 @@
 }
 
 .update-popup .close-popup:hover {
-    color: #22d3ee;
+    color: #5b8a8f;
     cursor: pointer;
 }
 
 #confirm-btn {
-    background-color: #22d3ee !important;
+    background-color: #5b8a8f !important;
     transition: all 400ms;
     outline: unset;
 }
 
 #confirm-btn:hover {
-    background-color: #ed0707 !important;
+    background-color: #c62c2c !important;
 }
 
 // The description-update "Confirm" (a non-destructive save) is a separate button/id
 // from the delete-preset "Confirm" above, so it doesn't inherit the red delete-hover.
 #confirm-edit-btn {
-    background-color: #22d3ee !important;
+    background-color: #5b8a8f !important;
     outline: unset;
 }
 
 #confirm-edit-btn:hover {
-    background-color: #1fbed6 !important;
+    background-color: #4b7276 !important;
 }
 
 #cancel-btn {
@@ -486,7 +486,7 @@
 .mat-drawer-left {
     /* -webkit-transition: right 1s ease-in-out 0s; */
     left: 0;
-    background-color: #14161c;
+    background-color: #0f1214;
     width: 15%;
 }
 
@@ -525,7 +525,7 @@
 }
 
 .mat-raised-button {
-    background-color: #22d3ee !important;
+    background-color: #5b8a8f !important;
 }
 
 
@@ -576,15 +576,15 @@ mat-form-field {
 }
 
 ::ng-deep .mat-focused .mat-form-field-label {
-    color: #22d3ee !important;
+    color: #5b8a8f !important;
 }
 
 ::ng-deep.mat-form-field-ripple {
-    background-color: #22d3ee;
+    background-color: #5b8a8f;
 }
 
 ::ng-deep .mat-form-field.mat-focused .mat-form-field-ripple {
-    background-color: #22d3ee;
+    background-color: #5b8a8f;
 }
 
 #back-to-filter-icon {
