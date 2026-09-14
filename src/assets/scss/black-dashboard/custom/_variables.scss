@@ -97,27 +97,46 @@ $colors: map-merge((
 $default-color-opacity:      rgba(182, 182, 182, .6) !default;
 $orange-color:               #f96332 !default;
 
+// -----------------------------------------------------------------------
+// Phantom flat tactical ground-control palette
+// Replaces the earlier "cyan HUD glow" reskin outright - flat panels,
+// hairline dividers, muted steel-teal accent, semantic status colors.
+// -----------------------------------------------------------------------
+$panel-bg:            #181c1f !default; // card/panel surface
+$hairline-border:     #2a3134 !default; // hairline borders / dividers
+$text-primary:        #e8e6e1 !default; // warm off-white body/heading text
+$text-secondary:      #8b9296 !default; // muted grey secondary/label text
+
+// Semantic status colors - kept functionally distinct from the brand accent.
+// Do not reuse these for decoration; they signal nominal/caution/critical
+// state only (connection status, live/archive banners, etc). The gauge
+// thresholdConfig in live-gauge.component.ts has its own red/yellow/green
+// zone thresholds and is intentionally left untouched.
+$status-nominal:      #4caf6d !default;
+$status-caution:      #e8a33d !default;
+$status-critical:     #d64545 !default;
+
 $default:       #344675 !default;
-$primary:       #22d3ee !default;
+$primary:       #5b8a8f !default; // muted steel-teal accent (was cyan #22d3ee)
 $secondary:     #f4f5f7 !default;
-$success:       #00f2c3 !default;
+$success:       $status-nominal !default;
 $info:          #1d8cf8 !default;
-$warning:       #ff8d72 !default;
-$danger:        #fd5d93 !default;
+$warning:       $status-caution !default;
+$danger:        $status-critical !default;
 $black:         #222a42 !default;
 
 
 // gradient
 $default-states:       #263148 !default;
-$primary-states:       #67e8f9 !default;
-$success-states:       #0098f0 !default;
+$primary-states:       lighten($primary, 10%) !default; // was cyan #67e8f9
+$success-states:       darken($success, 8%) !default;
 $info-states:          #3358f4 !default;
-$warning-states:       #ff6491 !default;
-$danger-states:        #ec250d !default;
+$warning-states:       darken($warning, 8%) !default;
+$danger-states:        darken($danger, 8%) !default;
 $black-states:         #1d253b !default;
 
-$background-black:           #0b0f1a !default;
-$background-states-black:    #1e1e24 !default;
+$background-black:           #0f1214 !default; // warm-neutral near-black graphite (was blue-tinted #0b0f1a)
+$background-states-black:    #1c2023 !default;
 
 // opacity
 $default-opacity:      rgba(182, 182, 182, .6) !default;
@@ -129,7 +148,7 @@ $danger-opacity:       rgba(255, 54, 54, .3) !default;
 
 $light-gray:                 #E3E3E3 !default;
 $medium-gray:                #DDDDDD !default;
-$dark-gray:                  #9A9A9A !default;
+$dark-gray:                  $text-secondary !default; // was #9A9A9A
 $card-stats-gray:            #808080 !default;
 $active-gray:                #777777 !default;
 $nav-gray:                   #444444 !default;
@@ -236,7 +255,7 @@ $love-color: $red !default;
 // Body
 
 $body-bg: $background-black !default;
-$body-color: $gray-700 !default;
+$body-color: $text-primary !default;
 
 
 // Sections
@@ -333,23 +352,24 @@ $border-thick:               2px !default;
 $border-width:                .0625rem !default;
 $border-color:                $gray-200 !default;
 
-$border-radius:               .25rem !default;
-$border-radius-xl:            0.875rem !default;
-$border-radius-lg:            0.4285rem !default;
-$border-radius-sm:            0.2857rem !default;
-$border-radius-xs:            0.1428rem !default;
+// Flat tactical aesthetic: near-zero corner radii everywhere (2px cap).
+$border-radius:               0.125rem !default;
+$border-radius-xl:            0.125rem !default;
+$border-radius-lg:            0.125rem !default;
+$border-radius-sm:            0.125rem !default;
+$border-radius-xs:            0 !default;
 
 $margin-bottom:                 10px        !default;
 $border:                        1px solid   !default;
 
-$box-shadow-sm:               0 .125rem .25rem rgba($black, .075);
-$box-shadow:                  0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07);
-$box-shadow-lg:               0 1rem 3rem rgba($black, .175);
+// Flat aesthetic: no drop shadows. Hairline borders carry separation instead.
+$box-shadow-sm:               none !default;
+$box-shadow-lg:               none !default;
 
-$dropdown-shadow:          1px 2px 3px 0px rgba(0, 0, 0, 0.125);
-$box-shadow-raised:        0px 10px 25px 0px rgba(0, 0, 0, 0.3);
-$box-shadow:               0 1px 20px 0px rgba(0, 0, 0, 0.1);
-$sidebar-box-shadow:       0px 2px 22px 0 rgba(0, 0, 0,.20), 0px 2px 30px 0 rgba(0, 0, 0,.35);
+$dropdown-shadow:          none !default;
+$box-shadow-raised:        none !default;
+$box-shadow:               none !default;
+$sidebar-box-shadow:       none !default;
 
 $component-active-color:        $white !default;
 $component-active-bg:           theme-color("primary") !default;
@@ -377,8 +397,8 @@ $general-transition-time:     300ms             !default;
 
 // Fonts
 
-$font-family-base:            'Poppins', sans-serif !default;
-$font-family-alt:             'Poppins', sans-serif !default;
+$font-family-base:            'IBM Plex Sans', sans-serif !default;
+$font-family-alt:             'IBM Plex Sans', sans-serif !default;
 
 $font-size-dash:              .875rem !default;
 
@@ -548,9 +568,9 @@ $btn-font-size-lg:            1em !default;
 $btn-font-weight:             600 !default;
 $btn-text-transform:          uppercase !default;
 $btn-letter-spacing:          .025em !default;
-$btn-box-shadow:              0 4px 6px rgba(50,50,93,.11), 0 1px 3px rgba(0,0,0,.08);
-$btn-hover-box-shadow:        0 7px 14px rgba(50,50,93,.1), 0 3px 6px rgba(0,0,0,.08);
-$btn-focus-box-shadow:        $btn-hover-box-shadow !default;
+$btn-box-shadow:              none !default;
+$btn-hover-box-shadow:        none !default;
+$btn-focus-box-shadow:        none !default;
 $btn-focus-width:             $input-btn-focus-width !default;
 
 
@@ -892,11 +912,11 @@ $card-spacer-y:                     1.25rem !default;
 $card-spacer-x:                     1.5rem !default;
 $card-border-width:                 $border-width !default;
 $card-border-radius:                $border-radius-sm !default;
-$card-border-color:                 rgba($black, .05);
+$card-border-color:                 $hairline-border !default;
 $card-inner-border-radius:          calc(#{$card-border-radius} - #{$card-border-width});
 $card-cap-bg:                       $gray-100 !default;
 $card-bg:                           $white !default;
-$card-black-background:             #141a2e !default;
+$card-black-background:             $panel-bg !default;
 $card-img-overlay-padding:          1.25rem !default;
 
 //$card-group-margin:                 ($grid-gutter-width / 2);
