@@ -14,7 +14,7 @@ body {
 
 body {
     margin: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-family: 'IBM Plex Sans', "Helvetica Neue", sans-serif;
 }
 
 // Terminal/HUD readout treatment for live telemetry numbers only - labels, nav,
@@ -25,5 +25,5 @@ body {
 .telemetry-value,
 .ngx-gauge-meter .reading-block,
 .tooltip-val {
-    font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+    font-family: 'IBM Plex Mono', 'Roboto Mono', monospace;
 }
