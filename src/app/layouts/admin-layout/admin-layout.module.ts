@@ -28,6 +28,8 @@ import { LiveLabelComponent } from '../../pages/live/charts/label/live-label.com
 import { LiveStatusComponent } from "../../pages/live/charts/status/live-status.component";
 import { LiveAlertComponent } from '../../pages/live/charts/alert/live-alert.component';
 import { LivePieComponent } from '../../pages/live/charts/pie/live-pie.component';
+import { LiveFocusComponent } from '../../pages/live/charts/focus/live-focus.component';
+import { LiveStripItemComponent } from '../../pages/live/charts/strip-item/live-strip-item.component';
 import { PresetManagerComponent } from '../../pages/live/preset-manager/preset-manager.component';
 import { ArchiveComponent } from '../../pages/archive/archive-manager/archive.component';
 import { MatNativeDateModule } from "@angular/material/core";
@@ -77,6 +79,8 @@ import { MatIconModule } from "@angular/material/icon"
     LiveStatusComponent,
     LiveAlertComponent,
     LivePieComponent,
+    LiveFocusComponent,
+    LiveStripItemComponent,
     PresetManagerComponent,
     ArchiveComponent,
     ArchiveChartComponent,

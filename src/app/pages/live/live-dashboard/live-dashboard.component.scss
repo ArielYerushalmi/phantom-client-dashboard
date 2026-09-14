@@ -171,11 +171,6 @@ mat-icon {
     align-content: flex-end;
 }
 
-:host ::ng-deep .gridster-row,
-:host ::ng-deep .gridster-column {
-    border-color: gainsboro;
-}
-
 .mat-mdc-option.mat-mdc-option-active {
     background-color: #424242;
 }
@@ -188,31 +183,105 @@ mat-icon {
     background-color: #0f1214;
 }
 
-::ng-deep .gridster .gridster-preview {
-    background-color: transparent;
-}
-
-::ng-deep .gridster-item:hover .gridster-item-resizable-handler.handle-se {
-    border-color: transparent;
-}
-
-.gridster-item {
-    // Flat panel treatment: a hairline border marks the streaming panel,
-    // no glow/box-shadow.
-    border: 1px solid #2a3134;
-    background-color: #181c1f;
-    border-radius: 2px;
-}
-
-.gridster {
-    background-color: transparent;
-}
-
-.gridster-container {
+// Instrument-panel composition: one dominant focus readout (big number + live graph)
+// beside a compact strip of every other watched parameter. Replaces the old
+// gridster2 drag/resize grid of identically-weighted chart cards - the operator no
+// longer arranges cards by hand, they just pick which one is in focus.
+.instrument-panel {
     background-color: transparent;
     position: absolute;
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.empty-state {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    color: #7c8688;
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 2.5rem;
+    height: 2.5rem;
+    width: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #5b8a8f;
+}
+
+.empty-state-title {
+    color: #ccc;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.empty-state-hint {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.focus-slot {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    border: 1px solid #2a3134;
+    background-color: #181c1f;
+    border-radius: 2px;
+    display: flex;
+}
+
+// The strip only renders when there's more than one watched parameter (single-item
+// state leaves the focus panel full-width); it scrolls independently once it has
+// more items than fit, rather than growing the page.
+.strip {
+    flex: 0 0 260px;
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.strip app-live-strip-item {
+    flex: 0 0 108px;
+}
+
+@media (max-width: 900px) {
+    .instrument-panel {
+        flex-direction: column;
+    }
+
+    .focus-slot {
+        flex: 1 1 60%;
+        min-height: 220px;
+    }
+
+    .strip {
+        flex: 0 0 auto;
+        width: 100%;
+        height: auto;
+        max-height: 40%;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .strip app-live-strip-item {
+        flex: 0 0 150px;
+        height: 100%;
+    }
 }
 
 .mat-darawer-content {
@@ -276,95 +345,6 @@ mat-icon {
     margin-bottom: 50%;
 }
 
-
-.chart-gridster-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    color: white;
-    width: 100%;
-    height: 25px;
-    padding: 1px;
-    align-items: center;
-}
-
-.extended-menu-icons .close-popup {
-    font-size: 30px;
-    text-decoration: none;
-    color: #ccc;
-    margin-bottom: unset;
-}
-
-.gridster-item-header-name {
-    margin-left: 5px;
-}
-
-.chart-gridster-container {
-    color: white;
-    width: 100%;
-    height: calc(100% - 20px);
-}
-
-.chart {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-flow: column;
-    justify-content: center;
-    align-items: center;
-    box-sizing: border-box;
-}
-
-.mat-select {
-    transform-origin: left top;
-    min-width: 112px;
-    max-width: 280px;
-    overflow: auto;
-    border-radius: 2px;
-    outline: 0;
-    visibility: hidden;
-    background: #424242;
-}
-
-::ng-deep .cdk-overlay-pane:not(.mat-mdc-select-panel-above) .mdc-menu-surface.mat-mdc-select-panel {
-    display: inline-table;
-    width: fit-content;
-}
-
-.app-live-chart {
-    width: 100%;
-    height: 100%;
-}
-
-.extended-menu-icons {
-    margin-left: auto;
-    margin-right: 5px;
-    margin-top: 3px;
-    display: inline-flex;
-    flex-direction: initial;
-    position: absolute;
-    right: 0;
-    z-index: 2;
-}
-
-.not-open-feather-icon {
-    cursor: pointer;
-    position: absolute;
-    right: 0;
-    height: 19px;
-    width: 19px;
-    margin-left: auto;
-    margin-right: 5px;
-}
-
-.open-feather-icon {
-    cursor: pointer;
-    float: right;
-    height: 19px;
-    width: 19px;
-    margin-left: auto;
-    margin-right: 5px;
-}
 
 .tim-icons {
     color: white;

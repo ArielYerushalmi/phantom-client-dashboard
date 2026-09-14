@@ -1,5 +1,4 @@
 import { Component, EventEmitter, OnDestroy, OnInit } from '@angular/core';
-import { GridsterConfig } from 'angular-gridster2';
 import { DashboardService } from 'src/app/common/services/dashboard-service/dashboard.service';
 import { IChartGridsterItem } from '../../../common/interfaces/gridster/chart-gridster-item.interface';
 import { ParameterRO } from 'src/app/common/dtos/parameter/parameter.ro';
@@ -10,7 +9,6 @@ import { PresetsUtilsService } from '../../../common/services/presets-utils-serv
 import { LtsService } from '../../../common/services/lts-service/lts.service'
 import { FrameParameter } from '../../../common/dtos/live/frame-parameter';
 import { createDashboardDTO } from 'src/app/common/dtos/dashboard/create-dashboard.dto';
-import { Router } from '@angular/router';
 import { IUser } from 'src/app/common/interfaces/user/user.intefrace';
 import { updateDashboardDTO } from 'src/app/common/dtos/dashboard/update-dashboard.dto';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -25,15 +23,24 @@ import { ToastrService } from 'ngx-toastr';
 export class LiveDashboardComponent implements OnInit, OnDestroy {
 
   IsLive: boolean = true;
-  options: GridsterConfig;
-  gridsterItemsList: IChartGridsterItem[] = [];
+
+  /**
+   * Every currently-subscribed parameter, in the order it was added. Kept as
+   * IChartGridsterItem[] (rather than a plain IChartEntity[]) purely so the existing
+   * preset-persistence DTOs (CreateDashboardItemDTO / updateDashboardDTO), which are
+   * built straight from this shape, keep working untouched. The cols/rows/x/y fields
+   * are no longer meaningful for layout - there's no grid to place items on anymore -
+   * and are only ever written as 1/1/0/0 for newly-added parameters.
+   */
+  watchedItems: IChartGridsterItem[] = [];
   dashboardItemMap = new Map<string, EventEmitter<number>>();
+
+  /** parameterName of the item currently shown in the large focus panel, or null when nothing is watched. */
+  focusedParameterName: string | null = null;
+
   dashboards: DashboardRO[] = [];
   parameters: ParameterRO[] = [];
-  chartTypes = [ChartType.GAUGE, ChartType.GRAPH, ChartType.PIE, ChartType.LABEL, ChartType.ALERT, ChartType.STATUS];
-  isMenu: boolean = false;
   isRefresh: boolean = true;
-  menuArray: boolean[] = new Array(this.gridsterItemsList.length).fill(false)
   dashboard: DashboardRO = null;
   isUpdatePopup: boolean = false;
 
@@ -60,66 +67,72 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     this.connectionStateSubscription = this.liveDataWebSocket.connectionState.subscribe((isOpen: boolean) => {
       this.wsDisconnected = !isOpen;
     });
-
-    this.options = {
-      gridType: 'fit',
-      pushItems: true,
-      maxCols: 5,
-      maxRows: 5,
-      resizable: {
-        enabled: true,
-      },
-      draggable: {
-        enabled: true,
-      }
-    };
   };
 
+  /** The single parameter shown large in the focus panel, or null when nothing is watched. */
+  get focusedItem(): IChartGridsterItem | null {
+    if (!this.focusedParameterName) {
+      return null;
+    }
+    return this.watchedItems.find((item) => item.chart.parameter.parameterName === this.focusedParameterName) ?? null;
+  }
+
+  /** Every watched parameter other than the focused one - rendered as the compact strip. */
+  get stripItems(): IChartGridsterItem[] {
+    return this.watchedItems.filter((item) => item.chart.parameter.parameterName !== this.focusedParameterName);
+  }
+
   async onParameterSelected(parameter: ParameterRO) {
-    let index = this.presetsUtils.findItem(this.gridsterItemsList, parameter);
+    let index = this.presetsUtils.findItem(this.watchedItems, parameter);
     if (index != -1) {
       this.onRemove(parameter);
     } else {
-      this.onAdd(parameter, parameter.chartTypes[0], {});
+      this.onAdd(parameter);
       await this.syncSubscription();
     }
   };
 
-  onAdd(parameter: ParameterRO, chartType: ChartType,
-    { cols = 1, rows = 1, x = 0, y = 0 }: { cols?: number, rows?: number, x?: number, y?: number }): void {
-    if (this.gridsterItemsList.length >= this.options.maxCols * this.options.maxRows) {
-      this.toastr.warning('Remove a chart before adding another.', 'Dashboard is full');
-      return;
-    }
+  onAdd(parameter: ParameterRO,
+    { cols = 1, rows = 1, x = 0, y = 0 }: { cols?: number, rows?: number, x?: number, y?: number } = {}): void {
+    // Every parameter watched on this page is driven off the same LiveData (value + time)
+    // shape - regardless of whatever chart type an older saved preset had recorded for it -
+    // so the focus/strip readouts always have both a number and a timeseries to draw from.
+    let itemToAdd: IChartEntity = this.presetsUtils.initGridsterItem(parameter, ChartType.GRAPH);
 
-    let itemToAdd: IChartEntity = this.presetsUtils.initGridsterItem(parameter, chartType);
-
-    if (!this.presetsUtils.isParameterExists(parameter, this.gridsterItemsList)) {
-      this.gridsterItemsList.push({ cols, rows, x, y, chart: itemToAdd });
+    if (!this.presetsUtils.isParameterExists(parameter, this.watchedItems)) {
+      this.watchedItems.push({ cols, rows, x, y, chart: itemToAdd });
       this.dashboardItemMap.set(itemToAdd.parameter.parameterName, itemToAdd.dataEvent);
+      if (!this.focusedParameterName) {
+        this.focusedParameterName = parameter.parameterName;
+      }
     };
   };
 
   async onRemove(parameter: ParameterRO): Promise<void> {
-    let index = this.presetsUtils.findItem(this.gridsterItemsList, parameter);
+    let index = this.presetsUtils.findItem(this.watchedItems, parameter);
     if (index != -1) {
-      this.gridsterItemsList.splice(index, 1);
+      this.watchedItems.splice(index, 1);
     };
     // Without this, the map keeps a growing set of stale EventEmitters for parameters
     // that are no longer on the dashboard, and handleLiveMessage keeps emitting into them.
     this.dashboardItemMap.delete(parameter.parameterName);
+
+    if (this.focusedParameterName === parameter.parameterName) {
+      // Promote whatever's left at the front of the strip; null (empty state) if nothing remains.
+      this.focusedParameterName = this.watchedItems[0]?.chart.parameter.parameterName ?? null;
+    }
+
     await this.syncSubscription();
   };
 
-  onChangeChartType(index: number, chartType: ChartType): void {
-    if (index != -1) {
-      this.gridsterItemsList[index].chart.chartType = chartType;
-    };
+  /** Swaps a compact strip item into the large focus slot. */
+  promoteToFocus(parameterName: string): void {
+    this.focusedParameterName = parameterName;
   };
 
   async loadPresetByIndex(): Promise<void> {
     for (const dashboardItemRO of this.dashboard.items) {
-      this.onAdd(dashboardItemRO.parameter, dashboardItemRO.chartType,
+      this.onAdd(dashboardItemRO.parameter,
         { cols: dashboardItemRO.cols, rows: dashboardItemRO.rows, x: dashboardItemRO.x, y: dashboardItemRO.y });
     };
 
@@ -129,23 +142,13 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   handleLiveMessage(gridsterItemData: FrameParameter[]) {
     gridsterItemData.forEach(item => {
       var dataEvent = this.dashboardItemMap.get(item.Name);
-      let index: number = this.presetsUtils.findItemByName(this.gridsterItemsList, item.Name);
+      let index: number = this.presetsUtils.findItemByName(this.watchedItems, item.Name);
       if (index != -1) {
-        let chartType: ChartType = this.gridsterItemsList[index].chart.chartType;
+        let chartType: ChartType = this.watchedItems[index].chart.chartType;
         let dataToEmit: any = this.presetsUtils.structureDataToType(item.Data, chartType);
         dataEvent.emit(dataToEmit);
       };
     });
-  };
-
-  getType(chartType: ChartType): string {
-    return ChartType[chartType];
-  };
-
-  menuToggle(index: number) {
-    if (index != -1) {
-      this.menuArray[index] = !this.menuArray[index];
-    };
   };
 
   refreshToggle() {
@@ -153,12 +156,12 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   };
 
   isParameterUsed(parameter: ParameterRO): boolean {
-    return this.presetsUtils.isParameterExists(parameter, this.gridsterItemsList);
+    return this.presetsUtils.isParameterExists(parameter, this.watchedItems);
   };
 
   async syncSubscription() {
-    let strArrayToSubscribe: string[] = this.gridsterItemsList.map((gridsterItem) => {
-      return gridsterItem.chart.parameter.parameterName;
+    let strArrayToSubscribe: string[] = this.watchedItems.map((watchedItem) => {
+      return watchedItem.chart.parameter.parameterName;
     });
     await this.liveDataWebSocket.subscribe(strArrayToSubscribe);
   };
@@ -190,7 +193,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   };
 
   updateDashboard() {
-    let updatedDashboard: updateDashboardDTO = this.presetsUtils.updateDashboardItems(this.dashboard, this.gridsterItemsList);
+    let updatedDashboard: updateDashboardDTO = this.presetsUtils.updateDashboardItems(this.dashboard, this.watchedItems);
     this.dashboardservice.updateDashboard(this.dashboard.id, updatedDashboard).subscribe((newDashboard: DashboardRO) => {
       this.dashboard = newDashboard;
       this.isUpdatePopup = true;
@@ -214,7 +217,8 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
 
   onGotoPresetManager() {
     this.dashboard = null;
-    this.gridsterItemsList = [];
+    this.watchedItems = [];
+    this.focusedParameterName = null;
     this.dashboardItemMap.clear();
     this.liveDataWebSocket.clearSubscription();
   };

@@ -56,55 +56,26 @@
                         </div>
                     </mat-drawer>
                     <mat-drawer-content class="mat-darawer-content">
-                        <div class="gridster-container">
-                            <gridster [options]="options" class="gridster">
-                                <gridster-item class="gridster-item" [item]="gridsterItem"
-                                    *ngFor="let gridsterItem of gridsterItemsList; let itemId = index">
-                                    <div class="chart-gridster-header">
-                                        <span class="gridster-item-header-name">
-                                            {{gridsterItem.chart.parameter.parameterName}}
-                                        </span>
-                                        <ng-container *ngIf="menuArray[itemId]==true; then menuOpen else menuClose">
-                                        </ng-container>
-                                        <ng-template #menuClose>
-                                            <mat-icon style="cursor: pointer;"
-                                                (click)="menuToggle(itemId)">menu</mat-icon>
-                                        </ng-template>
-                                        <ng-template #menuOpen>
-                                            <span class="extended-menu-icons">
-                                                <mat-icon style="cursor: pointer;"
-                                                    (click)="matSelect.toggle()">bar_chart</mat-icon>
-                                                <!-- <i class="tim-icons  icon-chart-pie-36"
-                                                    style="font-size: initial; cursor: pointer;"
-                                                    (click)="matSelect.toggle()"></i> -->
-                                                <mat-icon style="cursor: pointer;"
-                                                    (click)="menuToggle(itemId); onRemove(gridsterItem.chart.parameter)">delete_outline</mat-icon>
-                                                <!-- <i class="tim-icons  icon-trash-simple"
-                                                    style="font-size: initial; cursor: pointer;"
-                                                    (click)="menuToggle(itemId); onRemove(gridsterItem.chart.parameter)"></i> -->
-                                                <p class="close-popup" style="cursor: pointer;"
-                                                    (click)="menuToggle(itemId)">&times;</p>
-                                                <!-- <i class="tim-icons  icon-simple-remove"
-                                                    style="font-size: initial; cursor: pointer;"
-                                                    (click)="menuToggle(itemId)"></i> -->
-                                            </span>
-                                            <mat-select #matSelect name="chartSelect" class="mat-select">
-                                                <mat-option
-                                                    *ngFor="let chartType of gridsterItem.chart.parameter.chartTypes | slice:0:gridsterItem.chart.parameter.chartTypes.length-1 "
-                                                    value="chartType" (click)="onChangeChartType(itemId, chartType)">
-                                                    {{getType(chartType)}}
-                                                </mat-option>
-                                            </mat-select>
-                                        </ng-template>
-                                    </div>
-                                    <div class="chart-gridster-container">
-                                        <div class="chart" id="{{gridsterItem.chart.parameter.parameterName}}">
-                                            <app-live-chart class="app-live-chart" [entity]="gridsterItem.chart">
-                                            </app-live-chart>
-                                        </div>
-                                    </div>
-                                </gridster-item>
-                            </gridster>
+                        <div class="instrument-panel">
+                            <div class="empty-state" *ngIf="watchedItems.length === 0">
+                                <mat-icon class="empty-state-icon">sensors_off</mat-icon>
+                                <p class="empty-state-title">No parameters watched</p>
+                                <p class="empty-state-hint">Open the parameter list (menu icon, top right) to add one.
+                                </p>
+                            </div>
+
+                            <ng-container *ngIf="focusedItem">
+                                <div class="focus-slot">
+                                    <app-live-focus [entity]="focusedItem.chart"></app-live-focus>
+                                </div>
+                                <div class="strip" *ngIf="stripItems.length > 0">
+                                    <app-live-strip-item *ngFor="let stripItem of stripItems"
+                                        [entity]="stripItem.chart"
+                                        (focus)="promoteToFocus(stripItem.chart.parameter.parameterName)"
+                                        (remove)="onRemove(stripItem.chart.parameter)">
+                                    </app-live-strip-item>
+                                </div>
+                            </ng-container>
                         </div>
                     </mat-drawer-content>
                 </mat-drawer-container>
