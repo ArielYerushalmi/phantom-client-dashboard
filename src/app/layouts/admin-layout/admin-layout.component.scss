@@ -1,23 +1,12 @@
-.sidebar {
-    height: 100%;
-    width: 10%;
-    box-shadow: none;
-    margin-top: 0;
-    margin-left: 0;
+// No sidebar in this shell - the command bar (app-navbar) is a full-width,
+// sticky strip and the content below it fills the whole viewport width.
+// (Previously this file offset .main-panel/app-navbar to leave room for a
+// sidebar column; that offset has been removed along with the sidebar.)
+.wrapper {
+    min-height: 100vh;
 }
 
-::ng-deep .logo {
-    background-color: #24252a !important;
-}
-
-::ng-deep .sidebar-wrapper {
-    background-color: #24252a !important;
-}
-
-app-navbar {
-    width: 90%;
-    display: block;
-    height: 50px;
-    right: 0;
-    position: fixed;
+.main-panel {
+    width: 100%;
+    min-height: 100vh;
 }

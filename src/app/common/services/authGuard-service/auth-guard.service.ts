@@ -18,6 +18,11 @@ export class AuthGuardService implements CanActivate {
     Debrifer: "archive"
   }
 
+  // Routes any authenticated user may reach regardless of role - the shared
+  // shell landing page isn't tied to a single role's workflow the way
+  // live/archive/manager are.
+  private readonly openToAllRoles = ["home"];
+
   constructor(private httpClient: HttpClient, private router: Router) { }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
@@ -29,7 +34,7 @@ export class AuthGuardService implements CanActivate {
 
     return this.httpClient.get<IUser>(`${this.userURL}/${username}`).toPromise().then((user: IUser) => {
       this.userRole = user.role;
-      if (route.url[0].path == this.roleAuth[user.role] || user.role === Role.ADMIN) {
+      if (this.openToAllRoles.includes(route.url[0].path) || route.url[0].path == this.roleAuth[user.role] || user.role === Role.ADMIN) {
         return true;
       }
       return false;

@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { IUser } from 'src/app/common/interfaces/user/user.intefrace';
-import { Role } from 'src/app/common/enums/role.enum';
 import { AuthGuardService } from 'src/app/common/services/authGuard-service/auth-guard.service';
 import { FormControl, Validators } from '@angular/forms';
 
@@ -71,11 +70,10 @@ export class LoginComponent implements OnInit {
   onSubmitLogin() {
     this.httpClient.post<IUser>(this.userURL, { username: this.inputUsernameTxt, password: this.inputPasswordTxt }).subscribe((user: IUser) => {
       localStorage.setItem('UserName', user.username);
-      if (user.role === Role.Debrifer) {
-        this.router.navigateByUrl('/archive', { state: user });
-      } else {
-        this.router.navigateByUrl('/live', { state: user });
-      }
+      // Land everyone on the shared command-bar home screen after login,
+      // rather than dropping role-specific users straight into their one
+      // permitted page - Home is now the common entry point for every role.
+      this.router.navigateByUrl('/home', { state: user });
     },
       (error: HttpErrorResponse) => {
         if (error.error.message != undefined) {
