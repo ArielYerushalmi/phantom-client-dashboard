@@ -15,7 +15,7 @@
     position: fixed;
     height: calc(100% - 50px);
     overflow: auto;
-    background-color: #14161c;
+    background-color: #0f1214;
 }
 
 .archive-dashboard-container {
@@ -23,17 +23,17 @@
     display: flex;
     height: 100%;
     overflow: auto;
-    background-color: #14161c;
+    background-color: #0f1214;
 
-    // Faint HUD grid texture, matching the live dashboard.
+    // Faint 1px reference grid, matching the live dashboard.
     background-image:
-        linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+        linear-gradient(rgba(42, 49, 52, 0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42, 49, 52, 0.4) 1px, transparent 1px);
     background-size: 24px 24px;
 }
 
 .dashboard-container {
-    background-color: #14161c;
+    background-color: #0f1214;
     height: 100%;
     width: 100%;
 }
@@ -118,7 +118,7 @@
     width: 20px;
     height: 20px;
     padding: 2px;
-    background: #22d3ee;
+    background: #5b8a8f;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.20);
     border: 0;
     border-radius: 4px;
@@ -139,13 +139,13 @@
 .mat-drawer-left {
     /* -webkit-transition: right 1s ease-in-out 0s; */
     left: 0;
-    background-color: #14161c;
+    background-color: #0f1214;
     width: 15%;
 }
 
 .mat-drawer-right {
     right: 0;
-    background-color: #14161c;
+    background-color: #0f1214;
     width: 15%;
 }
 
@@ -209,9 +209,10 @@
 }
 
 .gridster-item {
-    border: 1px solid #22d3ee;
-    background-color: #0e2e3e33;
-    border-radius: 5px;
+    // Flat panel treatment: a hairline border marks the panel, no glow.
+    border: 1px solid #2a3134;
+    background-color: #181c1f;
+    border-radius: 2px;
     display: flex !important;
     flex-flow: column;
 }
@@ -323,12 +324,12 @@
 }
 
 .paginator {
-    background-color: #24252a;
+    background-color: #181c1f;
     color: white;
 }
 
 ::ng-deep .mat-select-panel {
-    background-color: #24252a;
+    background-color: #181c1f;
 }
 
 ::ng-deep .mat-paginator-page-size.ng-star-inserted {
@@ -412,7 +413,7 @@ mat-icon {
 }
 
 .confirm-popup {
-    background: #24252a;
+    background: #181c1f;
     border-radius: 5px;
     width: 25%;
     height: 30%;
@@ -480,12 +481,12 @@ mat-icon {
 }
 
 #confirm-btn {
-    background-color: #22d3ee !important;
+    background-color: #5b8a8f !important;
     outline: unset;
 }
 
 #confirm-btn:hover {
-    background-color: #1fbed6 !important;
+    background-color: #4b7276 !important;
 }
 
 

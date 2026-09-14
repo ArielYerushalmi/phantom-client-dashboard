@@ -8,7 +8,7 @@
     position: fixed;
     height: calc(100% - 50px);
     overflow: auto;
-    background-color: #14161c;
+    background-color: #0f1214;
 }
 
 .status-banner {
@@ -28,7 +28,8 @@
 }
 
 .status-banner-warning {
-    background-color: #ad4b1c;
+    background-color: #e8a33d;
+    color: #0f1214;
 }
 
 .status-banner-icon {
@@ -72,21 +73,24 @@ mat-icon {
     right: 0;
     bottom: 0;
 
-    // Faint HUD grid texture behind the live telemetry panels.
+    // Faint 1px reference grid behind the live telemetry panels (flat
+    // hairline texture, not a colored HUD scanline).
     background-image:
-        linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+        linear-gradient(rgba(42, 49, 52, 0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42, 49, 52, 0.4) 1px, transparent 1px);
     background-size: 24px 24px;
 }
 
 // Small pulsing "LIVE" indicator shown next to the connection status while
-// the live websocket is connected.
+// the live websocket is connected. Recolored to the nominal status color;
+// the dot signals active data flow via a subtle opacity pulse only (no
+// glow, no scale burst).
 .live-indicator {
     display: flex;
     align-items: center;
     gap: 0.4rem;
     margin-left: 0.75rem;
-    color: #22d3ee;
+    color: #4caf6d;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -96,31 +100,23 @@ mat-icon {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #22d3ee;
-    box-shadow: 0 0 6px rgba(34, 211, 238, 0.8);
+    background-color: #4caf6d;
     animation: live-pulse 1.6s ease-in-out infinite;
 }
 
 @keyframes live-pulse {
-    0% {
-        transform: scale(0.85);
-        opacity: 0.6;
+    0%, 100% {
+        opacity: 0.5;
     }
 
     50% {
-        transform: scale(1.15);
         opacity: 1;
-    }
-
-    100% {
-        transform: scale(0.85);
-        opacity: 0.6;
     }
 }
 
 .dashboard-container {
     position: sticky;
-    background-color: #14161c;
+    background-color: #0f1214;
     height: 100%;
     width: 100%;
 }
@@ -190,11 +186,11 @@ mat-icon {
 }
 
 .content {
-    background-color: #1d1f28;
+    background-color: #181c1f;
 }
 
 .row {
-    background-color: #14161c;
+    background-color: #0f1214;
 }
 
 ::ng-deep .gridster .gridster-preview {
@@ -206,11 +202,11 @@ mat-icon {
 }
 
 .gridster-item {
-    // Live telemetry glow: distinguishes actively-streaming panels from static content.
-    border: 1px solid rgba(34, 211, 238, 0.4);
-    box-shadow: 0 0 12px rgba(34, 211, 238, 0.35);
-    background-color: #0e2e3e33;
-    border-radius: 10px;
+    // Flat panel treatment: a hairline border marks the streaming panel,
+    // no glow/box-shadow.
+    border: 1px solid #2a3134;
+    background-color: #181c1f;
+    border-radius: 2px;
 }
 
 .gridster {
@@ -248,7 +244,7 @@ mat-icon {
 .mat-drawer {
     /* -webkit-transition: right 1s ease-in-out 0s; */
     right: 0px !important;
-    background-color: #14161c;
+    background-color: #0f1214;
     width: 15%;
 }
 
@@ -403,7 +399,7 @@ mat-icon {
     width: 20px;
     height: 20px;
     padding: 2px;
-    background: #22d3ee;
+    background: #5b8a8f;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.20);
     border: 0;
     border-radius: 4px;
@@ -419,7 +415,7 @@ mat-icon {
     width: 20px;
     height: 20px;
     padding: 2px;
-    background: #22d3ee;
+    background: #5b8a8f;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.20);
     border: 0;
     border-radius: 4px;
@@ -490,7 +486,7 @@ mat-icon {
 }
 
 .confirm-popup {
-    background: #24252a;
+    background: #181c1f;
     border-radius: 5px;
     width: 25%;
     height: 30%;
@@ -558,10 +554,10 @@ mat-icon {
 }
 
 #confirm-btn {
-    background-color: #22d3ee !important;
+    background-color: #5b8a8f !important;
     outline: unset;
 }
 
 #confirm-btn:hover {
-    background-color: #1fbed6 !important;
+    background-color: #4b7276 !important;
 }

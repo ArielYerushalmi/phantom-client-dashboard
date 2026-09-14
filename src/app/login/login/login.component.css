@@ -5,8 +5,8 @@ html {
 body {
     margin: 0;
     padding: 0;
-    font-family: sans-serif;
-    background: linear-gradient(#141e30, #22d3ee);
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: #0f1214;
 }
 
 .login-box {
@@ -16,10 +16,9 @@ body {
     width: 400px;
     padding: 40px;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, .5);
+    background: #181c1f;
     box-sizing: border-box;
-    box-shadow: 0 15px 25px rgba(0, 0, 0, .6);
-    border-radius: 10px;
+    border: 1px solid #2a3134;
 }
 
 .login-box h2 {
@@ -35,11 +34,11 @@ body {
 }
 
 input#usernameTextbox {
-    caret-color: #22d3ee;
+    caret-color: #5b8a8f;
 }
 
 input#passwordTextbox {
-    caret-color: #22d3ee;
+    caret-color: #5b8a8f;
 }
 
 .login-box .user-box input {
@@ -68,7 +67,7 @@ input#passwordTextbox {
 .login-box .user-box input:valid~label {
     top: -20px;
     left: 0;
-    color: #22d3ee;
+    color: #5b8a8f;
     font-size: 12px;
 }
 
@@ -76,112 +75,18 @@ input#passwordTextbox {
     position: relative;
     display: inline-block;
     padding: 10px 20px;
-    color: #22d3ee;
+    color: #5b8a8f;
     font-size: 16px;
     text-decoration: none;
-    text-transform: uppercase;
+    border: 1px solid #5b8a8f;
     overflow: hidden;
-    transition: .5s;
+    transition: background-color .2s ease, color .2s ease;
     margin-top: 40px;
-    letter-spacing: 4px
 }
 
 .login-box a:hover {
-    background: #22d3ee;
+    background: #5b8a8f;
     color: #fff;
-    border-radius: 5px;
-    box-shadow: 0 0 5px #22d3ee,
-        0 0 25px #22d3ee,
-        0 0 50px #22d3ee,
-        0 0 100px #22d3ee;
-}
-
-.login-box a span {
-    position: absolute;
-    display: block;
-}
-
-.login-box a span:nth-child(1) {
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #22d3ee);
-    animation: btn-anim1 1s linear infinite;
-}
-
-@keyframes btn-anim1 {
-    0% {
-        left: -100%;
-    }
-
-    50%,
-    100% {
-        left: 100%;
-    }
-}
-
-.login-box a span:nth-child(2) {
-    top: -100%;
-    right: 0;
-    width: 2px;
-    height: 100%;
-    background: linear-gradient(180deg, transparent, #22d3ee);
-    animation: btn-anim2 1s linear infinite;
-    animation-delay: .25s
-}
-
-@keyframes btn-anim2 {
-    0% {
-        top: -100%;
-    }
-
-    50%,
-    100% {
-        top: 100%;
-    }
-}
-
-.login-box a span:nth-child(3) {
-    bottom: 0;
-    right: -100%;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(270deg, transparent, #22d3ee);
-    animation: btn-anim3 1s linear infinite;
-    animation-delay: .5s
-}
-
-@keyframes btn-anim3 {
-    0% {
-        right: -100%;
-    }
-
-    50%,
-    100% {
-        right: 100%;
-    }
-}
-
-.login-box a span:nth-child(4) {
-    bottom: -100%;
-    left: 0;
-    width: 2px;
-    height: 100%;
-    background: linear-gradient(360deg, transparent, #22d3ee);
-    animation: btn-anim4 1s linear infinite;
-    animation-delay: .75s
-}
-
-@keyframes btn-anim4 {
-    0% {
-        bottom: -100%;
-    }
-
-    50%,
-    100% {
-        bottom: 100%;
-    }
 }
 
 .activeButton {
@@ -204,19 +109,19 @@ mat-form-field {
 }
 
 ::ng-deep .mat-focused .mat-form-field-label {
-    color: #22d3ee !important;
+    color: #5b8a8f !important;
 }
 
 ::ng-deep.mat-form-field-ripple {
-    background-color: #22d3ee;
+    background-color: #5b8a8f;
 }
 
 ::ng-deep .mat-form-field.mat-focused .mat-form-field-ripple {
-    background-color: #22d3ee;
+    background-color: #5b8a8f;
 }
 
 #alert {
     display: flex;
     justify-content: center;
-    color: red;
+    color: #d64545;
 }

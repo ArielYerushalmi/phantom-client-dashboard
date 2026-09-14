@@ -22,8 +22,8 @@
 
 .mat-header-row {
     justify-content: space-between;
-    background-color: #24252a;
-    border-bottom: 2px solid #22d3ee;
+    background-color: #181c1f;
+    border-bottom: 1px solid #2a3134;
     display: flex;
     align-content: center;
     flex-wrap: wrap;
@@ -33,15 +33,13 @@
 .mat-row {
     justify-content: space-between;
     display: flex;
+    border-bottom: 1px solid #2a3134;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+        background-color: #181c1f;
+    }
 }
-
-// .mat-row:nth-child(even) {
-//     background-color: rgb(25 27 31);
-// }
-
-// .mat-row:nth-child(odd) {
-//     background-color: rgb(28 30 34);
-// }
 
 .mat-header-cell {
     color: white;
@@ -55,12 +53,10 @@
 }
 
 .mat-cell {
-    color: #ffffffcc;
+    color: #e8e6e1cc;
     width: 50%;
     display: flex;
     padding: 0;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
     justify-content: center;
     align-content: center;
     flex-wrap: wrap;
