@@ -2,10 +2,10 @@
     <div *ngIf="status===true then status_on else status_off"></div>
 
     <ng-template #status_on>
-        <span class="status-design on-status-design"> <span class="blinker-dot">&bull;</span>ON</span>
+        <span class="status-design on-status-design"><span class="status-led"></span>On</span>
     </ng-template>
 
     <ng-template #status_off>
-        <span class="status-design off-status-design"> <span class="blinker-dot">&bull;</span>OFF</span>
+        <span class="status-design off-status-design"><span class="status-led"></span>Off</span>
     </ng-template>
 </div>

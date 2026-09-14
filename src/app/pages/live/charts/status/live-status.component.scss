@@ -5,43 +5,29 @@
     align-items: center;
 }
 
+// Flat "annunciator" style: a small square LED plus plain-language text,
+// not a rounded colored pill. The container itself carries no fill/border.
 .status-design {
     display: flex;
     align-items: center;
     height: 100%;
-    border-radius: 10px;
     font-size: medium;
+    color: #e8e6e1;
     padding: 0px 0.35rem;
 }
-.on-status-design {
-    border: 3px solid green;
-    background-color: green;
+
+.status-led {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 0.4rem;
+    flex: 0 0 auto;
 }
 
-.off-status-design {
-    border: 3px solid red;
-    background-color: red;
+.on-status-design .status-led {
+    background-color: #4caf6d;
 }
 
-.blinker-dot {
-    font-size: 150%;
-    animation-name: blinker;
-    animation-duration: 1s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    margin-right: 0.1rem;
-}
-
-@keyframes blinker {
-    0% {
-        opacity: 1.0;
-    }
-
-    50% {
-        opacity: 0.0;
-    }
-
-    100% {
-        opacity: 1.0;
-    }
+.off-status-design .status-led {
+    background-color: #d64545;
 }
