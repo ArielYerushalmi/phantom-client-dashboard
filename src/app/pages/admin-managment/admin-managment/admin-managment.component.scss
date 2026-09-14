@@ -2,14 +2,17 @@
     display: none;
 }
 
+// Previously reserved a 10% column for a page-local <app-sidebar> and
+// offset for the old fixed navbar height; the sidebar is gone (navigation
+// now lives in the shell's command bar) so this fills the full width,
+// recalibrated to the command bar's fixed 64px height (see
+// navbar.component.scss).
 .body {
-    width: 90%;
+    width: 100%;
     display: flex;
-    right: 0;
-    float: right;
-    top: 50px;
+    top: 64px;
     position: fixed;
-    height: calc(100% - 50px);
+    height: calc(100% - 64px);
     overflow: auto;
     background-color: #0f1214;
 }
@@ -44,14 +47,6 @@
     font-size: 1.1rem;
     height: 1.1rem;
     width: 1.1rem;
-}
-
-.sidebar {
-    height: 100%;
-    width: 10%;
-    box-shadow: none;
-    margin-top: 0;
-    margin-left: 0;
 }
 
 .mat-table {

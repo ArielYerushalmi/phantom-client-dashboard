@@ -1,0 +1,14 @@
+<div class="home-container">
+    <div class="home-panel">
+        <p class="home-eyebrow">PHANTOM GROUND CONTROL</p>
+        <h1 class="home-heading">Welcome<span *ngIf="username">, {{ username }}</span></h1>
+        <p class="home-subheading">Select a channel above to continue.</p>
+
+        <div class="home-links" *ngIf="links.length">
+            <a *ngFor="let link of links" class="home-link" [routerLink]="[link.path]">
+                <span class="home-link-label">{{ link.label }}</span>
+                <span class="home-link-description">{{ link.description }}</span>
+            </a>
+        </div>
+    </div>
+</div>

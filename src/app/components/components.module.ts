@@ -6,7 +6,6 @@ import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 
 import { FooterComponent } from "./footer/footer.component";
 import { NavbarComponent } from "./navbar/navbar.component";
-import { SidebarComponent } from "./sidebar/sidebar.component";
 // import { IconArrowLeft, IconCheck, IconCheckSquare, IconCornerDownLeft, IconDelete, IconEdit, IconEye, IconFilePlus, IconGithub, IconGrid, IconLogIn, IconMenu, IconMinusCircle, IconPlus, IconPlusSquare, IconZap, } from 'angular-feather';
 // import { IconFeather } from "angular-feather";
 

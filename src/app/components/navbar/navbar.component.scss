@@ -1,0 +1,206 @@
+// Phantom command bar - the shell's single persistent instrument strip.
+// Fixed (not sticky) at a constant 64px height across every breakpoint:
+// every top-level page below it (home/live/archive/manager) is built on a
+// position:fixed "fill the viewport below the chrome" layout with a
+// hardcoded top offset (see their own .scss files), so the bar's height
+// must stay constant rather than growing into a second row on narrow
+// screens - the channel strip condenses in place instead of wrapping.
+$command-bar-height: 64px;
+
+// Flat tactical palette tokens (kept in hex, matching how every other
+// component in this app already carries these values - see
+// src/assets/scss/black-dashboard/custom/_variables.scss for the
+// canonical names: $panel-bg, $hairline-border, $text-primary,
+// $text-secondary, $primary, $status-nominal, $status-critical).
+:host {
+  display: contents;
+}
+
+.command-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  height: $command-bar-height;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 1.5rem;
+  background-color: #181c1f;
+  border-bottom: 1px solid #2a3134;
+  font-family: 'IBM Plex Sans', "Helvetica Neue", sans-serif;
+}
+
+.command-bar-brand {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.brand-word {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: #e8e6e1;
+  // A deliberate wordmark treatment, not default nav-brand styling: wide
+  // tracking plus a hairline steel-teal underline gives it presence
+  // without resorting to a logo image.
+  padding-bottom: 3px;
+  border-bottom: 2px solid #5b8a8f;
+}
+
+.channel-strip {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.channel {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 1.1rem;
+  color: #8b9296;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    color: #e8e6e1;
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+}
+
+.channel-active {
+  color: #e8e6e1;
+  border-bottom-color: #5b8a8f;
+}
+
+.command-bar-status {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.command-bar-status.is-live {
+  color: #4caf6d;
+
+  .status-dot {
+    background-color: #4caf6d;
+    animation: command-bar-live-pulse 1.6s ease-in-out infinite;
+  }
+}
+
+.command-bar-status.is-offline {
+  color: #d64545;
+
+  .status-dot {
+    background-color: #d64545;
+  }
+}
+
+@keyframes command-bar-live-pulse {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.command-bar-session {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.session-user {
+  color: #8b9296;
+  font-size: 0.8rem;
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-logout {
+  background: transparent;
+  border: 1px solid #2a3134;
+  color: #e8e6e1;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    border-color: #5b8a8f;
+    color: #5b8a8f;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #5b8a8f;
+  }
+}
+
+// Condense rather than wrap at tablet widths (see note above the
+// $command-bar-height variable for why the bar can't grow a second row).
+// Bootstrap's own "md" breakpoint (768px) - no new breakpoint invented.
+@media (max-width: 768px) {
+  .command-bar {
+    gap: 0.75rem;
+    padding: 0 0.85rem;
+  }
+
+  .brand-word {
+    font-size: 0.9rem;
+    letter-spacing: 0.18em;
+  }
+
+  .channel {
+    padding: 0 0.7rem;
+    font-size: 0.72rem;
+  }
+
+  .command-bar-status .status-text {
+    display: none;
+  }
+
+  .session-user {
+    display: none;
+  }
+}

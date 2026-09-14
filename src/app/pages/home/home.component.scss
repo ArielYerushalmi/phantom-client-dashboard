@@ -1,0 +1,81 @@
+// Matches the fixed-viewport-fill convention the other top-level pages
+// (live-dashboard, archive, admin-managment) use below the command bar:
+// position:fixed with a top offset equal to the bar's fixed 64px height
+// (see navbar.component.scss), rather than flowing in normal document scroll.
+.home-container {
+    width: 100%;
+    top: 64px;
+    position: fixed;
+    height: calc(100% - 64px);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    background-color: #0f1214;
+}
+
+.home-panel {
+    width: 100%;
+    max-width: 46rem;
+    background-color: #181c1f;
+    border: 1px solid #2a3134;
+    padding: 2.5rem;
+}
+
+.home-eyebrow {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #5b8a8f;
+}
+
+.home-heading {
+    margin: 0 0 0.5rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #e8e6e1;
+}
+
+.home-subheading {
+    margin: 0 0 2rem;
+    color: #8b9296;
+    font-size: 0.95rem;
+}
+
+.home-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 1px;
+    background-color: #2a3134;
+    border: 1px solid #2a3134;
+}
+
+.home-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.25rem;
+    background-color: #181c1f;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.home-link:hover {
+    background-color: #1e2327;
+}
+
+.home-link-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #e8e6e1;
+}
+
+.home-link-description {
+    font-size: 0.8rem;
+    color: #8b9296;
+}

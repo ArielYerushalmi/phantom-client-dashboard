@@ -1,199 +1,77 @@
-import { Component, OnInit, ElementRef, OnDestroy } from "@angular/core";
-import { ROUTES } from "../sidebar/sidebar.component";
-import { Location } from "@angular/common";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
-import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
-import { Subscription } from 'rxjs';
+import { Subscription } from "rxjs";
+import { Role } from "src/app/common/enums/role.enum";
+import { AuthGuardService } from "src/app/common/services/authGuard-service/auth-guard.service";
+import { LtsService } from "src/app/common/services/lts-service/lts.service";
 
+interface ChannelLink {
+  path: string;
+  label: string;
+  // Roles permitted to see this channel. Omitted = every authenticated role.
+  roles?: Role[];
+}
+
+/**
+ * The shell's persistent top command bar: platform wordmark, the
+ * horizontal channel selector (Home/Live/Archive/Admin), a live
+ * connection-status strip, and the session/logout area. Replaces the old
+ * black-dashboard-angular navbar-plus-collapsible-sidebar pattern with a
+ * single, always-visible instrument strip.
+ */
 @Component({
   selector: "app-navbar",
   templateUrl: "./navbar.component.html",
-  styleUrls: ["./navbar.component.css"]
+  styleUrls: ["./navbar.component.scss"]
 })
 export class NavbarComponent implements OnInit, OnDestroy {
-  private listTitles: any[];
-  location: Location;
-  mobile_menu_visible: any = 0;
-  private toggleButton: any;
-  private sidebarVisible: boolean;
+  private readonly allChannels: ChannelLink[] = [
+    { path: "/home", label: "Home" },
+    { path: "/live", label: "Live", roles: [Role.Pilot, Role.ADMIN] },
+    { path: "/archive", label: "Archive", roles: [Role.Debrifer, Role.ADMIN] },
+    { path: "/manager", label: "Admin", roles: [Role.ADMIN] }
+  ];
 
-  public isCollapsed = true;
+  username: string = "";
+  connectionActive: boolean = false;
+  connectionLabel: string = "OFFLINE";
 
-  closeResult: string;
-  private routerEventsSubscription: Subscription;
+  private connectionStateSubscription: Subscription;
 
   constructor(
-    location: Location,
-    private element: ElementRef,
-    private router: Router,
-    private modalService: NgbModal
-  ) {
-    this.location = location;
-    this.sidebarVisible = false;
-  }
-  // function that adds color white/transparent to the navbar on resize (this is for the collapse)
-  updateColor = () => {
-    var navbar = document.getElementsByClassName('navbar')[0];
-    if (window.innerWidth < 993 && !this.isCollapsed) {
-      navbar.classList.add('bg-white');
-      navbar.classList.remove('navbar-transparent');
-    } else {
-      navbar.classList.remove('bg-white');
-      navbar.classList.add('navbar-transparent');
-    }
-  };
-  ngOnInit() {
-    window.addEventListener("resize", this.updateColor);
-    this.listTitles = ROUTES.filter(listTitle => listTitle);
-    const navbar: HTMLElement = this.element.nativeElement;
-    this.toggleButton = navbar.getElementsByClassName("navbar-toggler")[0];
-    this.routerEventsSubscription = this.router.events.subscribe(event => {
-      this.sidebarClose();
-      var $layer: any = document.getElementsByClassName("close-layer")[0];
-      if ($layer) {
-        $layer.remove();
-        this.mobile_menu_visible = 0;
-      }
-    });
-  }
+    private readonly router: Router,
+    private readonly authGuard: AuthGuardService,
+    private readonly ltsService: LtsService
+  ) { }
 
-  collapse() {
-    this.isCollapsed = !this.isCollapsed;
-    const navbar = document.getElementsByTagName("nav")[0];
-    if (!this.isCollapsed) {
-      navbar.classList.remove("navbar-transparent");
-      navbar.classList.add("bg-white");
-    } else {
-      navbar.classList.add("navbar-transparent");
-      navbar.classList.remove("bg-white");
-    }
-  }
+  ngOnInit(): void {
+    this.username = localStorage.getItem("UserName") || "";
 
-  sidebarOpen() {
-    const toggleButton = this.toggleButton;
-    const mainPanel = <HTMLElement>(
-      document.getElementsByClassName("main-panel")[0]
+    // Pick up whatever state the websocket is already in (e.g. a Live
+    // session started earlier in this visit) instead of waiting on the
+    // next open/close transition to know whether telemetry is flowing.
+    this.applyConnectionState(this.ltsService._isOpened);
+    this.connectionStateSubscription = this.ltsService.connectionState.subscribe(
+      (isOpen: boolean) => this.applyConnectionState(isOpen)
     );
-    const html = document.getElementsByTagName("html")[0];
-    if (window.innerWidth < 991) {
-      mainPanel.style.position = "fixed";
-    }
-
-    setTimeout(function () {
-      toggleButton.classList.add("toggled");
-    }, 500);
-
-    html.classList.add("nav-open");
-
-    this.sidebarVisible = true;
-  }
-  sidebarClose() {
-    const html = document.getElementsByTagName("html")[0];
-    this.toggleButton.classList.remove("toggled");
-    const mainPanel = <HTMLElement>(
-      document.getElementsByClassName("main-panel")[0]
-    );
-
-    if (window.innerWidth < 991) {
-      setTimeout(function () {
-        mainPanel.style.position = "";
-      }, 500);
-    }
-    this.sidebarVisible = false;
-    html.classList.remove("nav-open");
-  }
-  sidebarToggle() {
-    // const toggleButton = this.toggleButton;
-    // const html = document.getElementsByTagName('html')[0];
-    var $toggle = document.getElementsByClassName("navbar-toggler")[0];
-
-    if (this.sidebarVisible === false) {
-      this.sidebarOpen();
-    } else {
-      this.sidebarClose();
-    }
-    const html = document.getElementsByTagName("html")[0];
-
-    if (this.mobile_menu_visible == 1) {
-      // $('html').removeClass('nav-open');
-      html.classList.remove("nav-open");
-      if ($layer) {
-        $layer.remove();
-      }
-      setTimeout(function () {
-        $toggle.classList.remove("toggled");
-      }, 400);
-
-      this.mobile_menu_visible = 0;
-    } else {
-      setTimeout(function () {
-        $toggle.classList.add("toggled");
-      }, 430);
-
-      var $layer = document.createElement("div");
-      $layer.setAttribute("class", "close-layer");
-
-      if (html.querySelectorAll(".main-panel")) {
-        document.getElementsByClassName("main-panel")[0].appendChild($layer);
-      } else if (html.classList.contains("off-canvas-sidebar")) {
-        document
-          .getElementsByClassName("wrapper-full-page")[0]
-          .appendChild($layer);
-      }
-
-      setTimeout(function () {
-        $layer.classList.add("visible");
-      }, 100);
-
-      $layer.onclick = function () {
-        //asign a function
-        html.classList.remove("nav-open");
-        this.mobile_menu_visible = 0;
-        $layer.classList.remove("visible");
-        setTimeout(function () {
-          $layer.remove();
-          $toggle.classList.remove("toggled");
-        }, 400);
-      }.bind(this);
-
-      html.classList.add("nav-open");
-      this.mobile_menu_visible = 1;
-    }
   }
 
-  getTitle() {
-    var titlee = this.location.prepareExternalUrl(this.location.path());
-    if (titlee.charAt(0) === "#") {
-      titlee = titlee.slice(1);
-    }
-
-    for (var item = 0; item < this.listTitles.length; item++) {
-      if (this.listTitles[item].path === titlee) {
-        return this.listTitles[item].title;
-      }
-    }
-    return "Gridster";
+  ngOnDestroy(): void {
+    this.connectionStateSubscription?.unsubscribe();
   }
 
-  open(content) {
-    this.modalService.open(content, { windowClass: 'modal-search' }).result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    });
+  /** Channels visible to the current user's role, in display order. */
+  get channels(): ChannelLink[] {
+    const role = this.authGuard.userRole;
+    return this.allChannels.filter(channel => !channel.roles || channel.roles.includes(role));
   }
 
-  private getDismissReason(reason: any): string {
-    if (reason === ModalDismissReasons.ESC) {
-      return 'by pressing ESC';
-    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
-      return 'by clicking on a backdrop';
-    } else {
-      return `with: ${reason}`;
-    }
+  logout(): void {
+    this.router.navigateByUrl("/login");
   }
-  ngOnDestroy() {
-    window.removeEventListener("resize", this.updateColor);
-    this.routerEventsSubscription?.unsubscribe();
+
+  private applyConnectionState(isOpen: boolean): void {
+    this.connectionActive = isOpen;
+    this.connectionLabel = isOpen ? "LIVE" : "OFFLINE";
   }
 }

@@ -36,7 +36,7 @@ import { TableComponent } from '../../pages/archive/charts/table/table.component
 import { GraphComponent } from '../../pages/archive/charts/graph/graph.component';
 import { ArchiveFilterComponent } from '../../pages/archive/archive-filter/archive-filter.component';
 import { ArchiveDashboardComponent } from '../../pages/archive/archive-dashboard/archive-dashboard.component';
-import { SidebarComponent } from "src/app/components/sidebar/sidebar.component";
+import { HomeComponent } from '../../pages/home/home.component';
 import { IUser } from "src/app/common/interfaces/user/user.intefrace";
 import { LayoutModule } from "../layout.module";
 import { AuthGuardService } from "src/app/common/services/authGuard-service/auth-guard.service";
@@ -84,7 +84,7 @@ import { MatIconModule } from "@angular/material/icon"
     GraphComponent,
     ArchiveFilterComponent,
     ArchiveDashboardComponent,
-    SidebarComponent,
+    HomeComponent,
     AdminManagmentComponent
   ],
   providers: [AuthGuardService]
