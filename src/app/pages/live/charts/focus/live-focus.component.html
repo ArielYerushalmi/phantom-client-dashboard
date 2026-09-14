@@ -1,0 +1,13 @@
+<div class="focus">
+    <div class="focus-header">
+        <span class="focus-name">{{entity.parameter.parameterName}}</span>
+        <span class="focus-description" *ngIf="entity.parameter.description">{{entity.parameter.description}}</span>
+    </div>
+    <div class="focus-readout">
+        <span class="telemetry-value focus-value">{{ value !== null ? value : '—' }}</span>
+        <span class="focus-units" *ngIf="entity.parameter.units">{{entity.parameter.units}}</span>
+    </div>
+    <div class="focus-graph">
+        <app-live-graph [entity]="entity"></app-live-graph>
+    </div>
+</div>

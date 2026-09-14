@@ -1,0 +1,17 @@
+<div class="strip-item" (click)="onActivate()" (keyup.enter)="onActivate()" tabindex="0" role="button"
+    [attr.aria-label]="'Focus ' + entity.parameter.parameterName">
+    <div class="strip-item-top">
+        <span class="strip-item-name">{{entity.parameter.parameterName}}</span>
+        <button type="button" class="strip-item-remove" (click)="onRemove($event)"
+            [attr.aria-label]="'Remove ' + entity.parameter.parameterName">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div class="strip-item-readout">
+        <span class="telemetry-value strip-item-value">{{ value !== null ? value : '—' }}</span>
+        <span class="strip-item-units" *ngIf="entity.parameter.units">{{entity.parameter.units}}</span>
+    </div>
+    <svg class="strip-item-sparkline" viewBox="0 0 100 28" preserveAspectRatio="none">
+        <polyline [attr.points]="sparklinePoints" fill="none" stroke="#5b8a8f" stroke-width="2" />
+    </svg>
+</div>
