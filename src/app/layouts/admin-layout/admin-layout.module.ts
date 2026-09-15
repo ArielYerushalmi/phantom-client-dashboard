@@ -38,6 +38,7 @@ import { TableComponent } from '../../pages/archive/charts/table/table.component
 import { GraphComponent } from '../../pages/archive/charts/graph/graph.component';
 import { ArchiveFilterComponent } from '../../pages/archive/archive-filter/archive-filter.component';
 import { ArchiveDashboardComponent } from '../../pages/archive/archive-dashboard/archive-dashboard.component';
+import { ArchiveScrubberComponent } from '../../pages/archive/archive-scrubber/archive-scrubber.component';
 import { HomeComponent } from '../../pages/home/home.component';
 import { IUser } from "src/app/common/interfaces/user/user.intefrace";
 import { LayoutModule } from "../layout.module";
@@ -88,6 +89,7 @@ import { MatIconModule } from "@angular/material/icon"
     GraphComponent,
     ArchiveFilterComponent,
     ArchiveDashboardComponent,
+    ArchiveScrubberComponent,
     HomeComponent,
     AdminManagmentComponent
   ],

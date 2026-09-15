@@ -1,8 +1,3 @@
 <div class="body">
-    <app-archive-filter *ngIf="isFiltering" class="archive-container" (submitMetadataEvent)="onSubmitMetadata($event)">
-    </app-archive-filter>
-
-    <app-archive-dashboard *ngIf="!isFiltering" class="archive-container" [lengthForPaginator]="lengthForPaginator"
-        [startTime]="startTime" [endTime]="endTime" (goToFilterPage)="onReturnToFilter()">
-    </app-archive-dashboard>
+    <app-archive-dashboard class="archive-container"></app-archive-dashboard>
 </div>

@@ -1,266 +1,217 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { Router } from '@angular/router';
-import { GridsterConfig } from 'angular-gridster2';
-import { Subscription } from 'rxjs';
-import { createDashboardDTO } from 'src/app/common/dtos/dashboard/create-dashboard.dto';
-import { DashboardRO } from 'src/app/common/dtos/dashboard/dashboard.ro';
-import { updateDashboardDTO } from 'src/app/common/dtos/dashboard/update-dashboard.dto';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ParameterRO } from 'src/app/common/dtos/parameter/parameter.ro';
 import { ChartType } from 'src/app/common/enums/chartType.enum';
+import { IFrame } from 'src/app/common/interfaces/archive/archive-frame';
 import { IArchiveSettings } from 'src/app/common/interfaces/archive/telemetry-archive-settings';
-import { IChartGridsterItem } from 'src/app/common/interfaces/gridster/chart-gridster-item.interface';
-import { IChartEntity } from 'src/app/common/interfaces/gridster/entity.interface';
 import { ArchiveService } from 'src/app/common/services/archive-service/archive.service';
 import { DashboardService } from 'src/app/common/services/dashboard-service/dashboard.service';
-import { PresetsUtilsService } from 'src/app/common/services/presets-utils-service/presets-utils.service';
-import { ToastrService } from 'ngx-toastr';
+import { IArchiveRange } from '../archive-filter/archive-filter.component';
 
+interface IWindowOption {
+  label: string;
+  ms: number;
+}
+
+interface IParameterPanel {
+  parameter: ParameterRO;
+  chartType: ChartType;
+  frames: IFrame[];
+  nearest: IFrame | null;
+  loading: boolean;
+  error: boolean;
+  scrubSubject: Subject<Date>;
+  subscription: Subscription;
+}
+
+/**
+ * Main Archive view: a DVR-style timeline scrubber replaces the old
+ * filter-form-then-static-grid flow. The operator confirms a coarse time
+ * range (via ArchiveFilterComponent, now a compact range-setup strip), then
+ * drags/clicks the scrubber to move a playhead through that range. Each
+ * selected parameter gets its own small window of frames fetched "around"
+ * the playhead (skipFrames/startTime/endTime derived from scrub position),
+ * refetched as the playhead moves - debounced so dragging doesn't spam the
+ * backend, and raced safely via switchMap so a slow stale request can never
+ * clobber a fresher one.
+ */
 @Component({
   selector: 'app-archive-dashboard',
   templateUrl: './archive-dashboard.component.html',
   styleUrls: ['./archive-dashboard.component.scss']
 })
 export class ArchiveDashboardComponent implements OnInit, OnDestroy {
-  @Output() backToFiltering: boolean;
-  @Input() lengthForPaginator: number;
-  @Input() startTime: Date;
-  @Input() endTime: Date;
 
+  private static readonly FRAME_CAP = 500;
+  private static readonly SCRUB_DEBOUNCE_MS = 180;
+
+  range: IArchiveRange | null = null;
+  scrubTime: Date | null = null;
+
+  parameters: ParameterRO[] = [];
   parametersLoadError: boolean = false;
 
-  private getLengthSubscription: Subscription;
-  private archiveDataSubscription: Subscription;
+  panels: IParameterPanel[] = [];
 
-  pageSize: number = 5;
-  pageIndex: number = 0;
-  pageSizeOptions = [5, 10, 15];
-  pageEvent: PageEvent;
-  skipFrames: number = 0;
-  chartTypes = [ChartType.TABLE, ChartType.GRAPH];
+  readonly windowOptions: IWindowOption[] = [
+    { label: '10s window', ms: 10 * 1000 },
+    { label: '30s window', ms: 30 * 1000 },
+    { label: '1m window', ms: 60 * 1000 },
+    { label: '5m window', ms: 5 * 60 * 1000 },
+    { label: '15m window', ms: 15 * 60 * 1000 },
+    { label: '1h window', ms: 60 * 60 * 1000 },
+  ];
+  windowMs: number = this.windowOptions[2].ms;
 
-  options: GridsterConfig;
-  parameters: ParameterRO[] = [];
-  gridsterItemsList: IChartGridsterItem[] = [];
-  dashboardItemMap = new Map<string, EventEmitter<number[]>>();
-  menuArray: boolean[] = new Array(this.gridsterItemsList.length).fill(false)
-  dashboard: DashboardRO = null;
-  dashboards: DashboardRO[] = [];
-  IsLive: boolean = false;
-  isUpdatePopup: boolean = false;
+  readonly ChartType = ChartType;
 
+  private readonly scrubSubject = new Subject<Date>();
+  private scrubSubscription: Subscription;
 
-
-  @Output() goToFilterPage: EventEmitter<void> = new EventEmitter<void>();
-  @ViewChild('paginator') paginator: MatPaginator;
-
-  constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly archiveService: ArchiveService, private readonly toastr: ToastrService) { }
+  constructor(private readonly dashboardService: DashboardService, private readonly archiveService: ArchiveService) { }
 
   ngOnInit(): void {
     this.parametersLoadError = false;
-    this.dashboardservice.getParameters().then((parameters: ParameterRO[]) => {
+    this.dashboardService.getParameters().then((parameters: ParameterRO[]) => {
       this.parameters = parameters;
     }).catch((error: HttpErrorResponse) => {
-      if (error.error?.message != undefined) {
-        console.log(error.error.message);
-      } else {
-        console.log("dashboard service is down!");
-      }
+      console.log(error.error?.message ?? 'dashboard service is down!');
       this.parametersLoadError = true;
     });
 
-    this.getLengthSubscription = this.archiveService._getLengthSubscription.subscribe((message: number) => {
-      if (message) {
-        console.log("got length from archive server: ", message);
-        this.lengthForPaginator = message
-      }
-    });
-
-    this.archiveDataSubscription = this.archiveService._subscription.subscribe((message: IArchiveSettings) => {
-      if (message)
-        this.handleMessage(message);
-    });
-
-    this.options = {
-      gridType: 'fit',
-      pushItems: true,
-      maxCols: 5,
-      maxRows: 4,
-      resizable: {
-        enabled: true,
-      },
-      draggable: {
-        enabled: true,
-      }
-    };
+    this.scrubSubscription = this.scrubSubject.pipe(
+      debounceTime(ArchiveDashboardComponent.SCRUB_DEBOUNCE_MS),
+      distinctUntilChanged((a: Date, b: Date) => a.getTime() === b.getTime())
+    ).subscribe((t: Date) => this.fetchAllPanels(t));
   }
-
-  updateDashboard() {
-    let updatedDashboard: updateDashboardDTO = this.presetsUtils.updateDashboardItems(this.dashboard, this.gridsterItemsList);
-    this.dashboardservice.updateDashboard(this.dashboard.id, updatedDashboard).subscribe((newDashboard: DashboardRO) => {
-      this.dashboard = newDashboard;
-      this.isUpdatePopup = true;
-    },
-      (error: HttpErrorResponse) => {
-        if (error.error?.message != undefined) {
-          console.log(error.error.message);
-        } else {
-          console.log("dashboard service is down!");
-        }
-      });
-  };
-
-  updatePopupToggle() {
-    this.isUpdatePopup = !this.isUpdatePopup;
-  }
-
-  createPreset(presetName: string) {
-    let preset: createDashboardDTO = this.presetsUtils.setDashboard(presetName, this.IsLive);
-    this.dashboardservice.createDashboard(preset).subscribe((dashboard: DashboardRO) => {
-      this.dashboardservice.getDashboard(dashboard.id).subscribe((createdDashboard: DashboardRO) => {
-        this.onGetPreset(createdDashboard);
-        this.dashboards.push(createdDashboard);
-      });
-    }, (error: HttpErrorResponse) => {
-      if (error.error?.message != undefined) {
-        console.log(error.error.message);
-      } else {
-        console.log("dashboard service is down!");
-      }
-    });
-  };
-
-  onGetPreset(eventData: DashboardRO) {
-    this.dashboard = eventData;
-    this.loadPresetByIndex();
-  };
-
-  loadPresetByIndex(): void {
-    for (const dashboardItemRO of this.dashboard.items) {
-      this.onAdd(dashboardItemRO.parameter, dashboardItemRO.chartType,
-        { cols: dashboardItemRO.cols, rows: dashboardItemRO.rows, x: dashboardItemRO.x, y: dashboardItemRO.y });
-    };
-    if (this.lengthForPaginator > 0)
-      this.onSubscribeAll();
-  };
-
-  onGotoPresetManager() {
-    this.dashboard = null;
-    this.gridsterItemsList = [];
-    this.dashboardItemMap.clear();
-  };
 
   ngOnDestroy(): void {
-    this.getLengthSubscription?.unsubscribe();
-    this.archiveDataSubscription?.unsubscribe();
+    this.scrubSubscription?.unsubscribe();
+    this.panels.forEach(panel => panel.subscription?.unsubscribe());
   }
 
-  onGotoFilterPage() {
-    this.goToFilterPage.emit();
+  onRangeConfirmed(range: IArchiveRange): void {
+    this.range = range;
+    this.scrubTime = range.startTime;
+    this.fetchAllPanels(range.startTime);
   }
 
-  handlePageEvent(e: PageEvent) {
-    this.skipFrames = (e.pageIndex * this.pageSize);
-    this.onSubscribeAll(e);
-    this.setPage(e)
+  // Called continuously while dragging/clicking the scrubber. Updates the
+  // playhead position instantly (cheap, local) and pushes into the debounced
+  // subject that actually triggers backend fetches.
+  onScrub(t: Date): void {
+    this.scrubTime = t;
+    this.scrubSubject.next(t);
   }
 
-  setPage(e: PageEvent) {
-    this.pageEvent = e;
-    this.lengthForPaginator = e.length;
-    this.pageSize = e.pageSize;
-    this.pageIndex = e.pageIndex;
-  }
-
-  onSubscribeAll(e?: PageEvent) {
-    if (e != undefined) {
-      for (let i = 0; i < this.gridsterItemsList.length; i++) {
-        this.archiveService.httpSubscribe(this.gridsterItemsList[i].chart.parameter.parameterName, e.pageSize, this.skipFrames, this.startTime, this.endTime)
-      }
-    } else {
-      for (let i = 0; i < this.gridsterItemsList.length; i++) {
-        this.archiveService.httpSubscribe(this.gridsterItemsList[i].chart.parameter.parameterName, this.pageSize, this.skipFrames, this.startTime, this.endTime)
-      }
+  onWindowChange(): void {
+    if (this.scrubTime) {
+      this.fetchAllPanels(this.scrubTime);
     }
   }
 
-  handleMessage(gridsterItemData: IArchiveSettings) {
-    var dataEvent = this.dashboardItemMap.get(gridsterItemData.parameter);
-    var arrayToEmit: number[] = [];
-    gridsterItemData.values.forEach(item => {
-      let index: number = this.presetsUtils.findItemByName(this.gridsterItemsList, gridsterItemData.parameter);
-      if (index != -1) {
-        let chartType: ChartType = this.gridsterItemsList[index].chart.chartType;
-        let dataToEmit: any = this.presetsUtils.structureDataToType(item.value, chartType, item.time);
-        arrayToEmit.push(dataToEmit);
-      };
-    });
-    dataEvent.emit(arrayToEmit);
-  };
-
-  onSubscribeParameter(parameterName: string) {
-    this.archiveService.httpSubscribe(parameterName, this.pageSize, this.pageIndex, this.startTime, this.endTime)
+  isParameterSelected(parameter: ParameterRO): boolean {
+    return this.panels.some(p => p.parameter.id === parameter.id);
   }
 
-  isParameterUsed(parameter: ParameterRO): boolean {
-    return this.presetsUtils.isParameterExists(parameter, this.gridsterItemsList);
-  };
-
-  onAdd(parameter: ParameterRO, chartType: ChartType,
-    { cols = 1, rows = 1, x = 0, y = 0 }: { cols?: number, rows?: number, x?: number, y?: number }): void {
-    if (this.gridsterItemsList.length >= this.options.maxCols * this.options.maxRows) {
-      this.toastr.warning('Remove a chart before adding another.', 'Dashboard is full');
+  onToggleParameter(parameter: ParameterRO): void {
+    const index = this.panels.findIndex(p => p.parameter.id === parameter.id);
+    if (index !== -1) {
+      this.panels[index].subscription?.unsubscribe();
+      this.panels.splice(index, 1);
       return;
     }
+    const panel = this.createPanel(parameter);
+    this.panels.push(panel);
+    if (this.scrubTime) {
+      panel.scrubSubject.next(this.scrubTime);
+    }
+  }
 
-    let itemToAdd: IChartEntity = this.presetsUtils.initGridsterItem(parameter, chartType);
+  onRemovePanel(panel: IParameterPanel): void {
+    this.onToggleParameter(panel.parameter);
+  }
 
-    if (!this.presetsUtils.isParameterExists(parameter, this.gridsterItemsList)) {
-      this.gridsterItemsList.push({ cols, rows, x, y, chart: itemToAdd });
-      this.dashboardItemMap.set(itemToAdd.parameter.parameterName, itemToAdd.dataEvent);
+  onChangeChartType(panel: IParameterPanel, chartType: ChartType): void {
+    panel.chartType = chartType;
+  }
+
+  trackByParameterId(_index: number, panel: IParameterPanel): string {
+    return panel.parameter.id;
+  }
+
+  private fetchAllPanels(t: Date): void {
+    this.panels.forEach(panel => panel.scrubSubject.next(t));
+  }
+
+  private createPanel(parameter: ParameterRO): IParameterPanel {
+    const scrubSubject = new Subject<Date>();
+    const panel: IParameterPanel = {
+      parameter,
+      chartType: ChartType.GRAPH,
+      frames: [],
+      nearest: null,
+      loading: false,
+      error: false,
+      scrubSubject,
+      subscription: null
     };
-  };
 
-  onParameterSelected(parameter: ParameterRO) {
-    let index = this.presetsUtils.findItem(this.gridsterItemsList, parameter);
-    if (index != -1) {
-      this.onRemove(parameter);
-    } else {
-      // Bug fix: this used to reference the global `length` (always 0 in this context)
-      // instead of the paginator length input, so the "Set Correct First" branch below
-      // was effectively unreachable whenever startTime/endTime were also unset.
-      if (this.startTime != undefined || this.endTime != undefined || this.lengthForPaginator > 0) {
-        this.onAdd(parameter, ChartType.TABLE, {});
-        this.onSubscribeParameter(parameter.parameterName);
-      } else {
-        this.toastr.warning('Set a valid time range before adding a parameter.', 'Set Correct Time First');
+    panel.subscription = scrubSubject.pipe(
+      switchMap((t: Date) => {
+        panel.loading = true;
+        panel.error = false;
+        const { startTime, endTime } = this.windowFor(t);
+        return this.archiveService.getFrames(parameter.parameterName, ArchiveDashboardComponent.FRAME_CAP, 0, startTime, endTime);
+      })
+    ).subscribe(
+      (data: IArchiveSettings) => {
+        panel.loading = false;
+        panel.frames = data?.values ?? [];
+        panel.nearest = this.findNearest(panel.frames, this.scrubTime);
+      },
+      () => {
+        panel.loading = false;
+        panel.error = true;
+        panel.frames = [];
+        panel.nearest = null;
+      }
+    );
+
+    return panel;
+  }
+
+  // Translates a scrub position into the GetTime call's time window: a fixed
+  // duration centered on the playhead, clamped to the confirmed coarse
+  // range. skipFrames stays 0 because the window is already time-scoped;
+  // numberOfFrames is capped as a safety net for densely-sampled parameters.
+  private windowFor(t: Date): { startTime: Date; endTime: Date } {
+    const half = this.windowMs / 2;
+    let startMs = t.getTime() - half;
+    let endMs = t.getTime() + half;
+    if (this.range) {
+      startMs = Math.max(startMs, this.range.startTime.getTime());
+      endMs = Math.min(endMs, this.range.endTime.getTime());
+    }
+    if (startMs >= endMs) {
+      endMs = startMs + 1000;
+    }
+    return { startTime: new Date(startMs), endTime: new Date(endMs) };
+  }
+
+  private findNearest(frames: IFrame[], t: Date | null): IFrame | null {
+    if (!frames?.length || !t) { return null; }
+    let best = frames[0];
+    let bestDiff = Math.abs(new Date(best.time).getTime() - t.getTime());
+    for (const f of frames) {
+      const diff = Math.abs(new Date(f.time).getTime() - t.getTime());
+      if (diff < bestDiff) {
+        best = f;
+        bestDiff = diff;
       }
     }
-  };
-
-  getType(chartType: ChartType): string {
-    return ChartType[chartType];
-  };
-
-  menuToggle(index: number) {
-    if (index != -1) {
-      this.menuArray[index] = !this.menuArray[index];
-    };
-  };
-
-  onRemove(parameter: ParameterRO): void {
-    let index = this.presetsUtils.findItem(this.gridsterItemsList, parameter);
-    if (index != -1) {
-      this.gridsterItemsList.splice(index, 1);
-    };
-    this.dashboardItemMap.delete(parameter.parameterName);
-  };
-
-  onChangeChartType(index: number, chartType: ChartType): void {
-    if (index != -1) {
-      this.gridsterItemsList[index].chart.chartType = chartType;
-      this.onSubscribeAll(undefined);
-    };
-  };
+    return best;
+  }
 }
