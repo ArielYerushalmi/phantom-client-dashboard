@@ -1,64 +1,39 @@
-<!-- <div class="sidebar">
-    <app-sidebar></app-sidebar>
-</div> -->
-<div class="archive-filter-container">
-    <div class="archive-entering-room-container">
-        <div class="archive-entering-room">
-            <div class="time-select-side">
-                <mat-form-field>
-                    <mat-label>Start Time</mat-label>
-                    <input matInput type="datetime-local" style="color: white;" [(ngModel)]="inputStartTime">
-                </mat-form-field>
-                <mat-form-field>
-                    <mat-label>End Time</mat-label>
-                    <input matInput type="datetime-local" style="color: white;" [(ngModel)]="inputEndTime">
-                </mat-form-field>
-                <span *ngIf="!isTimeValid" style="color: red;">Time Entered Is Not Valid</span>
-                <button id="confirm-btn" (click)="onGetLength()">Confirm</button>
-            </div>
-            <div class="presets-container-side">
-                <div class="preset-container-body">
-                    <div class="drawer-empty-state" *ngIf="dashboardsLoadError">
-                        Dashboard service is unavailable. Try again later.
-                    </div>
-                    <div class="drawer-empty-state" *ngIf="!dashboardsLoadError && dashboards.length===0">
-                        No saved presets yet.
-                    </div>
-                    <div *ngFor=" let dashboard of dashboards; let i = index" class="preset-item">
-                        <div class="preset-item-container">
-                            <div class="preset-top">
-                                <span class="preset-name">{{dashboard.name}}</span>
-                            </div>
-                            <div class="border-line"></div>
-                            <div class="preset-body-container">
-                                <div class="preset-body">
-                                    <ng-container *ngFor="let item of dashboard.items; let itemId = index">
-                                        <span *ngIf="5>itemId" class="parameter">
-                                            {{item.parameter.parameterName}}
-                                        </span>
-                                        <span *ngIf="itemId>=5 && toggledDashboards[i]" class="parameter">
-                                            {{item.parameter.parameterName}}
-                                        </span>
+<div class="range-bar">
 
-                                    </ng-container>
+    <div class="range-summary" *ngIf="!expanded && confirmedRange">
+        <span class="range-summary-label">Range</span>
+        <span class="range-summary-value telemetry-value">{{confirmedRange.startTime | date:'MMM d, y HH:mm'}}
+            &rarr; {{confirmedRange.endTime | date:'MMM d, y HH:mm'}}</span>
+        <span class="range-summary-count telemetry-value">{{confirmedRange.totalFrames | number}} frames</span>
+        <button type="button" class="change-btn" (click)="onChangeRange()">Change</button>
+    </div>
 
-                                    <!-- <div class="expandCollapseContent" *ngIf="toggledDashboards[i]">
-                                        <div>
-                                            <h5>Toggled</h5>
-                                        </div>
-                                    </div> -->
-                                    <div class="expandCollapse" *ngIf="dashboard.items.length>5">
-                                        <span class="show-more-button" (click)="toggle(i)">
-                                            {{!toggledDashboards[i] ? 'more...' : 'less'}}
-                                        </span>
-                                    </div>
+    <div class="range-form" *ngIf="expanded">
+        <div class="range-form-fields">
+            <label class="field">
+                <span class="field-label">Start</span>
+                <input type="datetime-local" [(ngModel)]="inputStartTime">
+            </label>
+            <label class="field">
+                <span class="field-label">End</span>
+                <input type="datetime-local" [(ngModel)]="inputEndTime">
+            </label>
+            <button type="button" id="confirm-btn" [disabled]="isLoading" (click)="onConfirm()">
+                {{isLoading ? 'Loading...' : 'Load Range'}}
+            </button>
+        </div>
 
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="range-presets">
+            <span class="presets-label">Quick range:</span>
+            <button type="button" class="preset-chip" *ngFor="let preset of quickPresets"
+                (click)="applyPreset(preset)">{{preset.label}}</button>
+        </div>
+
+        <div class="range-message error" *ngIf="!isTimeValid">Enter a valid start time before the end time.</div>
+        <div class="range-message error" *ngIf="loadError">Archive service is unavailable. Try again later.</div>
+        <div class="range-message warning" *ngIf="noDataInRange">
+            No frames found in that range. The archive has gaps - try a wider or different window.
         </div>
     </div>
+
 </div>

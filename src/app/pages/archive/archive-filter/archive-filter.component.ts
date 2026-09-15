@@ -1,79 +1,114 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { DashboardRO } from 'src/app/common/dtos/dashboard/dashboard.ro';
-import { ArchiveService } from 'src/app/common/services/archive-service/archive.service';
-import { DashboardService } from 'src/app/common/services/dashboard-service/dashboard.service';
+import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { ArchiveService } from 'src/app/common/services/archive-service/archive.service';
 
+export interface IArchiveRange {
+  startTime: Date;
+  endTime: Date;
+  totalFrames: number;
+}
+
+interface IQuickPreset {
+  label: string;
+  hours: number;
+}
+
+/**
+ * Compact range-setup step for the Archive scrubber. This used to be the
+ * whole "filter form" page (pick start/end, browse saved dashboards, hit
+ * Confirm) that the operator had to fill in before seeing any data. Now it
+ * is just the coarse-range picker the scrubber needs to know what span of
+ * time to scale itself against - it collapses to a one-line strip once a
+ * range with data has been confirmed, and can be reopened to change it.
+ *
+ * The old "browse saved dashboards" panel that used to live here was a
+ * Live-page concept (saved chart-grid layouts) that doesn't map onto
+ * scrubbing through time, so it isn't reused here.
+ */
 @Component({
   selector: 'app-archive-filter',
   templateUrl: './archive-filter.component.html',
   styleUrls: ['./archive-filter.component.scss']
 })
-export class ArchiveFilterComponent implements OnInit, OnDestroy {
+export class ArchiveFilterComponent implements OnDestroy {
 
-  @Output() submitMetadataEvent = new EventEmitter<any>();
+  @Output() rangeConfirmed = new EventEmitter<IArchiveRange>();
 
-  IsLive: boolean = false;
-  dashboards: DashboardRO[] = [];
-  public toggledDashboards: boolean[] = [];
+  readonly quickPresets: IQuickPreset[] = [
+    { label: 'Last 1 Hour', hours: 1 },
+    { label: 'Last 6 Hours', hours: 6 },
+    { label: 'Last 24 Hours', hours: 24 },
+    { label: 'Last 7 Days', hours: 24 * 7 },
+  ];
 
-  inputStartTime: Date;
-  inputEndTime: Date;
+  expanded: boolean = true;
+  inputStartTime: string = '';
+  inputEndTime: string = '';
   isTimeValid: boolean = true;
-  dashboardsLoadError: boolean = false;
+  isLoading: boolean = false;
+  loadError: boolean = false;
+  noDataInRange: boolean = false;
+
+  confirmedRange: IArchiveRange | null = null;
 
   private getLengthSubscription: Subscription;
 
-  constructor(private readonly dashboardservice: DashboardService, private readonly archiveService: ArchiveService) { }
-
-  ngOnInit(): void {
-    this.onGetAllDashboards();
-
-    this.getLengthSubscription = this.archiveService._getLengthSubscription.subscribe((length: number) => {
-      if (length) {
-        console.log("got length from archive server: ", length);
-        let message = { length, startTime: this.inputStartTime, endTime: this.inputEndTime }
-        this.submitMetadataEvent.emit(message);
-      }
-    });
+  constructor(private readonly archiveService: ArchiveService) {
+    this.applyPreset(this.quickPresets[2]);
   }
 
   ngOnDestroy(): void {
     this.getLengthSubscription?.unsubscribe();
   }
 
-  onGetAllDashboards() {
-    this.dashboardsLoadError = false;
-    this.dashboardservice.getAllDashboards(this.IsLive).subscribe((dashboards: DashboardRO[]) => {
-      this.dashboards = dashboards;
-      console.log(this.dashboards);
-    }, (error: HttpErrorResponse) => {
-      if (error.error?.message != undefined) {
-        console.log(error.error.message);
-      } else {
-        console.log("dashboard service is down!");
-      }
-      this.dashboardsLoadError = true;
-    });
+  applyPreset(preset: IQuickPreset): void {
+    const end = new Date();
+    const start = new Date(end.getTime() - preset.hours * 60 * 60 * 1000);
+    this.inputStartTime = this.toDateTimeLocal(start);
+    this.inputEndTime = this.toDateTimeLocal(end);
+    this.onConfirm();
   }
 
-  onGetLength() {
-    // console.log("start time: ", new Date(this.inputStartTime));
-    // console.log("end time: ", this.inputEndTime);
+  onConfirm(): void {
+    const startTime = new Date(this.inputStartTime);
+    const endTime = new Date(this.inputEndTime);
 
-    // if (this.inputStartTime != null && this.inputEndTime != null) {
-    var CurrentDate: Date = new Date()
-    if (CurrentDate > new Date(this.inputStartTime) && CurrentDate > new Date(this.inputEndTime)) {
-      this.archiveService.httpGetLength(this.inputStartTime, this.inputEndTime);
-    } else {
+    if (!this.inputStartTime || !this.inputEndTime || isNaN(startTime.getTime()) || isNaN(endTime.getTime()) || startTime >= endTime) {
       this.isTimeValid = false;
-      console.log("Enter Correct Time");
+      return;
     }
+    this.isTimeValid = true;
+    this.loadError = false;
+    this.noDataInRange = false;
+    this.isLoading = true;
+
+    this.getLengthSubscription?.unsubscribe();
+    this.getLengthSubscription = this.archiveService.getLength(startTime, endTime).subscribe(
+      (totalFrames: number) => {
+        this.isLoading = false;
+        if (!totalFrames) {
+          this.noDataInRange = true;
+          return;
+        }
+        this.confirmedRange = { startTime, endTime, totalFrames };
+        this.expanded = false;
+        this.rangeConfirmed.emit(this.confirmedRange);
+      },
+      (error: HttpErrorResponse) => {
+        this.isLoading = false;
+        this.loadError = true;
+        console.log(error.error?.message ?? 'archive service is down!');
+      }
+    );
   }
 
-  toggle(index) {
-    // toggle based on index
-    this.toggledDashboards[index] = !this.toggledDashboards[index];
+  onChangeRange(): void {
+    this.expanded = true;
+  }
+
+  private toDateTimeLocal(date: Date): string {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
   }
 }

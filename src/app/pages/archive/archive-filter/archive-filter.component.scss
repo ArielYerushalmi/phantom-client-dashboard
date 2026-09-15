@@ -1,171 +1,176 @@
-.archive-filter-container {
+.range-bar {
     width: 100%;
-    height: 100%;
+    box-sizing: border-box;
 }
 
-.archive-entering-room-container {
-    width: 100%;
-    height: 100%;
-}
-
-.archive-entering-room {
+.range-summary {
     display: flex;
-    flex-direction: row;
-    width: 100%;
-    height: 100%;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 12px;
+    background-color: #181c1f;
+    border: 1px solid #2a3134;
+    border-radius: 2px;
+    color: #ccc;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.8rem;
 }
 
-.time-select-side {
-    width: 30%;
+.range-summary-label {
+    color: #7d8a8d;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.7rem;
+}
+
+.range-summary-value {
+    color: #e8e6e1;
+}
+
+.range-summary-count {
+    color: #5b8a8f;
+    margin-left: auto;
+}
+
+.change-btn {
+    background-color: transparent;
+    border: 1px solid #2a3134;
+    border-radius: 2px;
+    color: #ccc;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 4px 10px;
+    outline: unset;
+}
+
+.change-btn:hover {
+    border-color: #5b8a8f;
+    color: #5b8a8f;
+}
+
+.range-form {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    background-color: #181c1f;
+    border: 1px solid #2a3134;
+    border-radius: 2px;
+}
+
+.range-form-fields {
+    display: flex;
+    align-items: flex-end;
     flex-wrap: wrap;
-    align-content: center;
-    justify-content: center;
-    border-right: 1px solid white;
+    gap: 12px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.field-label {
+    color: #7d8a8d;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.field input[type="datetime-local"] {
+    background-color: #0f1214;
+    border: 1px solid #2a3134;
+    border-radius: 2px;
+    color: #e8e6e1;
+    font-family: "IBM Plex Mono", "Roboto Mono", monospace;
+    padding: 6px 8px;
+    min-height: 2rem;
+    box-sizing: border-box;
+}
+
+.field input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(1);
 }
 
 #confirm-btn {
-    width: 60%;
-    margin: 5%;
     background-color: #181c1f;
     min-width: 2.25rem;
     min-height: 2.25rem;
     border-radius: 2px;
     font-family: "IBM Plex Sans", sans-serif;
     font-weight: 600;
-    font-size: 0.875;
+    font-size: 0.8rem;
     border: 1px solid #5b8a8f;
     color: #e8e6e1;
     cursor: pointer;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding: 0 1rem;
     outline: unset;
 }
 
-#confirm-btn:hover {
+#confirm-btn:hover:not(:disabled) {
     background-color: #232830;
 }
 
-.presets-container-side {
-    width: 70%;
-    max-height: 100%;
-    overflow: auto;
+#confirm-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
-.presets-container-side::-webkit-scrollbar {
-    display: none;
-}
-
-.preset-item-container {
-    height: 250px;
-    border: 1px solid #2a3134;
-    border-radius: 2px;
-}
-
-.preset-top {
-    position: relative;
-    height: 20%;
-    color: white;
+.range-presets {
     display: flex;
-    flex-wrap: wrap;
-    align-content: center;
-    justify-content: center;
-}
-
-.preset-name {
-    font-size: x-large;
-}
-
-.border-line {
-    background-color: white;
-    width: 70%;
-    height: 1px;
-    margin: 0 auto;
-}
-
-.preset-body-container {
-    height: calc(80% - 1px);
-    display: flex;
-    justify-content: center;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-}
-
-.preset-body {
-    height: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    align-content: flex-start;
-    justify-content: center;
     align-items: center;
-    overflow: auto;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-.preset-body::-webkit-scrollbar {
-    display: none;
+.presets-label {
+    color: #7d8a8d;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.75rem;
 }
 
-.show-more-button {
-    color: #ccc;
-    cursor: pointer;
-}
-
-.show-more-button:hover {
-    text-decoration: underline;
-}
-
-.parameter {
-    display: inline-flex;
-    background-color: #181c1f;
+.preset-chip {
+    background-color: #0f1214;
     border: 1px solid #2a3134;
     border-radius: 2px;
-    max-width: fit-content;
-    padding: 4px;
-    margin: 5px;
     color: #ccc;
-    font-family: sans-serif;
-    display: inline-flex;
-}
-
-.preset-container-body {
-    height: fit-content;
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    background-color: #0f1214;
-    gap: 10px;
-    padding: 15px;
-}
-
-.drawer-empty-state {
-    grid-column: 1 / -1;
-    padding: 15px;
-    color: #ccc;
-    font-size: 0.9rem;
-    text-align: center;
-}
-
-.sidebar {
-    height: 100%;
-    width: 10%;
-    box-shadow: none;
-    margin-top: 0;
-    margin-left: 0;
-}
-
-::-webkit-calendar-picker-indicator {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.75rem;
     cursor: pointer;
-    filter: invert(1);
+    padding: 4px 10px;
+    outline: unset;
 }
 
-::ng-deep.mat-form-field-ripple {
-    /*change color of underline when focused*/
-    background-color: #5b8a8f !important;
+.preset-chip:hover {
+    border-color: #5b8a8f;
+    color: #5b8a8f;
 }
 
-::ng-deep .mat-focused .mat-form-field-label {
-    /*change color of label*/
-    color: #5b8a8f !important;
+.range-message {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.8rem;
+}
+
+.range-message.error {
+    color: #d64545;
+}
+
+.range-message.warning {
+    color: #e8a33d;
+}
+
+@media (max-width: 900px) {
+    .range-form-fields {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #confirm-btn {
+        width: 100%;
+    }
 }
