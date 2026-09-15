@@ -1,0 +1,134 @@
+.scrubber {
+    position: relative;
+    width: 100%;
+    background-color: #181c1f;
+    border: 1px solid #2a3134;
+    border-radius: 2px;
+    padding: 22px 10px 14px;
+    box-sizing: border-box;
+    user-select: none;
+
+    &.disabled {
+        opacity: 0.5;
+    }
+}
+
+.ticks {
+    position: relative;
+    height: 16px;
+    margin-bottom: 6px;
+}
+
+.tick {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    color: #7d8a8d;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.7rem;
+    white-space: nowrap;
+
+    &:first-child {
+        transform: translateX(0);
+    }
+
+    &:last-child {
+        transform: translateX(-100%);
+    }
+}
+
+.track {
+    position: relative;
+    height: 36px;
+    cursor: pointer;
+    touch-action: none;
+}
+
+.disabled .track {
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.track-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #2a3134;
+    transform: translateY(-50%);
+}
+
+.window-band {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    background-color: rgba(91, 138, 143, 0.18);
+    border-left: 1px solid rgba(91, 138, 143, 0.5);
+    border-right: 1px solid rgba(91, 138, 143, 0.5);
+    pointer-events: none;
+}
+
+.playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-50%);
+}
+
+.playhead-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    background-color: #5b8a8f;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.playhead-handle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    background-color: #5b8a8f;
+    border: 1px solid #0f1214;
+    border-radius: 2px;
+    transform: translate(-50%, -50%) rotate(45deg);
+    cursor: grab;
+    outline: none;
+
+    // Enlarge the touch/click target well past the visible 14px diamond
+    // without changing how big it looks - tablets need a real hit area.
+    &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 28px;
+        height: 28px;
+        transform: translate(-50%, -50%);
+    }
+
+    &:active {
+        cursor: grabbing;
+    }
+
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(91, 138, 143, 0.6);
+    }
+}
+
+.empty-hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7d8a8d;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.8rem;
+    pointer-events: none;
+}

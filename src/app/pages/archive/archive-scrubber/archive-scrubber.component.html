@@ -1,0 +1,17 @@
+<div class="scrubber" [class.disabled]="disabled">
+    <div class="ticks">
+        <span class="tick" *ngFor="let t of ticks" [style.left.%]="t.pct">{{t.label}}</span>
+    </div>
+    <div #track class="track" (pointerdown)="onTrackPointerDown($event)" (pointermove)="onTrackPointerMove($event)"
+        (pointerup)="onTrackPointerUp($event)" (pointercancel)="onTrackPointerUp($event)">
+        <div class="track-line"></div>
+        <div class="window-band" *ngIf="windowMs" [style.left.%]="bandLeftPct" [style.width.%]="bandWidthPct"></div>
+        <div class="playhead" [style.left.%]="playheadPct" *ngIf="currentValue">
+            <div class="playhead-line"></div>
+            <div class="playhead-handle" tabindex="0" role="slider" aria-label="Scrub position"
+                [attr.aria-valuemin]="rangeStart?.getTime()" [attr.aria-valuemax]="rangeEnd?.getTime()"
+                [attr.aria-valuenow]="currentValue?.getTime()" (keydown)="onHandleKeydown($event)"></div>
+        </div>
+    </div>
+    <div class="empty-hint" *ngIf="disabled">Set a time range to enable the scrubber.</div>
+</div>
