@@ -1,8 +1,8 @@
-<div class="entity" *ngIf="entity.chartType===1">
-    <app-graph class="entity" [entity]="entity">
+<div class="entity" *ngIf="chartType===ChartType.GRAPH">
+    <app-graph class="entity" [parameter]="parameter" [frames]="frames">
     </app-graph>
 </div>
-<div class="table-entity" *ngIf="entity.chartType===6">
-    <app-table [entity]="entity">
+<div class="table-entity" *ngIf="chartType===ChartType.TABLE">
+    <app-table [frames]="frames">
     </app-table>
 </div>
