@@ -1,17 +1,7 @@
 // Phantom command bar - the shell's single persistent instrument strip.
-// Fixed (not sticky) at a constant 64px height across every breakpoint:
-// every top-level page below it (home/live/archive/manager) is built on a
-// position:fixed "fill the viewport below the chrome" layout with a
-// hardcoded top offset (see their own .scss files), so the bar's height
-// must stay constant rather than growing into a second row on narrow
-// screens - the channel strip condenses in place instead of wrapping.
-$command-bar-height: 64px;
-
-// Flat tactical palette tokens (kept in hex, matching how every other
-// component in this app already carries these values - see
-// src/assets/scss/black-dashboard/custom/_variables.scss for the
-// canonical names: $panel-bg, $hairline-border, $text-primary,
-// $text-secondary, $primary, $status-nominal, $status-critical).
+// Fixed at var(--ph-bar-h) (64px) at every breakpoint: each top-level page
+// below it is a position:fixed "fill the viewport below the chrome" layout
+// with that offset, so the bar condenses in place rather than wrapping.
 :host {
   display: contents;
 }
@@ -21,41 +11,75 @@ $command-bar-height: 64px;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1030;
-  height: $command-bar-height;
+  z-index: var(--ph-z-bar);
+  height: var(--ph-bar-h);
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 0 1.5rem;
-  background-color: #181c1f;
-  border-bottom: 1px solid #2a3134;
-  font-family: 'IBM Plex Sans', "Helvetica Neue", sans-serif;
+  gap: 1.75rem;
+  padding: 0 1.25rem 0 1.25rem;
+  background: rgba(11, 15, 18, 0.82);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--ph-line);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 12px 32px -20px rgba(0, 0, 0, 0.9);
+  font-family: var(--ph-font-ui);
 }
 
-.command-bar-brand {
+// --- Brand ---------------------------------------------------------------
+
+.brand {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
+  gap: 0.65rem;
   text-decoration: none;
+  border-radius: var(--ph-r-sm);
+
+  &:hover .brand-mark {
+    transform: translateY(-1px) rotate(-6deg);
+  }
+}
+
+.brand-mark {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--ph-accent);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  transition: transform var(--ph-dur-slow) var(--ph-ease-spring);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  gap: 4px;
 }
 
 .brand-word {
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  color: #e8e6e1;
-  // A deliberate wordmark treatment, not default nav-brand styling: wide
-  // tracking plus a hairline steel-teal underline gives it presence
-  // without resorting to a logo image.
-  padding-bottom: 3px;
-  border-bottom: 2px solid #5b8a8f;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ph-text-hi);
 }
 
-.channel-strip {
+.brand-sub {
+  font-family: var(--ph-font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ph-text-lo);
+}
+
+// --- Channels ------------------------------------------------------------
+
+.channels {
   flex: 1 1 auto;
   display: flex;
   align-items: stretch;
-  height: 100%;
+  align-self: stretch;
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
@@ -66,87 +90,240 @@ $command-bar-height: 64px;
 }
 
 .channel {
+  position: relative;
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  height: 100%;
-  padding: 0 1.1rem;
-  color: #8b9296;
+  padding: 0 1rem;
+  color: var(--ph-text-mid);
   font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   text-decoration: none;
   white-space: nowrap;
-  border-bottom: 2px solid transparent;
-  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  transition: color var(--ph-dur) var(--ph-ease-out);
+
+  // Active rule grows from the centre instead of snapping on.
+  &::after {
+    content: "";
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    bottom: -1px;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+    background: var(--ph-accent);
+    box-shadow: 0 0 12px var(--ph-accent);
+    transform: scaleX(0);
+    transition: transform var(--ph-dur-slow) var(--ph-ease-spring);
+  }
 
   &:hover {
-    color: #e8e6e1;
-    background-color: rgba(255, 255, 255, 0.03);
+    color: var(--ph-text-hi);
+    text-decoration: none;
+  }
+
+  &.is-active {
+    color: var(--ph-text-hi);
+
+    &::after {
+      transform: scaleX(1);
+    }
+  }
+
+  &:focus-visible {
+    outline-offset: -6px;
   }
 }
 
-.channel-active {
-  color: #e8e6e1;
-  border-bottom-color: #5b8a8f;
-}
+// --- Instruments ---------------------------------------------------------
 
-.command-bar-status {
+.instruments {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  gap: 0.6rem;
 }
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex: 0 0 auto;
-}
+// Avionics master lamps: dark until lit, then backlit with the severity colour.
+.master {
+  --lamp: var(--ph-text-lo);
+  --lamp-bg: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--ph-line-strong);
+  border-radius: var(--ph-r-xs);
+  background: var(--ph-bg-0);
+  color: var(--lamp);
+  font-family: var(--ph-font-mono);
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  transition:
+    color var(--ph-dur) var(--ph-ease-out),
+    background-color var(--ph-dur) var(--ph-ease-out),
+    border-color var(--ph-dur) var(--ph-ease-out),
+    box-shadow var(--ph-dur) var(--ph-ease-out),
+    transform var(--ph-dur-fast) var(--ph-ease-out);
 
-.command-bar-status.is-live {
-  color: #4caf6d;
+  &:active {
+    transform: scale(0.96);
+  }
 
-  .status-dot {
-    background-color: #4caf6d;
-    animation: command-bar-live-pulse 1.6s ease-in-out infinite;
+  &--warning.is-lit {
+    --lamp: #ffd9d9;
+    --lamp-bg: var(--ph-warning);
+  }
+
+  &--caution.is-lit {
+    --lamp: #2a1a02;
+    --lamp-bg: var(--ph-caution);
+  }
+
+  &.is-lit {
+    background: var(--lamp-bg);
+    border-color: transparent;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 0 18px -2px var(--lamp-bg);
+  }
+
+  &.is-flashing {
+    animation: master-flash 0.9s steps(1, end) infinite;
   }
 }
 
-.command-bar-status.is-offline {
-  color: #d64545;
-
-  .status-dot {
-    background-color: #d64545;
-  }
+.master-top,
+.master-bottom {
+  display: block;
 }
 
-@keyframes command-bar-live-pulse {
-
-  0%,
-  100% {
-    opacity: 0.5;
-  }
-
+@keyframes master-flash {
   50% {
-    opacity: 1;
+    background: var(--ph-bg-0);
+    color: var(--lamp-bg);
+    box-shadow: inset 0 0 0 1px var(--lamp-bg);
   }
 }
 
-.command-bar-session {
+.link {
+  --tone: var(--ph-text-lo);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 36px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--ph-line);
+  border-radius: var(--ph-r-sm);
+  background: var(--ph-bg-1);
+  color: var(--tone);
+  font-family: var(--ph-font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color var(--ph-dur) var(--ph-ease-out), border-color var(--ph-dur) var(--ph-ease-out);
+
+  &--live {
+    --tone: var(--ph-nominal);
+  }
+
+  &--connecting,
+  &--reconnecting {
+    --tone: var(--ph-caution);
+  }
+
+  &--lost {
+    --tone: var(--ph-warning);
+    border-color: rgba(236, 77, 77, 0.35);
+  }
+}
+
+.link-dot {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--tone);
+  flex: 0 0 auto;
+}
+
+.link-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid var(--tone);
+  opacity: 0;
+}
+
+.link--live .link-ring {
+  animation: ph-ring 1.8s var(--ph-ease-out) infinite;
+}
+
+.link--connecting .link-dot,
+.link--reconnecting .link-dot {
+  animation: ph-pulse 0.8s var(--ph-ease-out) infinite;
+}
+
+.clock {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  height: 36px;
+  padding: 0 0.75rem;
+  border-left: 1px solid var(--ph-line);
+  line-height: 36px;
+}
+
+.clock-time {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ph-text-hi);
+  letter-spacing: 0.04em;
+}
+
+.clock-zone {
+  font-family: var(--ph-font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  color: var(--ph-text-lo);
+}
+
+// --- Session -------------------------------------------------------------
+
+.session {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.55rem;
+  padding-left: 0.9rem;
+  border-left: 1px solid var(--ph-line);
+}
+
+.session-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--ph-accent-soft);
+  border: 1px solid var(--ph-accent-line);
+  color: var(--ph-accent-strong);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .session-user {
-  color: #8b9296;
+  color: var(--ph-text-mid);
   font-size: 0.8rem;
   max-width: 9rem;
   overflow: hidden;
@@ -155,52 +332,51 @@ $command-bar-height: 64px;
 }
 
 .session-logout {
-  background: transparent;
-  border: 1px solid #2a3134;
-  color: #e8e6e1;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 0.4rem 0.85rem;
-  cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  height: 30px;
+}
 
-  &:hover {
-    border-color: #5b8a8f;
-    color: #5b8a8f;
-  }
+// --- Responsive: condense in place, never wrap ----------------------------
 
-  &:focus {
-    outline: none;
-    border-color: #5b8a8f;
+@media (max-width: 1180px) {
+  .clock,
+  .session-user {
+    display: none;
   }
 }
 
-// Condense rather than wrap at tablet widths (see note above the
-// $command-bar-height variable for why the bar can't grow a second row).
-// Bootstrap's own "md" breakpoint (768px) - no new breakpoint invented.
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .command-bar {
     gap: 0.75rem;
-    padding: 0 0.85rem;
+    padding: 0 0.75rem;
   }
 
-  .brand-word {
-    font-size: 0.9rem;
-    letter-spacing: 0.18em;
-  }
-
-  .channel {
-    padding: 0 0.7rem;
-    font-size: 0.72rem;
-  }
-
-  .command-bar-status .status-text {
+  .brand-sub,
+  .link-text {
     display: none;
   }
 
-  .session-user {
+  .channel {
+    padding: 0 0.6rem;
+    font-size: 0.75rem;
+
+    &::after {
+      left: 0.6rem;
+      right: 0.6rem;
+    }
+  }
+
+  .master {
+    width: 40px;
+  }
+
+  .session {
+    padding-left: 0.5rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .brand-text,
+  .session-avatar {
     display: none;
   }
 }

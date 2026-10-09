@@ -1,0 +1,207 @@
+// Shared by LoginComponent and RegisterComponent.
+.auth {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+    background: var(--ph-bg-0);
+}
+
+// ---------------------------------------------------------------------------
+// Brand side
+// ---------------------------------------------------------------------------
+
+.auth-brand {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+    overflow: hidden;
+    border-right: 1px solid var(--ph-line);
+    background-image:
+        radial-gradient(70% 60% at 30% 70%, rgba(86, 182, 198, 0.1), transparent 70%),
+        linear-gradient(var(--ph-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--ph-line) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+.auth-brand-top {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    animation: ph-rise var(--ph-dur-slow) var(--ph-ease-spring) both;
+}
+
+.auth-mark {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: var(--ph-accent);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+}
+
+.auth-word {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ph-text-hi);
+}
+
+// Flight trace that draws itself on load.
+.auth-flight {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 34%;
+    width: 100%;
+    height: 32%;
+    pointer-events: none;
+}
+
+.auth-flight-grid {
+    fill: none;
+    stroke: var(--ph-line);
+    stroke-dasharray: 2 6;
+}
+
+.auth-flight-path {
+    fill: none;
+    stroke: var(--ph-accent);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    filter: drop-shadow(0 0 6px rgba(86, 182, 198, 0.6));
+    animation: auth-draw 2.4s var(--ph-ease-out) 0.3s forwards;
+}
+
+@keyframes auth-draw {
+    to { stroke-dashoffset: 0; }
+}
+
+.auth-brand-copy {
+    position: relative;
+    max-width: 30rem;
+    animation: ph-rise var(--ph-dur-slow) var(--ph-ease-spring) 0.15s both;
+}
+
+.auth-tagline {
+    margin: 0.75rem 0 0;
+    font-size: clamp(1.5rem, 2.6vw, 2.35rem);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+    color: var(--ph-text-hi);
+    text-wrap: balance;
+}
+
+// ---------------------------------------------------------------------------
+// Form side
+// ---------------------------------------------------------------------------
+
+.auth-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem clamp(1rem, 4vw, 3rem);
+    overflow-y: auto;
+    background: linear-gradient(180deg, var(--ph-bg-1), var(--ph-bg-0));
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 22rem;
+    margin: 0;
+    animation: ph-rise var(--ph-dur-slow) var(--ph-ease-spring) 0.1s both;
+
+    mat-form-field {
+        width: 100%;
+    }
+}
+
+.auth-title {
+    margin: 0.5rem 0 1.75rem;
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    color: var(--ph-text-hi);
+}
+
+.auth-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.75rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid rgba(236, 77, 77, 0.35);
+    border-left: 3px solid var(--ph-warning);
+    border-radius: var(--ph-r-sm);
+    background: var(--ph-warning-soft);
+    color: #f5b5b5;
+    font-size: 0.82rem;
+    animation: ph-rise var(--ph-dur) var(--ph-ease-out);
+}
+
+.auth-submit {
+    height: 42px;
+    margin-top: 0.5rem;
+    font-size: 0.88rem;
+}
+
+.auth-switch {
+    margin: 1.25rem 0 0;
+    font-size: 0.83rem;
+    color: var(--ph-text-mid);
+    text-align: center;
+}
+
+.auth-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ph-accent-strong);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--ph-dur) var(--ph-ease-out);
+
+    &:hover {
+        text-decoration-color: currentColor;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Responsive
+// ---------------------------------------------------------------------------
+
+@media (max-width: 860px) {
+    .auth {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+
+    .auth-brand {
+        min-height: 0;
+        padding: 1.25rem 1rem;
+        border-right: 0;
+        border-bottom: 1px solid var(--ph-line);
+    }
+
+    .auth-flight,
+    .auth-brand-copy {
+        display: none;
+    }
+
+    .auth-panel {
+        align-items: flex-start;
+        padding-top: 2.5rem;
+    }
+}

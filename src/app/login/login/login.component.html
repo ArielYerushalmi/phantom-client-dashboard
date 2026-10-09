@@ -1,34 +1,47 @@
-<div class="login-box">
-    <img src="assets/img/phantom-og.png" style="width: 30%;">
-    <br>
-    <h2>Login</h2>
-    <form>
-        <!-- <div class="user-box"> -->
-        <mat-form-field appearance="fill">
-            <input matInput id="usernameTextbox" type="text" required="" autocomplete="off" [formControl]="username"
-                [(ngModel)]="inputUsernameTxt" name="txtName">
-            <mat-label>Username</mat-label>
-            <!-- <label>Username</label> -->
-            <mat-error *ngIf="username.invalid">{{getUserNameError()}}</mat-error>
-        </mat-form-field>
-        <!-- </div> -->
-        <!-- <div class="user-box"> -->
-        <mat-form-field appearance="fill">
-            <input matInput id="passwordTextbox" type="password" required="" autocomplete="off" [formControl]="password"
-                [(ngModel)]="inputPasswordTxt" name="txtName">
-            <mat-label>Password</mat-label>
-            <mat-error *ngIf="password.invalid">{{getPasswordError()}}</mat-error>
-        </mat-form-field>
-        
-        <span id="alert" *ngIf="allInfoAlert">Fill all required info</span>
-        <span id="alert" *ngIf="wrongUserAlert">Username Or Password Is Incorrect</span>
-        <span id="alert" *ngIf="serverDownAlert">User Service Is Down</span>
-        <!-- </div> -->
-        <a class="activeButton" (click)="onSubmitCreate()" style="color: #e8e6e1;">
-            Submit
-        </a>
-        <a class="activeButton" (click)="switchToRegister()" style="margin-left: 10%; color: #e8e6e1;">
-            Register
-        </a>
-    </form>
-</div>
+<main class="auth">
+    <aside class="auth-brand" aria-hidden="true">
+        <div class="auth-brand-top">
+            <svg class="auth-mark" viewBox="0 0 24 24"><path d="M12 2.5 21 20.5 12 16.2 3 20.5Z" /></svg>
+            <span class="auth-word">Phantom</span>
+        </div>
+        <svg class="auth-flight" viewBox="0 0 400 160" preserveAspectRatio="none">
+            <path class="auth-flight-grid" d="M0 40H400M0 80H400M0 120H400" />
+            <path class="auth-flight-path" d="M0 130 C 60 128, 90 70, 150 72 S 240 118, 300 60 S 370 20, 400 24" />
+        </svg>
+        <div class="auth-brand-copy">
+            <p class="ph-eyebrow">Ground control</p>
+            <p class="auth-tagline">Real-time flight telemetry, safety annunciators and archive playback.</p>
+        </div>
+    </aside>
+
+    <section class="auth-panel">
+        <form class="auth-form" (ngSubmit)="onSubmitCreate()" novalidate>
+            <span class="ph-eyebrow">Operator access</span>
+            <h1 class="auth-title">Sign in</h1>
+
+            <mat-form-field appearance="fill">
+                <mat-label>Username</mat-label>
+                <input matInput id="usernameTextbox" type="text" required autocomplete="username" [formControl]="username"
+                    [(ngModel)]="inputUsernameTxt" name="username">
+                <mat-error *ngIf="username.invalid">{{ getUserNameError() }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+                <mat-label>Password</mat-label>
+                <input matInput id="passwordTextbox" type="password" required autocomplete="current-password"
+                    [formControl]="password" [(ngModel)]="inputPasswordTxt" name="password">
+                <mat-error *ngIf="password.invalid">{{ getPasswordError() }}</mat-error>
+            </mat-form-field>
+
+            <p class="auth-alert" role="alert" *ngIf="allInfoAlert">Fill in your username and password.</p>
+            <p class="auth-alert" role="alert" *ngIf="wrongUserAlert">Username or password is incorrect.</p>
+            <p class="auth-alert" role="alert" *ngIf="serverDownAlert">The user service is unreachable. Try again shortly.</p>
+
+            <button type="submit" class="ph-btn ph-btn--primary auth-submit">Sign in</button>
+
+            <p class="auth-switch">New operator?
+                <button type="button" class="auth-link" (click)="switchToRegister()">Request an account</button>
+            </p>
+        </form>
+    </section>
+</main>

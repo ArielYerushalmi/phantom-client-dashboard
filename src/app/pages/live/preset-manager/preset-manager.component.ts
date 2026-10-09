@@ -29,6 +29,8 @@ export class PresetManagerComponent implements OnInit {
   deletePopUp: boolean = false;
   isPresetType: boolean = true;
   isCreatePresetValid: boolean = true;
+  isLoading: boolean = true;
+  loadError: boolean = false;
 
   description = new FormControl('', Validators.required);
 
@@ -70,11 +72,16 @@ export class PresetManagerComponent implements OnInit {
   }
 
   onGetAllDashboards() {
+    this.isLoading = true;
+    this.loadError = false;
     this.dashboardservice.getAllDashboards(this.IsLive).subscribe((dashboards: DashboardRO[]) => {
       this.dashboards = dashboards;
+      this.isLoading = false;
       console.log(this.dashboards);
     }, (error: HttpErrorResponse) => {
-      if (error.error.message != undefined) {
+      this.isLoading = false;
+      this.loadError = true;
+      if (error.error?.message != undefined) {
         console.log(error.error.message);
       } else {
         console.log("dashboard service is down!");

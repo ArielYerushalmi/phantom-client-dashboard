@@ -1,12 +1,44 @@
-<div class="focus">
-    <div class="focus-header">
-        <span class="focus-name">{{entity.parameter.parameterName}}</span>
-        <span class="focus-description" *ngIf="entity.parameter.description">{{entity.parameter.description}}</span>
-    </div>
+<div class="focus" [ngClass]="'level--' + level" [class.is-stale]="isStale">
+    <header class="focus-header">
+        <div class="focus-title">
+            <span class="ph-eyebrow">Focus</span>
+            <h2 class="focus-name">{{ entity.parameter.parameterName }}</h2>
+            <span class="focus-description" *ngIf="entity.parameter.description">{{ entity.parameter.description }}</span>
+        </div>
+        <span class="focus-age telemetry-value" [class.is-stale]="isStale">{{ ageLabel }}</span>
+    </header>
+
     <div class="focus-readout">
-        <span class="telemetry-value focus-value">{{ value !== null ? value : '—' }}</span>
-        <span class="focus-units" *ngIf="entity.parameter.units">{{entity.parameter.units}}</span>
+        <!-- Two copies alternate on every frame so the tick animation restarts -->
+        <span class="telemetry-value focus-value" *ngIf="tick">{{ value !== null ? value : '—' }}</span>
+        <span class="telemetry-value focus-value" *ngIf="!tick">{{ value !== null ? value : '—' }}</span>
+        <span class="focus-units" *ngIf="entity.parameter.units">{{ entity.parameter.units }}</span>
+        <span class="focus-delta telemetry-value" *ngIf="value !== null && delta !== 0"
+            [class.is-up]="delta > 0" [class.is-down]="delta < 0">
+            {{ delta > 0 ? '▲' : '▼' }} {{ delta > 0 ? '+' : '' }}{{ delta | number:'1.0-2' }}
+        </span>
+        <span class="focus-level telemetry-value" *ngIf="level === 'caution' || level === 'warning'">
+            {{ level === 'warning' ? 'Limit' : 'Near limit' }}
+        </span>
     </div>
+
+    <div class="envelope" *ngIf="hasRange" aria-hidden="true">
+        <div class="envelope-track">
+            <span class="band band--warn-lo"></span>
+            <span class="band band--caut-lo"></span>
+            <span class="band band--nominal"></span>
+            <span class="band band--caut-hi"></span>
+            <span class="band band--warn-hi"></span>
+            <span class="envelope-rail" *ngIf="value !== null" [style.transform]="'translateX(' + pct + '%)'">
+                <span class="envelope-marker"></span>
+            </span>
+        </div>
+        <div class="envelope-scale telemetry-value">
+            <span>{{ entity.parameter.minimum }}</span>
+            <span>{{ entity.parameter.maximum }}</span>
+        </div>
+    </div>
+
     <div class="focus-graph">
         <app-live-graph [entity]="entity"></app-live-graph>
     </div>

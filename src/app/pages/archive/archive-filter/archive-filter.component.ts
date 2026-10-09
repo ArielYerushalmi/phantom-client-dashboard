@@ -36,10 +36,10 @@ export class ArchiveFilterComponent implements OnDestroy {
   @Output() rangeConfirmed = new EventEmitter<IArchiveRange>();
 
   readonly quickPresets: IQuickPreset[] = [
-    { label: 'Last 1 Hour', hours: 1 },
-    { label: 'Last 6 Hours', hours: 6 },
-    { label: 'Last 24 Hours', hours: 24 },
-    { label: 'Last 7 Days', hours: 24 * 7 },
+    { label: '1h', hours: 1 },
+    { label: '6h', hours: 6 },
+    { label: '24h', hours: 24 },
+    { label: '7d', hours: 24 * 7 },
   ];
 
   expanded: boolean = true;

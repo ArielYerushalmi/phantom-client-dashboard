@@ -1,5 +1,23 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+
+/**
+ * idle         - no live session requested
+ * connecting   - first socket attempt in flight
+ * live         - socket open, frames flowing
+ * reconnecting - socket dropped, automatic retry scheduled/in flight
+ * lost         - automatic retries exhausted; needs a manual retry()
+ */
+export type LiveLinkPhase = 'idle' | 'connecting' | 'live' | 'reconnecting' | 'lost';
+
+export interface LiveLinkState {
+  phase: LiveLinkPhase;
+  attempt: number;
+  maxAttempts: number;
+  /** Delay before the next automatic attempt, for countdown UI. */
+  retryInMs: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +31,9 @@ export class LtsService {
    * silently dropping live data.
    */
   connectionState: EventEmitter<boolean> = new EventEmitter<boolean>();
+
+  /** Richer view of the same connection for reconnect/progress indicators. */
+  readonly linkState = new BehaviorSubject<LiveLinkState>({ phase: 'idle', attempt: 0, maxAttempts: 5, retryInMs: 3000 });
 
   private readonly ltsUrl: string = 'http://127.0.0.1:5000/User';
   private readonly ltsWebSocket: string = "ws://127.0.0.1:5555";
@@ -43,10 +64,12 @@ export class LtsService {
     this.manualClose = false;
     this.clearReconnectTimer();
     this._websocket = new WebSocket(this.ltsWebSocket);
+    this.setLink(this.reconnectAttempts > 0 ? 'reconnecting' : 'connecting');
 
     this._websocket.onopen = () => {
       this._isOpened = true;
       this.reconnectAttempts = 0;
+      this.setLink('live');
       this.connectionState.emit(true);
     }
 
@@ -61,11 +84,22 @@ export class LtsService {
       console.log("Websocket Closed");
       this.connectionState.emit(false);
       this.scheduleReconnect();
+      if (this.manualClose) {
+        this.setLink('idle');
+      } else if (!this.reconnectTimeoutId) {
+        this.setLink('lost');
+      }
     }
 
     this._websocket.onerror = (err) => {
       console.log(err);
     }
+  }
+
+  /** Operator-initiated reconnect after automatic retries gave up. */
+  retry() {
+    this.reconnectAttempts = 0;
+    this.initWebsocket();
   }
 
   clearSubscription() {
@@ -134,11 +168,21 @@ export class LtsService {
     }
     this.reconnectAttempts++;
     this.clearReconnectTimer();
+    this.setLink('reconnecting');
     this.reconnectTimeoutId = setTimeout(() => {
       if (!this.manualClose) {
         this.initWebsocket();
       }
     }, this.reconnectDelayMs);
+  }
+
+  private setLink(phase: LiveLinkPhase) {
+    this.linkState.next({
+      phase,
+      attempt: this.reconnectAttempts,
+      maxAttempts: this.maxReconnectAttempts,
+      retryInMs: this.reconnectDelayMs
+    });
   }
 
   private clearReconnectTimer() {

@@ -28,7 +28,7 @@ export class GraphComponent implements OnChanges, OnDestroy {
   showXAxisLabel: boolean = false;
   showYAxisLabel: boolean = false;
   colorScheme = {
-    domain: ['#5b8a8f']
+    domain: ['#56b6c6']
   }
 
   constructor(private readonly hostRef: ElementRef<HTMLElement>) { }
@@ -55,12 +55,14 @@ export class GraphComponent implements OnChanges, OnDestroy {
   applyChart(arrayOfFrames: IFrame[]): void {
     this.graphValues = [{
       name: this.parameter?.parameterName ?? '',
-      series: arrayOfFrames.map((item: IFrame) => ({ value: item.value, name: item.time }))
+      // Frame times arrive as ISO strings over JSON; as Dates the chart uses a
+      // real time scale instead of treating each timestamp as an ordinal label.
+      series: arrayOfFrames.map((item: IFrame) => ({ value: item.value, name: new Date(item.time) }))
     }];
   }
 
   public formatTime(date: string): string {
-    return new Date(date).toLocaleTimeString();
+    return new Date(date).toLocaleTimeString([], { hour12: false });
   }
 
 }

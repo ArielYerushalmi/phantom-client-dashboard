@@ -9,7 +9,7 @@ import { FormControl, Validators } from '@angular/forms';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['../auth.scss']
 })
 export class LoginComponent implements OnInit {
 

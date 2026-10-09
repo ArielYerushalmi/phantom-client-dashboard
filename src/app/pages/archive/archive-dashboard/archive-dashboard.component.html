@@ -1,84 +1,130 @@
 <div class="archive-shell">
 
-    <div class="range-row">
-        <app-archive-filter (rangeConfirmed)="onRangeConfirmed($event)"></app-archive-filter>
-    </div>
+    <header class="archive-head">
+        <div class="archive-title">
+            <span class="ph-eyebrow">Archive · Debrief</span>
+            <h1 class="archive-heading">Flight playback</h1>
+        </div>
+        <app-archive-filter class="range-bar" (rangeConfirmed)="onRangeConfirmed($event)"></app-archive-filter>
+    </header>
 
-    <div class="scrubber-row" *ngIf="range; else noRangeHint">
+    <section class="scrubber-row" *ngIf="range; else noRangeHint">
         <div class="scrubber-toolbar">
-            <span class="scrub-readout telemetry-value">{{ scrubTime | date:'yyyy-MM-dd HH:mm:ss' }}</span>
+            <div class="playhead-readout">
+                <span class="ph-eyebrow">Playhead</span>
+                <span class="scrub-readout telemetry-value">
+                    <span class="scrub-date">{{ scrubTime | date:'yyyy-MM-dd' }}</span>
+                    {{ scrubTime | date:'HH:mm:ss' }}
+                </span>
+            </div>
 
             <label class="window-select">
-                <span class="window-select-label">Window</span>
-                <select [(ngModel)]="windowMs" (ngModelChange)="onWindowChange()">
-                    <option *ngFor="let opt of windowOptions" [ngValue]="opt.ms">{{opt.label}}</option>
+                <span class="ph-eyebrow">Window</span>
+                <select class="ph-input" [(ngModel)]="windowMs" (ngModelChange)="onWindowChange()">
+                    <option *ngFor="let opt of windowOptions" [ngValue]="opt.ms">{{ opt.label }}</option>
                 </select>
             </label>
 
-            <button type="button" class="drawer-toggle-btn" (click)="parametersDrawer.toggle()">
-                <mat-icon>menu</mat-icon>
-                Parameters ({{panels.length}})
+            <button type="button" class="ph-btn drawer-toggle-btn" (click)="parametersDrawer?.toggle()">
+                <mat-icon>tune</mat-icon>
+                Parameters
+                <span class="count telemetry-value">{{ panels.length }}</span>
             </button>
         </div>
 
         <app-archive-scrubber [rangeStart]="range.startTime" [rangeEnd]="range.endTime" [value]="scrubTime"
             [windowMs]="windowMs" (scrub)="onScrub($event)">
         </app-archive-scrubber>
-    </div>
+    </section>
 
     <ng-template #noRangeHint>
-        <div class="no-range-hint">Set a time range above to begin scrubbing.</div>
+        <div class="no-range-hint">
+            <svg class="no-range-art" viewBox="0 0 160 40" aria-hidden="true">
+                <line x1="4" y1="20" x2="156" y2="20" />
+                <line class="no-range-tick" *ngFor="let x of [4, 29, 54, 79, 104, 129, 154]" [attr.x1]="x" y1="12"
+                    [attr.x2]="x" y2="28" />
+                <circle cx="54" cy="20" r="5" />
+            </svg>
+            <p class="no-range-title">Choose a time range to load the flight record</p>
+            <p class="no-range-sub">Use a quick range or set start and end above. The scrubber and parameter panels
+                appear once frames are found.</p>
+        </div>
     </ng-template>
 
     <div class="dashboard-body" *ngIf="range">
         <mat-drawer-container class="mat-drawer-container" [hasBackdrop]="true">
-            <mat-drawer #parametersDrawer mode="over" class="mat-drawer-right" position="end">
-                <div class="drawer-empty-state" *ngIf="parametersLoadError">
-                    Parameter service is unavailable. Try again later.
+            <mat-drawer #parametersDrawer mode="over" class="param-drawer" position="end">
+                <div class="param-drawer-head">
+                    <div>
+                        <span class="ph-eyebrow">Parameters</span>
+                        <p class="param-drawer-sub">{{ panels.length }} of {{ parameters.length }} on screen</p>
+                    </div>
+                    <button type="button" class="ph-btn ph-btn--ghost ph-btn--icon" (click)="parametersDrawer.close()"
+                        aria-label="Close parameter list">
+                        <mat-icon>close</mat-icon>
+                    </button>
                 </div>
-                <div class="drawer-empty-state" *ngIf="!parametersLoadError && parameters.length===0">
-                    No parameters available.
-                </div>
-                <div *ngFor="let parameter of parameters" class="mat-drawer-parameters">
-                    <span [ngClass]="isParameterSelected(parameter) ? 'usedParameter' : 'notUsedParameter'"
-                        (click)="onToggleParameter(parameter)">
-                        {{parameter.parameterName}}
-                    </span>
+                <div class="param-list ph-scroll">
+                    <div class="drawer-empty-state" *ngIf="parametersLoadError">
+                        Parameter service is unavailable. Try again later.
+                    </div>
+                    <div class="drawer-empty-state" *ngIf="!parametersLoadError && parameters.length===0">
+                        No parameters available.
+                    </div>
+                    <button type="button" *ngFor="let parameter of parameters" class="param-row"
+                        [class.is-on]="isParameterSelected(parameter)" (click)="onToggleParameter(parameter)"
+                        [attr.aria-pressed]="isParameterSelected(parameter)">
+                        <span class="param-check" aria-hidden="true"></span>
+                        <span class="param-name">{{ parameter.parameterName }}</span>
+                        <span class="param-units telemetry-value" *ngIf="parameter.units">{{ parameter.units }}</span>
+                    </button>
                 </div>
             </mat-drawer>
 
-            <mat-drawer-content class="mat-darawer-content">
+            <mat-drawer-content class="mat-darawer-content ph-scroll">
                 <div class="panels-grid" *ngIf="panels.length; else noPanels">
-                    <div class="panel" *ngFor="let panel of panels; trackBy: trackByParameterId">
-                        <div class="panel-header">
-                            <span class="panel-name">{{panel.parameter.parameterName}}</span>
-                            <span class="panel-units" *ngIf="panel.parameter.units">{{panel.parameter.units}}</span>
-                            <div class="panel-actions">
-                                <button type="button" class="chart-toggle"
-                                    [class.active]="panel.chartType===ChartType.GRAPH"
-                                    (click)="onChangeChartType(panel, ChartType.GRAPH)" title="Graph view">graph</button>
-                                <button type="button" class="chart-toggle"
-                                    [class.active]="panel.chartType===ChartType.TABLE"
-                                    (click)="onChangeChartType(panel, ChartType.TABLE)" title="Table view">table</button>
-                                <button type="button" class="remove-btn" (click)="onRemovePanel(panel)"
-                                    title="Remove parameter">&times;</button>
+                    <article class="panel ph-panel ph-enter" *ngFor="let panel of panels; let i = index; trackBy: trackByParameterId"
+                        [style.animation-delay.ms]="i * 50" [class.is-loading]="panel.loading">
+                        <header class="panel-top">
+                            <div class="panel-title">
+                                <span class="panel-name">{{ panel.parameter.parameterName }}</span>
+                                <span class="panel-units telemetry-value" *ngIf="panel.parameter.units">{{ panel.parameter.units }}</span>
                             </div>
-                        </div>
+                            <div class="panel-actions">
+                                <div class="segmented" role="group" aria-label="View">
+                                    <button type="button" class="segment" [class.active]="panel.chartType===ChartType.GRAPH"
+                                        [attr.aria-pressed]="panel.chartType===ChartType.GRAPH"
+                                        (click)="onChangeChartType(panel, ChartType.GRAPH)">Graph</button>
+                                    <button type="button" class="segment" [class.active]="panel.chartType===ChartType.TABLE"
+                                        [attr.aria-pressed]="panel.chartType===ChartType.TABLE"
+                                        (click)="onChangeChartType(panel, ChartType.TABLE)">Table</button>
+                                </div>
+                                <button type="button" class="ph-btn ph-btn--ghost ph-btn--icon remove-btn"
+                                    (click)="onRemovePanel(panel)" [attr.aria-label]="'Remove ' + panel.parameter.parameterName">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                        </header>
 
                         <div class="panel-readout">
                             <ng-container *ngIf="panel.nearest as n; else noReadout">
-                                <span class="telemetry-value">{{n.value}}</span>
-                                <span class="readout-time">at {{n.time | date:'HH:mm:ss'}}</span>
+                                <span class="readout-value telemetry-value">{{ n.value }}</span>
+                                <span class="readout-time telemetry-value">@ {{ n.time | date:'HH:mm:ss' }}</span>
                             </ng-container>
                             <ng-template #noReadout>
-                                <span class="readout-loading" *ngIf="panel.loading">loading...</span>
-                                <span class="readout-empty" *ngIf="!panel.loading">no data at this instant</span>
+                                <span class="readout-skeleton ph-skeleton" *ngIf="panel.loading"></span>
+                                <span class="readout-empty" *ngIf="!panel.loading">No sample at this instant</span>
                             </ng-template>
+                            <span class="panel-sync" *ngIf="panel.loading" aria-label="Loading"></span>
                         </div>
 
                         <div class="panel-body">
+                            <div class="panel-skeleton" *ngIf="panel.loading && panel.frames.length===0" aria-hidden="true">
+                                <span class="ph-skeleton" *ngFor="let h of [38, 52, 44, 70, 61, 80, 58, 66, 49, 73]"
+                                    [style.height.%]="h"></span>
+                            </div>
                             <div class="panel-empty" *ngIf="!panel.loading && !panel.error && panel.frames.length===0">
-                                No frames in this window. Try widening the window or moving the playhead.
+                                No frames in this window. Widen the window or move the playhead.
                             </div>
                             <div class="panel-empty error" *ngIf="panel.error">
                                 Archive service is unavailable.
@@ -87,12 +133,17 @@
                                 [frames]="panel.frames" [chartType]="panel.chartType">
                             </app-archive-chart>
                         </div>
-                    </div>
+                    </article>
                 </div>
 
                 <ng-template #noPanels>
                     <div class="panels-empty-state">
-                        Open the parameter list and choose at least one parameter to scrub through.
+                        <p class="no-range-title">Nothing on the bench yet</p>
+                        <p class="no-range-sub">Add the parameters you want to replay. Each gets its own panel, synced
+                            to the playhead.</p>
+                        <button type="button" class="ph-btn ph-btn--primary" (click)="parametersDrawer.open()">
+                            <mat-icon>add</mat-icon>Add parameters
+                        </button>
                     </div>
                 </ng-template>
             </mat-drawer-content>

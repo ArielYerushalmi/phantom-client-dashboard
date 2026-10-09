@@ -1,5 +1,4 @@
-<ngx-charts-line-chart class="graph" 
-    style="fill: white"
+<ngx-charts-area-chart class="graph"
     [results]="graphValues"
 
     [scheme]="colorScheme"
@@ -12,8 +11,10 @@
     [xAxisLabel]="'Time'"
     [yAxisLabel]="entity.parameter.units"
     [legendTitle]="false"
+    [showGridLines]="true"
+    [roundDomains]="true"
 
     [autoScale]="true"
     [animations]="true"
     [xAxisTickFormatting]="formatTime">
-</ngx-charts-line-chart>
+</ngx-charts-area-chart>

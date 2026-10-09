@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatDrawer } from '@angular/material/sidenav';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ParameterRO } from 'src/app/common/dtos/parameter/parameter.ro';
@@ -66,6 +67,11 @@ export class ArchiveDashboardComponent implements OnInit, OnDestroy {
   windowMs: number = this.windowOptions[2].ms;
 
   readonly ChartType = ChartType;
+
+  // Looked up via ViewChild rather than a template ref: the toggle button sits in
+  // the scrubber row's *ngIf, a sibling of the drawer's own *ngIf block, and
+  // template refs don't resolve across structural-directive scopes.
+  @ViewChild('parametersDrawer') parametersDrawer?: MatDrawer;
 
   private readonly scrubSubject = new Subject<Date>();
   private scrubSubscription: Subscription;

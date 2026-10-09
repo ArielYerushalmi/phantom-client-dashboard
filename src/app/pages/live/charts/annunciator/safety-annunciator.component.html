@@ -1,0 +1,27 @@
+<section class="annunciator" aria-label="Safety annunciators">
+    <header class="annunciator-head">
+        <span class="ph-eyebrow">Safety</span>
+        <span class="feed" [ngClass]="'feed--' + link">
+            <span class="feed-dot"></span>{{ link === 'online' ? 'Sensor feed' : link === 'connecting' ? 'Linking' : 'No sensor feed' }}
+        </span>
+        <span class="annunciator-count telemetry-value" *ngIf="activeCount > 0">{{ activeCount }} active</span>
+    </header>
+
+    <div class="lamps">
+        <button type="button" class="lamp" *ngFor="let state of states; trackBy: trackByKind"
+            [ngClass]="'lamp--' + state.severity" [class.is-active]="state.active"
+            [class.is-unack]="state.active && !state.acknowledged" [class.is-stale]="link !== 'online'"
+            (click)="onLampClick(state)"
+            [attr.aria-label]="state.label + (state.active ? ' active' : ' normal')"
+            [attr.title]="state.active && !state.acknowledged ? 'Click to acknowledge' : state.detail">
+            <span class="lamp-code telemetry-value">{{ state.code }}</span>
+            <span class="lamp-body">
+                <span class="lamp-label">{{ state.label }}</span>
+                <span class="lamp-state telemetry-value" *ngIf="state.active">
+                    {{ state.severity === 'advisory' ? 'Ready' : 'Active' }} · {{ elapsed(state) }}
+                </span>
+                <span class="lamp-state telemetry-value" *ngIf="!state.active">Normal</span>
+            </span>
+        </button>
+    </div>
+</section>

@@ -10,11 +10,11 @@
 .body {
     width: 100%;
     display: flex;
-    top: 64px;
+    top: var(--ph-bar-h);
     position: fixed;
-    height: calc(100% - 64px);
+    height: calc(100% - var(--ph-bar-h));
     overflow: auto;
-    background-color: #0f1214;
+    background-color: var(--ph-bg-0);
 }
 
 .manage-card {
@@ -23,8 +23,8 @@
     height: fit-content;
     margin: auto;
     overflow-y: scroll;
-    background-color: #181c1f;
-    border: 1px solid #2a3134;
+    background-color: var(--ph-bg-1);
+    border: 1px solid var(--ph-line-strong);
 }
 
 .status-banner {
@@ -39,8 +39,8 @@
 }
 
 .status-banner-warning {
-    background-color: #e8a33d;
-    color: #0f1214;
+    background-color: var(--ph-caution);
+    color: var(--ph-bg-0);
 }
 
 .status-banner-icon {
@@ -63,8 +63,8 @@
 
 .mat-header-row {
     justify-content: space-between;
-    background-color: #181c1f;
-    border-bottom: 1px solid #2a3134;
+    background-color: var(--ph-bg-1);
+    border-bottom: 1px solid var(--ph-line-strong);
     display: flex;
     align-content: center;
     flex-wrap: wrap;
@@ -74,11 +74,11 @@
 .mat-row {
     justify-content: space-between;
     display: flex;
-    border-bottom: 1px solid #2a3134;
+    border-bottom: 1px solid var(--ph-line-strong);
     transition: background-color 0.15s ease;
 
     &:hover {
-        background-color: #181c1f;
+        background-color: var(--ph-bg-1);
     }
 }
 
@@ -119,7 +119,7 @@
 }
 
 .mat-cell {
-    color: #ffffffcc;
+    color: var(--ph-text-hi);
     width: 45%;
     display: flex;
     padding: 0;
@@ -149,8 +149,8 @@
 
 .popup {
     padding: 20px;
-    background: #181c1f;
-    border-radius: 2px;
+    background: var(--ph-bg-1);
+    border-radius: var(--ph-r-sm);
     width: 50%;
     height: 50%;
     position: relative;
@@ -164,11 +164,11 @@
     font-size: 30px;
     font-weight: bold;
     text-decoration: none;
-    color: #ccc;
+    color: var(--ph-text-mid);
 }
 
 .popup .close-popup:hover {
-    color: #5b8a8f;
+    color: var(--ph-accent);
     cursor: pointer;
 }
 
@@ -186,8 +186,8 @@
 
 .delete-popup {
     padding: 20px;
-    background: #181c1f;
-    border-radius: 2px;
+    background: var(--ph-bg-1);
+    border-radius: var(--ph-r-sm);
     width: 30%;
     height: 35%;
     position: relative;
@@ -223,11 +223,11 @@
     font-size: 30px;
     font-weight: bold;
     text-decoration: none;
-    color: #ccc;
+    color: var(--ph-text-mid);
 }
 
 .delete-popup .close-popup:hover {
-    color: #5b8a8f;
+    color: var(--ph-accent);
     cursor: pointer;
 }
 
@@ -252,11 +252,11 @@
 
 //mat-input focused color
 ::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
-    color: #5b8a8f !important;
+    color: var(--ph-accent) !important;
 }
 
 .error {
-    color: #d64545;
+    color: var(--ph-warning);
 }
 
 .editUserName {
@@ -280,16 +280,16 @@
 
 .passwordInput {
     width: 200px;
-    background-color: #424242;
+    background-color: var(--ph-bg-3);
     border: none;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid var(--ph-text-mid);
     outline: none;
     background-color: transparent;
-    color: #ccc;
+    color: var(--ph-text-mid);
 }
 
 ::placeholder {
-    color: #ccc;
+    color: var(--ph-text-mid);
 }
 
 .popup-header {
@@ -309,7 +309,7 @@
 }
 
 #usernameID {
-    color: #ccc;
+    color: var(--ph-text-mid);
     margin-left: 10px;
     font-size: large;
 }
@@ -320,7 +320,7 @@
     display: inline-block;
     padding: 10px 20px;
     font-size: 16px;
-    border-radius: 2px;
+    border-radius: var(--ph-r-sm);
     font-size: 0.875;
     border: none;
     color: white;
@@ -334,7 +334,7 @@
     display: inline-block;
     padding: 10px 20px;
     font-size: 16px;
-    border-radius: 2px;
+    border-radius: var(--ph-r-sm);
     font-size: 0.875;
     border: none;
     color: white;
@@ -348,21 +348,21 @@
 }
 
 #confirm-edit-btn {
-    background-color: #5b8a8f !important;
+    background-color: var(--ph-accent) !important;
 }
 
 #confirm-edit-btn:hover {
-    background-color: #4b7276 !important;
+    background-color: var(--ph-accent-strong) !important;
 }
 
 #confirm-btn {
-    background-color: #5b8a8f !important;
+    background-color: var(--ph-accent) !important;
     transition: all 400ms;
     outline: unset;
 }
 
 #confirm-btn:hover {
-    background-color: #c62c2c !important;
+    background-color: var(--ph-warning) !important;
 }
 
 #cancel-btn {
@@ -382,17 +382,17 @@
 
 ::ng-deep .mat-form-field-appearance-fill .mat-form-field-flex {
     background-color: transparent;
-    color: #ccc;
+    color: var(--ph-text-mid);
 }
 
 ::ng-deep .mat-focused .mat-form-field-label {
-    color: #5b8a8f !important;
+    color: var(--ph-accent) !important;
 }
 
 ::ng-deep.mat-form-field-ripple {
-    background-color: #5b8a8f;
+    background-color: var(--ph-accent);
 }
 
 ::ng-deep .mat-form-field.mat-focused .mat-form-field-ripple {
-    background-color: #5b8a8f;
+    background-color: var(--ph-accent);
 }

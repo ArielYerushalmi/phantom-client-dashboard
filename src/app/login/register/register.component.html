@@ -1,59 +1,62 @@
-<div class="login-box">
-    <img src="assets/img/phantom-og.png" style="width: 30%;">
-    <br>
-    <h2>Register</h2>
-    <form>
-        <!-- <div class="user-box"> -->
-        <mat-form-field appearance="fill">
-            <input matInput id="usernameTextbox" type="text" required="" autocomplete="off" [formControl]="username"
-                [(ngModel)]="inputUsernameTxt" name="txtName">
-            <mat-label>Username</mat-label>
-            <mat-error *ngIf="username.invalid">{{getUserNameError()}}</mat-error>
-        </mat-form-field>
-        <!-- </div> -->
-        <!-- <div class="user-box"> -->
-        <mat-form-field appearance="fill">
-            <input matInput id="passwordTextbox" type="password" required="" autocomplete="off" [formControl]="password"
-                [(ngModel)]="inputPasswordTxt" name="txtName">
-            <mat-label>Password</mat-label>
-            <mat-error *ngIf="password.invalid">{{getPasswordError()}}</mat-error>
-        </mat-form-field>
-        <!-- </div> -->
-        <!-- <div class="user-box"> -->
-        <mat-form-field appearance="fill">
-            <input matInput id="emailTextbox" type="text" required="" autocomplete="off" [formControl]="email"
-                [(ngModel)]="inputEmaildTxt" name="txtName">
-            <mat-label>E-Mail</mat-label>
-            <mat-error *ngIf="email.invalid">{{getEmailError()}}</mat-error>
-        </mat-form-field>
-        <!-- </div> -->
-        <!-- <div class="user-box">
-            <input id="ageTextbox" type="number" required="" autocomplete="off" [(ngModel)]="inputAgeTxt"
-                name="txtName">
-            <label>Age</label>
-        </div> -->
-        <div class="select-box">
-            <mat-form-field appearance="fill">
-                <mat-label>Select Type</mat-label>
-                <mat-select style="color:black" [formControl]="type" [(ngModel)]="selectRole" required name="selector">
-                    <div>
-                        <mat-option style="color:#ccc;background-color: rgb(27, 26, 26)" *ngFor="let select of selects"
-                            value="{{select.type}}"> {{select.name}} </mat-option>
-                    </div>
-                </mat-select>
-                <mat-error *ngIf="type.hasError('required')">Required</mat-error>
-            </mat-form-field>
+<main class="auth">
+    <aside class="auth-brand" aria-hidden="true">
+        <div class="auth-brand-top">
+            <svg class="auth-mark" viewBox="0 0 24 24"><path d="M12 2.5 21 20.5 12 16.2 3 20.5Z" /></svg>
+            <span class="auth-word">Phantom</span>
         </div>
+        <svg class="auth-flight" viewBox="0 0 400 160" preserveAspectRatio="none">
+            <path class="auth-flight-grid" d="M0 40H400M0 80H400M0 120H400" />
+            <path class="auth-flight-path" d="M0 130 C 60 128, 90 70, 150 72 S 240 118, 300 60 S 370 20, 400 24" />
+        </svg>
+        <div class="auth-brand-copy">
+            <p class="ph-eyebrow">Ground control</p>
+            <p class="auth-tagline">Pilots watch live telemetry. Debriefers replay recorded flights.</p>
+        </div>
+    </aside>
 
-        <span id="alert" *ngIf="allInfoAlert">Fill all required info</span>
-        <span id="alert" *ngIf="wrongUserAlert">Username Or Password Is Incorrect</span>
-        <span id="alert" *ngIf="serverDownAlert">User Service Is Down</span>
+    <section class="auth-panel">
+        <form class="auth-form" (ngSubmit)="onSubmitCreate()" novalidate>
+            <span class="ph-eyebrow">New operator</span>
+            <h1 class="auth-title">Create account</h1>
 
-        <a class=" activeButton" (click)="onSubmitCreate()" style="color: #e8e6e1;">
-            Submit
-        </a>
-        <a class=" activeButton" (click)="switchToLogin()" style="margin-left: 25%;color: #e8e6e1;">
-            Login
-        </a>
-    </form>
-</div>
+            <mat-form-field appearance="fill">
+                <mat-label>Username</mat-label>
+                <input matInput id="usernameTextbox" type="text" required autocomplete="username" [formControl]="username"
+                    [(ngModel)]="inputUsernameTxt" name="username">
+                <mat-error *ngIf="username.invalid">{{ getUserNameError() }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+                <mat-label>Password</mat-label>
+                <input matInput id="passwordTextbox" type="password" required autocomplete="new-password"
+                    [formControl]="password" [(ngModel)]="inputPasswordTxt" name="password">
+                <mat-error *ngIf="password.invalid">{{ getPasswordError() }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+                <mat-label>Email</mat-label>
+                <input matInput id="emailTextbox" type="email" required autocomplete="email" [formControl]="email"
+                    [(ngModel)]="inputEmaildTxt" name="email">
+                <mat-error *ngIf="email.invalid">{{ getEmailError() }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+                <mat-label>Role</mat-label>
+                <mat-select [formControl]="type" [(ngModel)]="selectRole" required name="role">
+                    <mat-option *ngFor="let select of selects" [value]="select.type">{{ select.name }}</mat-option>
+                </mat-select>
+                <mat-error *ngIf="type.hasError('required')">Choose a role.</mat-error>
+            </mat-form-field>
+
+            <p class="auth-alert" role="alert" *ngIf="allInfoAlert">Fill in every field to create the account.</p>
+            <p class="auth-alert" role="alert" *ngIf="wrongUserAlert">That username can't be used. Try another.</p>
+            <p class="auth-alert" role="alert" *ngIf="serverDownAlert">The user service is unreachable. Try again shortly.</p>
+
+            <button type="submit" class="ph-btn ph-btn--primary auth-submit">Create account</button>
+
+            <p class="auth-switch">Already have access?
+                <button type="button" class="auth-link" (click)="switchToLogin()">Sign in</button>
+            </p>
+        </form>
+    </section>
+</main>

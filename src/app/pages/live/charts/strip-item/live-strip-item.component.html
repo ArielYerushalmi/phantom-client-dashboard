@@ -1,7 +1,7 @@
-<div class="strip-item" (click)="onActivate()" (keyup.enter)="onActivate()" tabindex="0" role="button"
-    [attr.aria-label]="'Focus ' + entity.parameter.parameterName">
+<div class="strip-item" [ngClass]="'level--' + level" (click)="onActivate()" (keyup.enter)="onActivate()"
+    tabindex="0" role="button" [attr.aria-label]="'Focus ' + entity.parameter.parameterName">
     <div class="strip-item-top">
-        <span class="strip-item-name">{{entity.parameter.parameterName}}</span>
+        <span class="strip-item-name">{{ entity.parameter.parameterName }}</span>
         <button type="button" class="strip-item-remove" (click)="onRemove($event)"
             [attr.aria-label]="'Remove ' + entity.parameter.parameterName">
             <mat-icon>close</mat-icon>
@@ -9,9 +9,16 @@
     </div>
     <div class="strip-item-readout">
         <span class="telemetry-value strip-item-value">{{ value !== null ? value : '—' }}</span>
-        <span class="strip-item-units" *ngIf="entity.parameter.units">{{entity.parameter.units}}</span>
+        <span class="strip-item-units" *ngIf="entity.parameter.units">{{ entity.parameter.units }}</span>
     </div>
-    <svg class="strip-item-sparkline" viewBox="0 0 100 28" preserveAspectRatio="none">
-        <polyline [attr.points]="sparklinePoints" fill="none" stroke="#5b8a8f" stroke-width="2" />
+    <svg class="strip-item-sparkline" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+            <linearGradient [attr.id]="gradientId" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="currentColor" stop-opacity="0.28" />
+                <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+            </linearGradient>
+        </defs>
+        <path class="spark-area" *ngIf="sparklineArea" [attr.d]="sparklineArea" [attr.fill]="'url(#' + gradientId + ')'" />
+        <polyline class="spark-line" [attr.points]="sparklinePoints" fill="none" vector-effect="non-scaling-stroke" />
     </svg>
 </div>

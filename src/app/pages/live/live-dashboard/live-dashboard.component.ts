@@ -6,7 +6,7 @@ import { DashboardRO } from 'src/app/common/dtos/dashboard/dashboard.ro';
 import { IChartEntity } from 'src/app/common/interfaces/gridster/entity.interface';
 import { ChartType } from 'src/app/common/enums/chartType.enum';
 import { PresetsUtilsService } from '../../../common/services/presets-utils-service/presets-utils.service'
-import { LtsService } from '../../../common/services/lts-service/lts.service'
+import { LiveLinkState, LtsService } from '../../../common/services/lts-service/lts.service'
 import { FrameParameter } from '../../../common/dtos/live/frame-parameter';
 import { createDashboardDTO } from 'src/app/common/dtos/dashboard/create-dashboard.dto';
 import { IUser } from 'src/app/common/interfaces/user/user.intefrace';
@@ -42,7 +42,10 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   parameters: ParameterRO[] = [];
   isRefresh: boolean = true;
   dashboard: DashboardRO = null;
-  isUpdatePopup: boolean = false;
+  isSaving: boolean = false;
+  parametersLoading: boolean = true;
+  parameterFilter: string = '';
+  link: LiveLinkState = { phase: 'idle', attempt: 0, maxAttempts: 5, retryInMs: 0 };
 
   user: any;
 
@@ -53,6 +56,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
 
   private liveMessageSubscription: Subscription;
   private connectionStateSubscription: Subscription;
+  private linkStateSubscription: Subscription;
 
   constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly liveDataWebSocket: LtsService, private readonly toastr: ToastrService) { }
 
@@ -67,7 +71,32 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     this.connectionStateSubscription = this.liveDataWebSocket.connectionState.subscribe((isOpen: boolean) => {
       this.wsDisconnected = !isOpen;
     });
+    this.linkStateSubscription = this.liveDataWebSocket.linkState.subscribe((state: LiveLinkState) => {
+      this.link = state;
+    });
   };
+
+  /** Parameters matching the drawer's filter box (case-insensitive, name or units). */
+  get filteredParameters(): ParameterRO[] {
+    const q = this.parameterFilter.trim().toLowerCase();
+    if (!q) {
+      return this.parameters;
+    }
+    return this.parameters.filter((p) =>
+      p.parameterName.toLowerCase().includes(q) || (p.units ?? '').toLowerCase().includes(q));
+  }
+
+  trackByParameterId(_: number, parameter: ParameterRO) {
+    return parameter.id;
+  }
+
+  trackByWatched(_: number, item: IChartGridsterItem) {
+    return item.chart.parameter.parameterName;
+  }
+
+  retryLink(): void {
+    this.liveDataWebSocket.retry();
+  }
 
   /** The single parameter shown large in the focus panel, or null when nothing is watched. */
   get focusedItem(): IChartGridsterItem | null {
@@ -168,11 +197,14 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
 
   loadParameters() {
     this.parametersLoadError = false;
+    this.parametersLoading = true;
     this.dashboardservice.getParameters().then((parameters: ParameterRO[]) => {
       this.parameters = parameters;
+      this.parametersLoading = false;
     }).catch((error: any) => {
       console.error('Error occurred while fetching parameters:', error);
       this.parametersLoadError = true;
+      this.parametersLoading = false;
     });
   };
 
@@ -194,21 +226,22 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
 
   updateDashboard() {
     let updatedDashboard: updateDashboardDTO = this.presetsUtils.updateDashboardItems(this.dashboard, this.watchedItems);
+    this.isSaving = true;
     this.dashboardservice.updateDashboard(this.dashboard.id, updatedDashboard).subscribe((newDashboard: DashboardRO) => {
       this.dashboard = newDashboard;
-      this.isUpdatePopup = true;
+      this.isSaving = false;
+      this.toastr.success(`${this.watchedItems.length} parameters saved to the preset.`, newDashboard?.name ?? 'Preset saved');
     }, (error: HttpErrorResponse) => {
+      this.isSaving = false;
       if (error.error?.message != undefined) {
         console.log(error.error.message);
+        this.toastr.error(error.error.message, 'Preset not saved');
       } else {
         console.log("dashboard service is down!");
+        this.toastr.error('Dashboard service is unreachable. Your layout is still on screen; try saving again.', 'Preset not saved');
       }
     });
   };
-
-  updatePopupToggle() {
-    this.isUpdatePopup = !this.isUpdatePopup;
-  }
 
   async onGetPreset(eventData: DashboardRO) {
     this.dashboard = eventData;
@@ -226,6 +259,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.liveMessageSubscription?.unsubscribe();
     this.connectionStateSubscription?.unsubscribe();
+    this.linkStateSubscription?.unsubscribe();
     this.liveDataWebSocket.unsubscribe();
   }
 };

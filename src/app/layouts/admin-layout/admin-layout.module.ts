@@ -30,6 +30,7 @@ import { LiveAlertComponent } from '../../pages/live/charts/alert/live-alert.com
 import { LivePieComponent } from '../../pages/live/charts/pie/live-pie.component';
 import { LiveFocusComponent } from '../../pages/live/charts/focus/live-focus.component';
 import { LiveStripItemComponent } from '../../pages/live/charts/strip-item/live-strip-item.component';
+import { SafetyAnnunciatorComponent } from '../../pages/live/charts/annunciator/safety-annunciator.component';
 import { PresetManagerComponent } from '../../pages/live/preset-manager/preset-manager.component';
 import { ArchiveComponent } from '../../pages/archive/archive-manager/archive.component';
 import { MatNativeDateModule } from "@angular/material/core";
@@ -82,6 +83,7 @@ import { MatIconModule } from "@angular/material/icon"
     LivePieComponent,
     LiveFocusComponent,
     LiveStripItemComponent,
+    SafetyAnnunciatorComponent,
     PresetManagerComponent,
     ArchiveComponent,
     ArchiveChartComponent,
@@ -93,7 +95,7 @@ import { MatIconModule } from "@angular/material/icon"
     HomeComponent,
     AdminManagmentComponent
   ],
-  providers: [AuthGuardService]
+  providers: []
 })
 export class AdminLayoutModule {
 }

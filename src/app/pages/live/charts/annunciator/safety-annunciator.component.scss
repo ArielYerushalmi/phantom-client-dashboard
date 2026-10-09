@@ -1,0 +1,242 @@
+:host {
+    display: block;
+}
+
+.annunciator {
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+}
+
+.annunciator-head {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 7.5rem;
+}
+
+.feed {
+    --tone: var(--ph-text-lo);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ph-text-mid);
+    font-size: 0.72rem;
+    white-space: nowrap;
+
+    &--online { --tone: var(--ph-nominal); }
+    &--connecting { --tone: var(--ph-caution); }
+    &--offline { --tone: var(--ph-warning); }
+}
+
+.feed-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tone);
+}
+
+.feed--connecting .feed-dot {
+    animation: ph-pulse 0.8s var(--ph-ease-out) infinite;
+}
+
+.annunciator-count {
+    font-size: 0.68rem;
+    color: var(--ph-caution);
+}
+
+.lamps {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+// ---------------------------------------------------------------------------
+// Lamp
+// ---------------------------------------------------------------------------
+
+.lamp {
+    --tone: var(--ph-text-lo);
+    --tone-soft: transparent;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    height: 56px;
+    padding: 0 0.85rem;
+    overflow: hidden;
+    border: 1px solid var(--ph-line);
+    border-radius: var(--ph-r-sm);
+    background: var(--ph-bg-1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), inset 0 -8px 16px -12px rgba(0, 0, 0, 0.8);
+    color: var(--ph-text-lo);
+    text-align: left;
+    cursor: default;
+    transition:
+        background-color var(--ph-dur) var(--ph-ease-out),
+        border-color var(--ph-dur) var(--ph-ease-out),
+        box-shadow var(--ph-dur-slow) var(--ph-ease-out),
+        color var(--ph-dur) var(--ph-ease-out),
+        transform var(--ph-dur-fast) var(--ph-ease-out);
+
+    &--warning { --tone: var(--ph-warning); --tone-soft: var(--ph-warning-soft); }
+    &--caution { --tone: var(--ph-caution); --tone-soft: var(--ph-caution-soft); }
+    &--advisory { --tone: var(--ph-nominal); --tone-soft: var(--ph-nominal-soft); }
+
+    // Left severity rule, dim while normal.
+    &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 10px;
+        bottom: 10px;
+        width: 2px;
+        border-radius: 0 2px 2px 0;
+        background: var(--tone);
+        opacity: 0.25;
+        transition: opacity var(--ph-dur) var(--ph-ease-out), top var(--ph-dur) var(--ph-ease-out);
+    }
+
+    &.is-active {
+        border-color: var(--tone);
+        background: linear-gradient(90deg, var(--tone-soft), transparent 85%), var(--ph-bg-1);
+        box-shadow: 0 0 0 1px var(--tone-soft), 0 0 24px -6px var(--tone);
+        color: var(--ph-text-hi);
+        animation: lamp-latch var(--ph-dur-slow) var(--ph-ease-spring);
+
+        &::before {
+            opacity: 1;
+            top: 0;
+            bottom: 0;
+        }
+
+        .lamp-code {
+            color: var(--tone);
+            border-color: var(--tone);
+            text-shadow: 0 0 10px var(--tone);
+        }
+
+        .lamp-state {
+            color: var(--tone);
+        }
+    }
+
+    // Unacknowledged: flash plus a scan sweep, and clickable to acknowledge.
+    &.is-unack {
+        cursor: pointer;
+        animation: lamp-latch var(--ph-dur-slow) var(--ph-ease-spring), lamp-flash 1s steps(1, end) infinite;
+
+        &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, var(--tone-soft), transparent);
+            transform: translateX(-100%);
+            animation: lamp-scan 1.6s var(--ph-ease-out) infinite;
+            pointer-events: none;
+        }
+
+        &:hover {
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+    }
+
+    &.is-stale:not(.is-active) {
+        opacity: 0.55;
+    }
+}
+
+.lamp-code {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    min-width: 3.1rem;
+    height: 26px;
+    padding: 0 0.4rem;
+    border: 1px solid var(--ph-line-strong);
+    border-radius: var(--ph-r-xs);
+    color: var(--ph-text-lo);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    transition: color var(--ph-dur) var(--ph-ease-out), border-color var(--ph-dur) var(--ph-ease-out);
+}
+
+.lamp-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.lamp-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lamp-state {
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ph-text-lo);
+}
+
+@keyframes lamp-latch {
+    from {
+        transform: scale(0.97);
+        box-shadow: 0 0 0 0 var(--tone), 0 0 48px 4px var(--tone);
+    }
+}
+
+@keyframes lamp-flash {
+    50% {
+        border-color: var(--ph-line);
+        box-shadow: none;
+    }
+}
+
+@keyframes lamp-scan {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+@media (max-width: 1100px) {
+    .lamps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .annunciator {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .annunciator-head {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .lamp {
+        height: 50px;
+        gap: 0.5rem;
+    }
+
+    .lamp-code {
+        min-width: 2.6rem;
+    }
+}

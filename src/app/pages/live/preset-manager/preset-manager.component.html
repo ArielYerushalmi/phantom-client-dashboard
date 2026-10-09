@@ -1,116 +1,128 @@
-<div class="body">
-    <div class="empty-preset-container" *ngIf="dashboards.length == 0">
-        <img id="empty-camera-icon" src="./assets/img/new-empty-presets.png">
-    </div>
+<div class="presets ph-scroll">
 
-    <div class="overlay" *ngIf="presetPopUp">
-        <div class="update-popup">
-            <a class="close-popup" (click)="onPresetPopUpClick()">&times;</a>
-            <div class="update-popup-header">
-                <h2>Change Description Of Preset</h2>
-            </div>
-            <div class="update-popup-content">
-                <div class="popup-content">
-                    <mat-form-field appearance="fill">
-                        <input matInput type="text" required="" autocomplete="off" [formControl]="description"
-                            [(ngModel)]="presetDescription">
-                        <mat-label>New Description</mat-label>
-                        <mat-error *ngIf="description.hasError('required')">You Didn't Enter a
-                            Description</mat-error>
-                    </mat-form-field>
-                    <!-- <div class="user-box"> -->
-                    <!-- <input [(ngModel)]="presetDescription"> -->
-
-                    <!-- </div> -->
+    <!-- Edit description dialog -->
+    <div class="overlay" *ngIf="presetPopUp" (click)="onPresetPopUpClick()">
+        <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="desc-title" (click)="$event.stopPropagation()">
+            <header class="dialog-head">
+                <div>
+                    <span class="ph-eyebrow">Preset</span>
+                    <h2 class="dialog-title" id="desc-title">Edit description</h2>
                 </div>
-            </div>
-            <div class="update-popup-bottom">
-                <div class="update-buttons">
-                    <button class="delete-popup-btn" id="confirm-edit-btn"
-                        (click)="updateDescription(); onPresetPopUpClick()">Confirm</button>
-                </div>
-            </div>
+                <button type="button" class="ph-btn ph-btn--ghost ph-btn--icon" (click)="onPresetPopUpClick()" aria-label="Close">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </header>
+            <mat-form-field appearance="fill" class="dialog-field">
+                <mat-label>Description</mat-label>
+                <input matInput type="text" required autocomplete="off" [formControl]="description"
+                    [(ngModel)]="presetDescription">
+                <mat-error *ngIf="description.hasError('required')">Enter a description.</mat-error>
+            </mat-form-field>
+            <footer class="dialog-actions">
+                <button type="button" class="ph-btn ph-btn--ghost" (click)="onPresetPopUpClick()">Cancel</button>
+                <button type="button" class="ph-btn ph-btn--primary"
+                    (click)="updateDescription(); onPresetPopUpClick()">Save description</button>
+            </footer>
         </div>
     </div>
-    <div class="overlay" *ngIf="deletePopUp">
-        <div class="delete-popup">
-            <a class="close-popup" (click)="ondeletePopUpClick()">&times;</a>
-            <div class="delete-popup-header">
-                <h2>Delete Preset:</h2>
-                <h2 style="padding-left: 0.5rem;">{{this.dashboard.name}}</h2>
-                <!-- <span id="usernameID">{{this.dashboard.name}}</span> -->
-            </div>
-            <div class="delete-popup-content">
-                <div class="delete-alert-icon">
-                    <mat-icon style="font-size: 3rem;height: fit-content;width: fit-content;">error_outline</mat-icon>
+
+    <!-- Delete confirmation dialog -->
+    <div class="overlay" *ngIf="deletePopUp" (click)="ondeletePopUpClick()">
+        <div class="dialog dialog--danger" role="alertdialog" aria-modal="true" aria-labelledby="del-title" (click)="$event.stopPropagation()">
+            <header class="dialog-head">
+                <div>
+                    <span class="ph-eyebrow">Delete preset</span>
+                    <h2 class="dialog-title" id="del-title">{{ dashboard?.name }}</h2>
                 </div>
-            </div>
-            <div class="delete-popup-bottom">
-                <div class="delete-buttons">
-                    <button class="delete-popup-btn" id="cancel-btn" (click)="ondeletePopUpClick()">Cancel</button>
-                    <button class="delete-popup-btn" id="confirm-btn"
-                        (click)="ondeletePopUpClick(); deletePreset()">Confirm</button>
-                </div>
-            </div>
+            </header>
+            <p class="dialog-copy">This removes the preset and its {{ dashboard?.items?.length || 0 }} saved parameters
+                for every operator. Recorded telemetry is not affected.</p>
+            <footer class="dialog-actions">
+                <button type="button" class="ph-btn ph-btn--ghost" (click)="ondeletePopUpClick()">Keep it</button>
+                <button type="button" class="ph-btn danger-solid" (click)="ondeletePopUpClick(); deletePreset()">Delete preset</button>
+            </footer>
         </div>
     </div>
-    <mat-icon id="back-to-filter-icon" *ngIf="!IsLive" style="cursor: pointer;" (click)="onGotoFilterPage()">keyboard_backspace</mat-icon>
-    <div class="preset-container-body">
-        <div *ngFor=" let dashboard of dashboards let i=index" class="preset-item">
-            <div class="preset-item-container">
-                <div class="preset-top">
-                    <mat-icon style="cursor: pointer;"
-                        (click)="ondeletePopUpClick(dashboard);">delete_outline</mat-icon>
-                    <span class="preset-name">{{dashboard.name}}</span>
-                    <mat-icon style="cursor: pointer;"
-                        (click)="getPresetDescription(dashboard); onPresetPopUpClick()">error_outline</mat-icon>
-                </div>
-                <div class="border-line"></div>
-                <div class="preset-body-container">
-                    <div class="preset-body">
-                        <ng-container *ngFor="let item of dashboard.items; let itemId = index">
-                            <span *ngIf="5>itemId" class="parameter">
-                                {{item.parameter.parameterName}}
-                            </span>
-                            <span *ngIf="itemId>=5 && toggledDashboards[i]" class="parameter">
-                                {{item.parameter.parameterName}}
-                            </span>
 
-                        </ng-container>
+    <header class="presets-head">
+        <div class="presets-title">
+            <button type="button" class="ph-btn ph-btn--ghost back-btn" *ngIf="!IsLive" (click)="onGotoFilterPage()">
+                <mat-icon>arrow_back</mat-icon>Back
+            </button>
+            <span class="ph-eyebrow">{{ IsLive ? 'Live' : 'Archive' }} presets</span>
+            <h1 class="presets-heading">Choose a preset</h1>
+            <p class="presets-sub">A preset is a saved set of parameters. Open one to start watching, or create a new one.</p>
+        </div>
 
-                        <!-- <div class="expandCollapseContent" *ngIf="toggledDashboards[i]">
-                            <div>
-                                <h5>Toggled</h5>
-                            </div>
-                        </div> -->
-                        <div class="expandCollapse" *ngIf="dashboard.items.length>5">
-                            <span class="show-more-button" (click)="toggle(i)">
-                                {{!toggledDashboards[i] ? 'more...' : 'less'}}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="preset-bottom">
-                    <span class="bottom-text" (click)="goToPreset(dashboard)"> Go to
-                        preset</span>
-                </div>
+        <form class="create" (ngSubmit)="createPreset()" autocomplete="off">
+            <label class="ph-eyebrow" for="create-preset-input">New preset</label>
+            <div class="create-row">
+                <input id="create-preset-input" class="ph-input" type="text" [(ngModel)]="presetName" name="create-preset"
+                    placeholder="e.g. Approach checks" [class.is-invalid]="!isCreatePresetValid" maxlength="40">
+                <button type="submit" class="ph-btn ph-btn--primary">
+                    <mat-icon>add</mat-icon>Create
+                </button>
             </div>
+            <span class="create-error" *ngIf="!isCreatePresetValid">Enter a short name (about 12 characters max).</span>
+        </form>
+    </header>
+
+    <div class="grid" *ngIf="isLoading">
+        <div class="preset-card preset-card--skeleton" *ngFor="let s of [1,2,3]">
+            <span class="ph-skeleton sk-title"></span>
+            <span class="ph-skeleton sk-line"></span>
+            <span class="chips"><span class="ph-skeleton chip-skel" *ngFor="let c of [1,2,3,4]"></span></span>
         </div>
     </div>
-    <div class="create-preset-container-body">
-        <div class="create-preset-container">
-            <div class="create-preset-top">
-                <span class="preset-name">Create Preset</span>
+
+    <div class="state state--error" *ngIf="!isLoading && loadError">
+        <p class="state-title">Couldn't reach the dashboard service</p>
+        <p class="state-sub">Presets load from the dashboard manager. Check that it's running, then try again.</p>
+        <button type="button" class="ph-btn" (click)="onGetAllDashboards()"><mat-icon>refresh</mat-icon>Try again</button>
+    </div>
+
+    <div class="state" *ngIf="!isLoading && !loadError && dashboards.length === 0">
+        <p class="state-title">No presets yet</p>
+        <p class="state-sub">Name your first preset above. You'll pick its parameters on the next screen.</p>
+    </div>
+
+    <div class="grid" *ngIf="!isLoading && dashboards.length > 0">
+        <article *ngFor="let dashboard of dashboards; let i = index" class="preset-card ph-enter" [style.animation-delay.ms]="i * 45">
+            <header class="card-head">
+                <h2 class="card-name">{{ dashboard.name }}</h2>
+                <div class="card-tools">
+                    <button type="button" class="ph-btn ph-btn--ghost ph-btn--icon" title="Edit description"
+                        [attr.aria-label]="'Edit description of ' + dashboard.name"
+                        (click)="getPresetDescription(dashboard); onPresetPopUpClick()">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button type="button" class="ph-btn ph-btn--ghost ph-btn--icon tool-danger" title="Delete preset"
+                        [attr.aria-label]="'Delete ' + dashboard.name" (click)="ondeletePopUpClick(dashboard)">
+                        <mat-icon>delete_outline</mat-icon>
+                    </button>
+                </div>
+            </header>
+            <p class="card-desc" *ngIf="dashboard.description">{{ dashboard.description }}</p>
+
+            <div class="chips">
+                <ng-container *ngFor="let item of dashboard.items; let itemId = index">
+                    <span class="chip" *ngIf="itemId < 5 || toggledDashboards[i]">{{ item.parameter.parameterName }}</span>
+                </ng-container>
+                <button type="button" class="chip chip--more" *ngIf="dashboard.items.length > 5" (click)="toggle(i)">
+                    {{ toggledDashboards[i] ? 'Show less' : '+' + (dashboard.items.length - 5) + ' more' }}
+                </button>
+                <span class="chip chip--empty" *ngIf="dashboard.items.length === 0">No parameters yet</span>
             </div>
-            <div class="create-preset-body">
-                <input id="creat-preset-input" type="text" required="" autocomplete="off" [(ngModel)]="presetName"
-                    name="create-preset">
-                <mat-icon class="btn-add" style="color: #ccc;" (click)="createPreset()">add</mat-icon>
-            </div>
-            <span class="create-preset-error" *ngIf="!isCreatePresetValid">Name Is Not Valid</span>
-            <!-- <div class="create-preset-bottom">
-                <button mat-raised-button color="primary" (click)="createPreset()">Create</button>
-            </div> -->
-        </div>
+
+            <footer class="card-foot">
+                <span class="card-count telemetry-value">{{ dashboard.items.length }} params</span>
+                <button type="button" class="open-btn" (click)="goToPreset(dashboard)">
+                    Open preset
+                    <span class="open-btn-icon" aria-hidden="true">
+                        <svg viewBox="0 0 16 16"><path d="M5 11 11 5M6 5h5v5" /></svg>
+                    </span>
+                </button>
+            </footer>
+        </article>
     </div>
 </div>

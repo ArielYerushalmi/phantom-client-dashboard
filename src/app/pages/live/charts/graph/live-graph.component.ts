@@ -20,7 +20,7 @@ export class ChartsTryComponent implements OnInit, OnDestroy {
   showXAxisLabel: boolean = false;
   showYAxisLabel: boolean = true;
   colorScheme = {
-    domain: ['#5b8a8f']
+    domain: ['#56b6c6']
   }
 
 
@@ -56,7 +56,7 @@ export class ChartsTryComponent implements OnInit, OnDestroy {
   }
 
   public formatTime(date: Date): string {
-    return date.toLocaleTimeString();
+    return date.toLocaleTimeString([], { hour12: false });
   }
 
 }

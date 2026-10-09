@@ -1,85 +1,123 @@
-<div class="body">
-    <div class="status-banner status-banner-warning" *ngIf="wsDisconnected">
-        <mat-icon class="status-banner-icon">wifi_off</mat-icon>
-        Live data connection lost - trying to reconnect...
+<div class="live-page">
+    <div class="link-banner" *ngIf="link.phase === 'reconnecting' || link.phase === 'lost'"
+        [ngClass]="'link-banner--' + link.phase" role="alert">
+        <ng-container *ngIf="link.phase === 'reconnecting'">
+            <span class="link-banner-dot"></span>
+            <span class="link-banner-text">Telemetry link dropped. Reconnecting
+                <span class="telemetry-value">{{ link.attempt }}/{{ link.maxAttempts }}</span></span>
+            <!-- ngFor over [attempt] restarts the countdown bar on every retry -->
+            <span class="link-banner-progress" *ngFor="let a of [link.attempt]"
+                [style.animation-duration.ms]="link.retryInMs"></span>
+        </ng-container>
+        <ng-container *ngIf="link.phase === 'lost'">
+            <span class="link-banner-dot"></span>
+            <span class="link-banner-text">Telemetry link lost after {{ link.maxAttempts }} attempts. Values below are frozen.</span>
+            <button type="button" class="ph-btn link-banner-retry" (click)="retryLink()">Reconnect</button>
+        </ng-container>
     </div>
-    <div class="live-dashboard-container" *ngIf="dashboard===null">
-        <app-preset-manager class="live-preset-continer" [IsLive]="IsLive" (presetEvent)="onGetPreset($event)"
+
+    <div class="live-presets" *ngIf="dashboard===null">
+        <app-preset-manager class="live-presets-inner" [IsLive]="IsLive" (presetEvent)="onGetPreset($event)"
             (createPresetEvent)="createPreset($event)"></app-preset-manager>
     </div>
 
+    <div class="live-session" *ngIf="dashboard">
+        <header class="toolbar">
+            <button type="button" class="ph-btn ph-btn--ghost toolbar-back" (click)="onGotoPresetManager()"
+                title="Back to presets">
+                <mat-icon>arrow_back</mat-icon>
+                <span class="hide-sm">Presets</span>
+            </button>
 
-    <div class="live-dashboard-container" *ngIf="dashboard">
-        <div class="overlay" *ngIf="isUpdatePopup">
-            <div class="confirm-popup">
-                <div class="confirm-popup-header">
-                    <h2>Dashboard Updated</h2>
-                </div>
-                <div class="popup-content">
-                    <mat-icon class="alert-icon">check_circle_outline</mat-icon>
-                </div>
-                <div class="popup-bottom">
-                    <button class="popup-btn" id="confirm-btn" (click)="updatePopupToggle()">Confirm</button>
-                </div>
+            <div class="toolbar-title">
+                <span class="ph-eyebrow">Live preset</span>
+                <h1 class="toolbar-name">{{ dashboard.name }}</h1>
             </div>
-        </div>
-        <div class="dashboard-container">
-            <div class="dashboard-container-head">
-                <div class="headline-content">
-                    <div class="headline-content-left">
-                        <mat-icon style="cursor: pointer;" (click)="onGotoPresetManager()">apps</mat-icon>
-                        <span class="live-indicator" *ngIf="!wsDisconnected">
-                            <span class="live-dot"></span>LIVE
-                        </span>
-                    </div>
-                    <div class="headline-content-right">
-                        <mat-icon style="cursor: pointer;" (click)="updateDashboard()">save</mat-icon>
-                        <mat-icon style="cursor: pointer;" (click)="drawer.toggle()">menu</mat-icon>
-                    </div>
-                </div>
-            </div>
-            <div class="dashboard-container-body">
-                <mat-drawer-container class="mat-drawer-container" [hasBackdrop]="true">
-                    <mat-drawer #drawer mode="'over'" class="mat-drawer" position="end">
-                        <div class="drawer-empty-state" *ngIf="parametersLoadError">
-                            Parameter service is unavailable. Try again later.
-                        </div>
-                        <div class="drawer-empty-state" *ngIf="!parametersLoadError && parameters.length===0">
-                            No parameters available.
-                        </div>
-                        <div *ngFor="let parameter of parameters; let i = index" class="mat-drawer-parameters">
-                            <span class="parameterText"
-                                [ngClass]="isParameterUsed(parameter) ? 'usedParameter' : 'notUsedParameter'"
-                                (click)="onParameterSelected(parameter);">
-                                {{parameter.parameterName}}
-                            </span>
-                        </div>
-                    </mat-drawer>
-                    <mat-drawer-content class="mat-darawer-content">
-                        <div class="instrument-panel">
-                            <div class="empty-state" *ngIf="watchedItems.length === 0">
-                                <mat-icon class="empty-state-icon">sensors_off</mat-icon>
-                                <p class="empty-state-title">No parameters watched</p>
-                                <p class="empty-state-hint">Open the parameter list (menu icon, top right) to add one.
-                                </p>
-                            </div>
 
-                            <ng-container *ngIf="focusedItem">
-                                <div class="focus-slot">
-                                    <app-live-focus [entity]="focusedItem.chart"></app-live-focus>
-                                </div>
-                                <div class="strip" *ngIf="stripItems.length > 0">
-                                    <app-live-strip-item *ngFor="let stripItem of stripItems"
-                                        [entity]="stripItem.chart"
-                                        (focus)="promoteToFocus(stripItem.chart.parameter.parameterName)"
-                                        (remove)="onRemove(stripItem.chart.parameter)">
-                                    </app-live-strip-item>
-                                </div>
-                            </ng-container>
-                        </div>
-                    </mat-drawer-content>
-                </mat-drawer-container>
+            <span class="live-badge" [ngClass]="'live-badge--' + link.phase">
+                <span class="live-badge-dot"></span>{{ link.phase === 'live' ? 'Live' : link.phase === 'lost' ? 'Frozen' : 'Standby' }}
+            </span>
+
+            <div class="toolbar-actions">
+                <button type="button" class="ph-btn" (click)="drawer.toggle()" [attr.aria-expanded]="drawer.opened">
+                    <mat-icon>tune</mat-icon>
+                    <span class="hide-sm">Parameters</span>
+                    <span class="count telemetry-value">{{ watchedItems.length }}</span>
+                </button>
+                <button type="button" class="ph-btn ph-btn--primary" (click)="updateDashboard()" [disabled]="isSaving">
+                    <mat-icon>{{ isSaving ? 'sync' : 'save' }}</mat-icon>
+                    <span class="hide-sm">{{ isSaving ? 'Saving' : 'Save' }}</span>
+                </button>
             </div>
-        </div>
+        </header>
+
+        <app-safety-annunciator class="annunciator-row"></app-safety-annunciator>
+
+        <mat-drawer-container class="session-body" [hasBackdrop]="true">
+            <mat-drawer #drawer mode="over" class="param-drawer" position="end">
+                <div class="param-drawer-head">
+                    <div>
+                        <span class="ph-eyebrow">Parameters</span>
+                        <p class="param-drawer-sub">{{ watchedItems.length }} of {{ parameters.length }} watched</p>
+                    </div>
+                    <button type="button" class="ph-btn ph-btn--ghost ph-btn--icon" (click)="drawer.close()"
+                        aria-label="Close parameter list">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
+                <input class="ph-input param-search" type="search" placeholder="Filter parameters"
+                    [(ngModel)]="parameterFilter" aria-label="Filter parameters">
+
+                <div class="param-list ph-scroll">
+                    <div class="drawer-empty-state" *ngIf="parametersLoadError">
+                        Parameter service is unavailable. Try again later.
+                    </div>
+                    <ng-container *ngIf="!parametersLoadError && parametersLoading">
+                        <div class="param-skeleton ph-skeleton" *ngFor="let s of [1,2,3,4,5,6]"></div>
+                    </ng-container>
+                    <div class="drawer-empty-state"
+                        *ngIf="!parametersLoadError && !parametersLoading && filteredParameters.length===0">
+                        {{ parameters.length === 0 ? 'No parameters available.' : 'No parameter matches “' + parameterFilter + '”.' }}
+                    </div>
+                    <button type="button" *ngFor="let parameter of filteredParameters; trackBy: trackByParameterId"
+                        class="param-row" [class.is-on]="isParameterUsed(parameter)"
+                        (click)="onParameterSelected(parameter)" [attr.aria-pressed]="isParameterUsed(parameter)">
+                        <span class="param-check" aria-hidden="true"></span>
+                        <span class="param-name">{{ parameter.parameterName }}</span>
+                        <span class="param-units telemetry-value" *ngIf="parameter.units">{{ parameter.units }}</span>
+                    </button>
+                </div>
+            </mat-drawer>
+
+            <mat-drawer-content class="session-content">
+                <div class="instrument-panel">
+                    <div class="empty-state" *ngIf="watchedItems.length === 0">
+                        <svg class="empty-state-art" viewBox="0 0 120 64" aria-hidden="true">
+                            <path d="M2 48 C 22 48, 26 20, 44 20 S 70 44, 86 32 S 108 12, 118 14" />
+                            <line x1="2" y1="58" x2="118" y2="58" />
+                        </svg>
+                        <p class="empty-state-title">No parameters on this preset yet</p>
+                        <p class="empty-state-hint">Pick the readouts you want to watch. The first one you add becomes
+                            the focus instrument.</p>
+                        <button type="button" class="ph-btn ph-btn--primary" (click)="drawer.open()">
+                            <mat-icon>add</mat-icon>Add parameters
+                        </button>
+                    </div>
+
+                    <ng-container *ngIf="focusedItem">
+                        <div class="focus-slot ph-panel" [class.is-stale]="link.phase === 'lost'">
+                            <app-live-focus [entity]="focusedItem.chart"></app-live-focus>
+                        </div>
+                        <div class="strip ph-scroll" *ngIf="stripItems.length > 0">
+                            <app-live-strip-item class="ph-enter" *ngFor="let stripItem of stripItems; let i = index; trackBy: trackByWatched"
+                                [style.animation-delay.ms]="i * 40" [entity]="stripItem.chart"
+                                (focus)="promoteToFocus(stripItem.chart.parameter.parameterName)"
+                                (remove)="onRemove(stripItem.chart.parameter)">
+                            </app-live-strip-item>
+                        </div>
+                    </ng-container>
+                </div>
+            </mat-drawer-content>
+        </mat-drawer-container>
     </div>
 </div>

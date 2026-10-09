@@ -7,7 +7,7 @@ import { Role } from 'src/app/common/enums/role.enum';
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css']
+  styleUrls: ['../auth.scss']
 })
 
 @Injectable()
@@ -20,7 +20,7 @@ export class RegisterComponent implements OnInit {
 
   selects: Array<{ type: Role, name: string }> =
     [
-      { type: Role.Debrifer, name: 'Debrifer' },
+      { type: Role.Debrifer, name: 'Debriefer' },
       { type: Role.Pilot, name: 'Pilot' }
     ];
 

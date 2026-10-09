@@ -59,12 +59,14 @@ export class LiveGaugeComponent implements OnInit, OnDestroy {
   setGaugeSettings() {
     this.gaugeAppendText = this.entity.parameter.units;
     let range = this.entity.parameter.maximum - this.entity.parameter.minimum;
+    // Same bands as ../envelope.ts, in the annunciator palette (--ph-warning /
+    // --ph-caution / --ph-nominal); ngx-gauge paints to canvas so it needs literal colours.
     this.thresholdConfig = {
-      [this.entity.parameter.minimum]: { color: 'red' },
-      [(0.1 * range) + this.entity.parameter.minimum]: { color: 'yellow' },
-      [(0.25 * range) + this.entity.parameter.minimum]: { color: 'green' },
-      [(0.75 * range) + this.entity.parameter.minimum]: { color: 'yellow' },
-      [(0.9 * range) + this.entity.parameter.minimum]: { color: 'red' },
+      [this.entity.parameter.minimum]: { color: '#ec4d4d' },
+      [(0.1 * range) + this.entity.parameter.minimum]: { color: '#e5a33a' },
+      [(0.25 * range) + this.entity.parameter.minimum]: { color: '#46c08a' },
+      [(0.75 * range) + this.entity.parameter.minimum]: { color: '#e5a33a' },
+      [(0.9 * range) + this.entity.parameter.minimum]: { color: '#ec4d4d' },
     }
   }
 }

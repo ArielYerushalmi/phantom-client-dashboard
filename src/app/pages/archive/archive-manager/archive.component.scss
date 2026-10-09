@@ -1,19 +1,16 @@
+// Fills the viewport below the fixed command bar (var(--ph-bar-h)).
+.body {
+    position: fixed;
+    top: var(--ph-bar-h);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    overflow: hidden;
+    background-color: var(--ph-bg-0);
+}
+
 .archive-container {
     height: 100%;
     width: 100%;
-}
-
-// Previously reserved a 10% column for a page-local <app-sidebar> and
-// offset for the old fixed navbar height; the sidebar is gone (navigation
-// now lives in the shell's command bar) so this fills the full width,
-// recalibrated to the command bar's fixed 64px height (see
-// navbar.component.scss).
-.body {
-    width: 100%;
-    display: flex;
-    top: 64px;
-    position: fixed;
-    height: calc(100% - 64px);
-    overflow: auto;
-    background-color: #14161c;
 }

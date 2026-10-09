@@ -1,81 +1,301 @@
-// Matches the fixed-viewport-fill convention the other top-level pages
-// (live-dashboard, archive, admin-managment) use below the command bar:
-// position:fixed with a top offset equal to the bar's fixed 64px height
-// (see navbar.component.scss), rather than flowing in normal document scroll.
-.home-container {
-    width: 100%;
-    top: 64px;
+// Fills the viewport below the fixed command bar (var(--ph-bar-h)).
+.home {
     position: fixed;
-    height: calc(100% - 64px);
+    top: var(--ph-bar-h);
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: auto;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
     align-items: center;
-    justify-content: center;
-    padding: 2rem 1.5rem;
-    background-color: #0f1214;
+    gap: clamp(2rem, 6vw, 6rem);
+    padding: clamp(2rem, 6vw, 5rem) clamp(1rem, 7vw, 7rem);
+    box-sizing: border-box;
+    background-color: var(--ph-bg-0);
+    background-image:
+        radial-gradient(60% 70% at 15% 40%, rgba(86, 182, 198, 0.07), transparent 70%),
+        linear-gradient(var(--ph-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--ph-line) 1px, transparent 1px);
+    background-size: 100% 100%, 32px 32px, 32px 32px;
 }
 
-.home-panel {
-    width: 100%;
-    max-width: 46rem;
-    background-color: #181c1f;
-    border: 1px solid #2a3134;
-    padding: 2.5rem;
+// ---------------------------------------------------------------------------
+// Intro
+// ---------------------------------------------------------------------------
+
+.home-intro {
+    max-width: 38rem;
+    animation: ph-rise var(--ph-dur-slow) var(--ph-ease-spring) both;
 }
 
 .home-eyebrow {
-    margin: 0 0 0.5rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: #5b8a8f;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 1.5rem;
+    padding: 5px 10px;
+    border: 1px solid var(--ph-line-strong);
+    border-radius: var(--ph-r-xs);
+    color: var(--ph-text-mid);
+}
+
+.home-eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background: var(--ph-accent);
+    box-shadow: 0 0 8px var(--ph-accent);
 }
 
 .home-heading {
-    margin: 0 0 0.5rem;
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: #e8e6e1;
+    margin: 0 0 1.25rem;
+    font-size: clamp(2.4rem, 5vw, 4.25rem);
+    font-weight: 500;
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    color: var(--ph-text-hi);
+    text-wrap: balance;
 }
 
-.home-subheading {
-    margin: 0 0 2rem;
-    color: #8b9296;
-    font-size: 0.95rem;
+.home-name {
+    color: var(--ph-accent-strong);
 }
 
-.home-links {
+.home-sub {
+    max-width: 44ch;
+    margin: 0 0 2.5rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ph-text-mid);
+
+    strong {
+        font-weight: 600;
+        color: var(--ph-text-hi);
+    }
+}
+
+// Systems board: three readouts separated by hairlines.
+.systems {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-    gap: 1px;
-    background-color: #2a3134;
-    border: 1px solid #2a3134;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    border-top: 1px solid var(--ph-line-strong);
 }
 
-.home-link {
+.system {
+    --tone: var(--ph-text-lo);
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    padding: 1.25rem;
-    background-color: #181c1f;
+    gap: 0.5rem;
+    padding: 1rem 1rem 0 0;
+
+    & + & {
+        padding-left: 1rem;
+        border-left: 1px solid var(--ph-line);
+    }
+
+    dd {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--ph-text-hi);
+    }
+
+    &--live,
+    &--online { --tone: var(--ph-nominal); }
+    &--connecting,
+    &--reconnecting { --tone: var(--ph-caution); }
+    &--lost,
+    &--offline,
+    &--alert { --tone: var(--ph-warning); }
+}
+
+.system-dot {
+    flex: 0 0 auto;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--tone);
+}
+
+.system--live .system-dot,
+.system--online .system-dot {
+    box-shadow: 0 0 0 3px var(--ph-nominal-soft);
+}
+
+.system--alert .system-dot {
+    animation: ph-pulse 0.9s var(--ph-ease-out) infinite;
+}
+
+.system-codes {
+    display: inline-flex;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+
+    span {
+        padding: 1px 5px;
+        border: 1px solid currentColor;
+        border-radius: 2px;
+    }
+
+    .code--warning { color: var(--ph-warning); }
+    .code--caution { color: var(--ph-caution); }
+    .code--advisory { color: var(--ph-nominal); }
+}
+
+// ---------------------------------------------------------------------------
+// Channel cards
+// ---------------------------------------------------------------------------
+
+.home-channels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.channel-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.35rem 1.25rem 1.35rem 1.4rem;
+    overflow: hidden;
+    border: 1px solid var(--ph-line);
+    border-radius: var(--ph-r-lg);
+    background: linear-gradient(180deg, var(--ph-bg-2), var(--ph-bg-1));
+    box-shadow: var(--ph-highlight), var(--ph-shadow-1);
     text-decoration: none;
-    transition: background-color 0.15s ease;
+    transition:
+        border-color var(--ph-dur) var(--ph-ease-out),
+        transform var(--ph-dur-slow) var(--ph-ease-spring),
+        box-shadow var(--ph-dur) var(--ph-ease-out);
+
+    // Accent wash that slides in from the left on hover.
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, var(--ph-accent-soft), transparent 70%);
+        opacity: 0;
+        transform: translateX(-12%);
+        transition: opacity var(--ph-dur-slow) var(--ph-ease-out), transform var(--ph-dur-slow) var(--ph-ease-spring);
+        pointer-events: none;
+    }
+
+    &:hover,
+    &:focus-visible {
+        text-decoration: none;
+        border-color: var(--ph-accent-line);
+        transform: translateX(4px);
+        box-shadow: var(--ph-highlight), var(--ph-shadow-2);
+
+        &::before {
+            opacity: 1;
+            transform: none;
+        }
+
+        .channel-go {
+            background: var(--ph-accent);
+            border-color: var(--ph-accent);
+            color: #061316;
+
+            svg {
+                transform: translate(1px, -1px) scale(1.05);
+            }
+        }
+
+        .channel-index {
+            color: var(--ph-accent-strong);
+        }
+    }
+
+    &:active {
+        transform: translateX(4px) scale(0.99);
+    }
 }
 
-.home-link:hover {
-    background-color: #1e2327;
+.channel-index {
+    position: relative;
+    flex: 0 0 auto;
+    font-size: 0.72rem;
+    color: var(--ph-text-lo);
+    transition: color var(--ph-dur) var(--ph-ease-out);
 }
 
-.home-link-label {
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #e8e6e1;
+.channel-body {
+    position: relative;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
 }
 
-.home-link-description {
-    font-size: 0.8rem;
-    color: #8b9296;
+.channel-label {
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--ph-text-hi);
+}
+
+.channel-description {
+    font-size: 0.83rem;
+    line-height: 1.45;
+    color: var(--ph-text-mid);
+}
+
+.channel-go {
+    position: relative;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--ph-line-strong);
+    border-radius: 50%;
+    color: var(--ph-text-mid);
+    transition: background-color var(--ph-dur) var(--ph-ease-out), border-color var(--ph-dur) var(--ph-ease-out),
+        color var(--ph-dur) var(--ph-ease-out);
+
+    svg {
+        width: 15px;
+        height: 15px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transition: transform var(--ph-dur) var(--ph-ease-spring);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Responsive
+// ---------------------------------------------------------------------------
+
+@media (max-width: 900px) {
+    .home {
+        grid-template-columns: 1fr;
+        align-content: start;
+        gap: 2rem;
+        padding: 2rem 1rem;
+    }
+
+    .systems {
+        grid-template-columns: 1fr;
+    }
+
+    .system + .system {
+        padding-left: 0;
+        border-left: 0;
+        border-top: 1px solid var(--ph-line);
+    }
+
+    .system {
+        padding-bottom: 1rem;
+    }
 }

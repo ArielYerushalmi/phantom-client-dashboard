@@ -1,38 +1,44 @@
 <div class="range-bar">
 
     <div class="range-summary" *ngIf="!expanded && confirmedRange">
-        <span class="range-summary-label">Range</span>
-        <span class="range-summary-value telemetry-value">{{confirmedRange.startTime | date:'MMM d, y HH:mm'}}
-            &rarr; {{confirmedRange.endTime | date:'MMM d, y HH:mm'}}</span>
-        <span class="range-summary-count telemetry-value">{{confirmedRange.totalFrames | number}} frames</span>
-        <button type="button" class="change-btn" (click)="onChangeRange()">Change</button>
+        <span class="ph-eyebrow">Range</span>
+        <span class="range-summary-value telemetry-value">
+            {{ confirmedRange.startTime | date:'MMM d, HH:mm' }}
+            <span class="range-arrow">→</span>
+            {{ confirmedRange.endTime | date:'MMM d, HH:mm' }}
+        </span>
+        <span class="range-summary-count telemetry-value">{{ confirmedRange.totalFrames | number }} frames</span>
+        <button type="button" class="ph-btn ph-btn--ghost change-btn" (click)="onChangeRange()">Change</button>
     </div>
 
     <div class="range-form" *ngIf="expanded">
         <div class="range-form-fields">
             <label class="field">
-                <span class="field-label">Start</span>
-                <input type="datetime-local" [(ngModel)]="inputStartTime">
+                <span class="ph-eyebrow">Start</span>
+                <input class="ph-input" type="datetime-local" [(ngModel)]="inputStartTime"
+                    [class.is-invalid]="!isTimeValid">
             </label>
             <label class="field">
-                <span class="field-label">End</span>
-                <input type="datetime-local" [(ngModel)]="inputEndTime">
+                <span class="ph-eyebrow">End</span>
+                <input class="ph-input" type="datetime-local" [(ngModel)]="inputEndTime"
+                    [class.is-invalid]="!isTimeValid">
             </label>
-            <button type="button" id="confirm-btn" [disabled]="isLoading" (click)="onConfirm()">
-                {{isLoading ? 'Loading...' : 'Load Range'}}
+
+            <div class="range-presets" role="group" aria-label="Quick range">
+                <button type="button" class="preset-chip" *ngFor="let preset of quickPresets"
+                    (click)="applyPreset(preset)">{{ preset.label }}</button>
+            </div>
+
+            <button type="button" class="ph-btn ph-btn--primary load-btn" [disabled]="isLoading" (click)="onConfirm()">
+                <span class="spinner" *ngIf="isLoading" aria-hidden="true"></span>
+                {{ isLoading ? 'Loading' : 'Load range' }}
             </button>
         </div>
 
-        <div class="range-presets">
-            <span class="presets-label">Quick range:</span>
-            <button type="button" class="preset-chip" *ngFor="let preset of quickPresets"
-                (click)="applyPreset(preset)">{{preset.label}}</button>
-        </div>
-
-        <div class="range-message error" *ngIf="!isTimeValid">Enter a valid start time before the end time.</div>
+        <div class="range-message error" *ngIf="!isTimeValid">Start time must be before the end time.</div>
         <div class="range-message error" *ngIf="loadError">Archive service is unavailable. Try again later.</div>
         <div class="range-message warning" *ngIf="noDataInRange">
-            No frames found in that range. The archive has gaps - try a wider or different window.
+            No frames in that range. The archive has gaps; try a wider or different window.
         </div>
     </div>
 

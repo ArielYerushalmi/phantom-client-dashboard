@@ -33,7 +33,8 @@ import {MatFormFieldModule} from '@angular/material/form-field';
     NgxGaugeModule,
     NgxChartsModule,
     AppRoutingModule,
-    ToastrModule.forRoot(),
+    // Bottom-right keeps toasts clear of the command bar and page toolbars (Save, Parameters).
+    ToastrModule.forRoot({ positionClass: 'toast-bottom-right', maxOpened: 4 }),
   ],
   declarations: [AppComponent, AdminLayoutComponent, LoginComponent, RegisterComponent],
   providers: [],

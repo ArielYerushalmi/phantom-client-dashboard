@@ -1,22 +1,50 @@
 <header class="command-bar">
-  <a class="command-bar-brand" routerLink="/home">
-    <span class="brand-word">PHANTOM</span>
+  <a class="brand" routerLink="/home" aria-label="Phantom home">
+    <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2.5 21 20.5 12 16.2 3 20.5Z" />
+    </svg>
+    <span class="brand-text">
+      <span class="brand-word">Phantom</span>
+      <span class="brand-sub">Ground control</span>
+    </span>
   </a>
 
-  <nav class="channel-strip" aria-label="Primary">
-    <a *ngFor="let channel of channels" class="channel" [routerLink]="[channel.path]" routerLinkActive="channel-active">
+  <nav class="channels" aria-label="Primary">
+    <a *ngFor="let channel of channels" class="channel" [routerLink]="[channel.path]" routerLinkActive="is-active"
+      #rla="routerLinkActive" [attr.aria-current]="rla.isActive ? 'page' : null">
       {{ channel.label }}
     </a>
   </nav>
 
-  <div class="command-bar-status" [ngClass]="connectionActive ? 'is-live' : 'is-offline'"
-    title="Live telemetry connection status">
-    <span class="status-dot"></span>
-    <span class="status-text">{{ connectionLabel }}</span>
+  <div class="instruments">
+    <button type="button" class="master master--warning" [class.is-lit]="master.warning"
+      [class.is-flashing]="master.warning && master.unacknowledged" (click)="onMasterClick()"
+      [attr.aria-pressed]="master.warning" title="Master warning - click to acknowledge and open Live">
+      <span class="master-top">Master</span>
+      <span class="master-bottom">Warn</span>
+    </button>
+    <button type="button" class="master master--caution" [class.is-lit]="master.caution"
+      [class.is-flashing]="master.caution && master.unacknowledged" (click)="onMasterClick()"
+      [attr.aria-pressed]="master.caution" title="Master caution - click to acknowledge and open Live">
+      <span class="master-top">Master</span>
+      <span class="master-bottom">Caut</span>
+    </button>
+
+    <div class="link" [ngClass]="'link--' + link.phase" role="status" aria-live="polite"
+      [title]="'Live telemetry link: ' + linkLabel">
+      <span class="link-dot"><span class="link-ring"></span></span>
+      <span class="link-text">{{ linkLabel }}</span>
+    </div>
+
+    <div class="clock" title="Mission clock (UTC)">
+      <span class="clock-time telemetry-value">{{ utcTime }}</span>
+      <span class="clock-zone">UTC</span>
+    </div>
   </div>
 
-  <div class="command-bar-session">
+  <div class="session">
+    <span class="session-avatar" *ngIf="username" aria-hidden="true">{{ username.charAt(0) }}</span>
     <span class="session-user" *ngIf="username">{{ username }}</span>
-    <button type="button" class="session-logout" (click)="logout()">Logout</button>
+    <button type="button" class="ph-btn ph-btn--ghost session-logout" (click)="logout()">Sign out</button>
   </div>
 </header>

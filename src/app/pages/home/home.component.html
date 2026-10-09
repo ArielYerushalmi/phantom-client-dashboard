@@ -1,14 +1,47 @@
-<div class="home-container">
-    <div class="home-panel">
-        <p class="home-eyebrow">PHANTOM GROUND CONTROL</p>
-        <h1 class="home-heading">Welcome<span *ngIf="username">, {{ username }}</span></h1>
-        <p class="home-subheading">Select a channel above to continue.</p>
+<main class="home">
+    <section class="home-intro">
+        <p class="ph-eyebrow home-eyebrow">
+            <span class="home-eyebrow-dot"></span>Phantom ground control · {{ today | date:'EEE d MMM y':'UTC' }} UTC
+        </p>
+        <h1 class="home-heading">{{ greeting }}<span *ngIf="username">,<br><span class="home-name">{{ username }}</span></span></h1>
+        <p class="home-sub">Signed in as <strong>{{ roleLabel }}</strong>. Pick a channel to start, or use the command bar
+            at any time.</p>
 
-        <div class="home-links" *ngIf="links.length">
-            <a *ngFor="let link of links" class="home-link" [routerLink]="[link.path]">
-                <span class="home-link-label">{{ link.label }}</span>
-                <span class="home-link-description">{{ link.description }}</span>
-            </a>
-        </div>
-    </div>
-</div>
+        <dl class="systems">
+            <div class="system" [ngClass]="'system--' + telemetryPhase">
+                <dt class="ph-eyebrow">Telemetry link</dt>
+                <dd><span class="system-dot"></span>{{ telemetryLabel }}</dd>
+            </div>
+            <div class="system" [ngClass]="'system--' + sensorLink">
+                <dt class="ph-eyebrow">Safety sensors</dt>
+                <dd><span class="system-dot"></span>{{ sensorLink === 'online' ? 'Online' : sensorLink === 'connecting' ? 'Linking' : 'Offline' }}</dd>
+            </div>
+            <div class="system" [class.system--alert]="activeAlerts.length > 0">
+                <dt class="ph-eyebrow">Annunciators</dt>
+                <dd>
+                    <span class="system-dot"></span>
+                    <ng-container *ngIf="activeAlerts.length === 0">All normal</ng-container>
+                    <ng-container *ngIf="activeAlerts.length > 0">
+                        <span class="system-codes telemetry-value">
+                            <span *ngFor="let a of activeAlerts" [ngClass]="'code--' + a.severity">{{ a.code }}</span>
+                        </span>
+                    </ng-container>
+                </dd>
+            </div>
+        </dl>
+    </section>
+
+    <nav class="home-channels" aria-label="Channels" *ngIf="links.length">
+        <a *ngFor="let link of links; let i = index" class="channel-card ph-enter" [style.animation-delay.ms]="80 + i * 70"
+            [routerLink]="[link.path]">
+            <span class="channel-index telemetry-value">0{{ i + 1 }}</span>
+            <span class="channel-body">
+                <span class="channel-label">{{ link.label }}</span>
+                <span class="channel-description">{{ link.description }}</span>
+            </span>
+            <span class="channel-go" aria-hidden="true">
+                <svg viewBox="0 0 16 16"><path d="M5 11 11 5M6 5h5v5" /></svg>
+            </span>
+        </a>
+    </nav>
+</main>
