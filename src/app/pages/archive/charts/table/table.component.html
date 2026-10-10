@@ -1,4 +1,4 @@
-<div class="table-scroll">
+<div class="table-scroll" #rowsArea>
 <table mat-table [dataSource]="dataSource" class="mat-table">
 
     <!-- Time Column -->
@@ -17,4 +17,4 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
 </div>
-<mat-paginator class="table-pager" [pageSize]="50" [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>
+<mat-paginator class="table-pager" [pageSize]="pageSize" [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>

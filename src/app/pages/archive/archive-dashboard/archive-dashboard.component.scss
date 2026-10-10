@@ -1,5 +1,18 @@
 :host {
     display: block;
+    height: 100%;
+}
+
+// Preset picker, shown until a preset is open (same component Live uses).
+.archive-presets {
+    position: relative;
+    height: 100%;
+}
+
+.archive-presets-inner {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .archive-shell {
@@ -22,7 +35,42 @@
     flex: 0 0 auto;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.9rem;
+    min-height: 44px;
+}
+
+.head-back {
+    margin-left: -0.5rem;
+}
+
+.archive-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+
+    .archive-heading {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.head-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.save-btn {
+    min-width: 104px;
+    justify-content: center;
+
+    &.is-error {
+        background: var(--ph-warning);
+        border-color: var(--ph-warning);
+    }
 }
 
 .archive-heading {
@@ -34,17 +82,22 @@
     color: var(--ph-text-hi);
 }
 
-.drawer-toggle-btn {
-    margin-left: auto;
-}
-
 app-archive-filter {
     flex: 0 0 auto;
 }
 
+// What is loaded, plus the panel pager when the preset has more panels than fit.
+.view-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 30px;
+}
+
 // What is currently on screen, so nobody has to remember what they loaded.
 .loaded-line {
-    flex: 0 0 auto;
+    min-width: 0;
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
@@ -70,6 +123,56 @@ app-archive-filter {
 .loaded-warn {
     margin-left: 0.5rem;
     color: var(--ph-caution);
+}
+
+.loaded-none {
+    color: var(--ph-text-lo);
+}
+
+.pager {
+    margin-left: auto;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--ph-text-mid);
+
+    .telemetry-value {
+        color: var(--ph-text-hi);
+    }
+}
+
+.pager-label {
+    margin-right: 0.35rem;
+}
+
+.pager-btn {
+    width: 30px;
+    height: 30px;
+
+    &:disabled {
+        opacity: 0.35;
+    }
+}
+
+.pager-dots {
+    display: flex;
+    gap: 5px;
+}
+
+.pager-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ph-line-strong);
+    cursor: pointer;
+    transition: background-color var(--ph-dur) var(--ph-ease-out), transform var(--ph-dur) var(--ph-ease-out);
+
+    &.is-on {
+        background: var(--ph-accent);
+        transform: scale(1.2);
+    }
 }
 
 .count {
@@ -250,33 +353,28 @@ app-archive-filter {
 
 .mat-darawer-content {
     height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden;
     background-color: transparent;
-    scrollbar-width: thin;
-    scrollbar-color: var(--ph-line-strong) transparent;
 }
 
 // ---------------------------------------------------------------------------
 // Panels
 // ---------------------------------------------------------------------------
 
-// Rows stretch to fill the window when few panels are open, but never drop
-// below a height where the chart and table stay readable; past that the
-// panel area scrolls (the query bar above stays put).
+// Fills the panel area exactly. Columns/rows come from the component, which
+// fits as many readable panels as the window holds and pages the rest.
 .panels-grid {
-    --panel-min-height: 400px;
     display: grid;
-    grid-template-columns: repeat(var(--panel-cols, 2), minmax(0, 1fr));
-    grid-auto-rows: minmax(var(--panel-min-height), 1fr);
-    min-height: 100%;
-    gap: 0.75rem;
+    height: 100%;
+    gap: 12px;
     box-sizing: border-box;
+    animation: panels-in 220ms var(--ph-ease-out);
 }
 
-@media (max-width: 1000px) {
-    .panels-grid {
-        grid-template-columns: minmax(0, 1fr);
+@keyframes panels-in {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
     }
 }
 
@@ -380,7 +478,10 @@ app-archive-filter {
     > div {
         flex: 1 1 0;
         min-width: 0;
-        padding: 0.35rem 0.75rem;
+        display: flex;
+        align-items: baseline;
+        gap: 0.45rem;
+        padding: 0.3rem 0.75rem;
 
         & + div {
             border-left: 1px solid var(--ph-line);
@@ -388,14 +489,14 @@ app-archive-filter {
     }
 
     dt {
-        font-size: 0.66rem;
+        font-size: 0.68rem;
         font-weight: 500;
         color: var(--ph-text-lo);
     }
 
     dd {
         margin: 0;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         font-weight: 500;
         color: var(--ph-text-hi);
         white-space: nowrap;
@@ -480,7 +581,7 @@ app-archive-chart {
         padding: 0.75rem;
     }
 
-    .drawer-toggle-btn {
-        margin-left: 0;
+    .hide-sm {
+        display: none;
     }
 }

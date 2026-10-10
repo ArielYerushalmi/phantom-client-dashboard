@@ -1,27 +1,64 @@
-<div class="archive-shell">
+<div class="archive-presets" *ngIf="dashboard===null">
+    <app-preset-manager class="archive-presets-inner" [IsLive]="false" (presetEvent)="onOpenPreset($event)"
+        (createPresetEvent)="createPreset($event)"></app-preset-manager>
+</div>
+
+<div class="archive-shell" *ngIf="dashboard">
 
     <header class="archive-head">
-        <h1 class="archive-heading">Flight archive</h1>
-        <button type="button" class="ph-btn drawer-toggle-btn" (click)="parametersDrawer?.toggle()">
-            <mat-icon>tune</mat-icon>
-            Parameters
-            <span class="count telemetry-value">{{ panels.length }}</span>
+        <button type="button" class="ph-btn ph-btn--ghost head-back" (click)="onBackToPresets()" title="Back to presets">
+            <mat-icon>arrow_back</mat-icon>
+            <span class="hide-sm">Presets</span>
         </button>
+        <div class="archive-title">
+            <span class="ph-eyebrow">Flight archive</span>
+            <h1 class="archive-heading">{{ dashboard.name }}</h1>
+        </div>
+        <div class="head-actions">
+            <button type="button" class="ph-btn drawer-toggle-btn" (click)="parametersDrawer?.toggle()">
+                <mat-icon>tune</mat-icon>
+                <span class="hide-sm">Parameters</span>
+                <span class="count telemetry-value">{{ panels.length }}</span>
+            </button>
+            <button type="button" class="ph-btn ph-btn--primary save-btn" (click)="savePreset()"
+                [disabled]="saveState==='saving'" [class.is-error]="saveState==='error'">
+                <mat-icon>{{ saveState==='saved' ? 'check' : saveState==='saving' ? 'sync' : saveState==='error' ? 'error_outline' : 'save' }}</mat-icon>
+                <span>{{ saveState==='saved' ? 'Saved' : saveState==='saving' ? 'Saving' : saveState==='error' ? 'Not saved' : 'Save' }}</span>
+            </button>
+        </div>
     </header>
 
     <app-archive-filter (load)="onLoad($event)"></app-archive-filter>
 
-    <div class="loaded-line" *ngIf="range" role="status">
-        <span class="loaded-label">Showing</span>
-        <span class="telemetry-value">{{ range.startTime | date:'MMM d, HH:mm:ss' }}</span>
-        <span class="loaded-arrow">→</span>
-        <span class="telemetry-value">{{ range.endTime | date:'MMM d, HH:mm:ss' }}</span>
-        <span class="loaded-sep">·</span>
-        <span><span class="telemetry-value">{{ range.totalFrames | number }}</span> frames</span>
-        <span class="loaded-warn" *ngIf="isTruncated">
-            Range is larger than one load ({{ maxFrames | number }} frames per parameter)<ng-container *ngIf="shownUntil">,
-                showing up to {{ shownUntil | date:'MMM d, HH:mm:ss' }}</ng-container>. Narrow the range to see the rest.
-        </span>
+    <div class="view-bar">
+        <div class="loaded-line" role="status">
+            <ng-container *ngIf="range; else nothingLoaded">
+                <span class="loaded-label">Showing</span>
+                <span class="telemetry-value">{{ range.startTime | date:'MMM d, HH:mm:ss' }}</span>
+                <span class="loaded-arrow">→</span>
+                <span class="telemetry-value">{{ range.endTime | date:'MMM d, HH:mm:ss' }}</span>
+                <span class="loaded-sep">·</span>
+                <span><span class="telemetry-value">{{ range.totalFrames | number }}</span> frames</span>
+                <span class="loaded-warn" *ngIf="isTruncated">
+                    Range is larger than one load ({{ maxFrames | number }} frames per parameter)<ng-container *ngIf="shownUntil">,
+                        showing up to {{ shownUntil | date:'MMM d, HH:mm:ss' }}</ng-container>. Narrow the range to see the rest.
+                </span>
+            </ng-container>
+            <ng-template #nothingLoaded><span class="loaded-none">No time range loaded yet</span></ng-template>
+        </div>
+
+        <nav class="pager" *ngIf="pageCount > 1" aria-label="Panel pages">
+            <span class="pager-label">Panels <span class="telemetry-value">{{ pageFirst }}–{{ pageLast }}</span> of
+                <span class="telemetry-value">{{ panels.length }}</span></span>
+            <button type="button" class="ph-btn ph-btn--icon pager-btn" (click)="goToPage(page - 1)" [disabled]="page===0"
+                aria-label="Previous panels"><mat-icon>chevron_left</mat-icon></button>
+            <span class="pager-dots" aria-hidden="true">
+                <span *ngFor="let i of pageIndexes" class="pager-dot" [class.is-on]="i===page"
+                    (click)="goToPage(i)"></span>
+            </span>
+            <button type="button" class="ph-btn ph-btn--icon pager-btn" (click)="goToPage(page + 1)"
+                [disabled]="page===pageCount-1" aria-label="Next panels"><mat-icon>chevron_right</mat-icon></button>
+        </nav>
     </div>
 
     <div class="dashboard-body">
@@ -54,10 +91,11 @@
                 </div>
             </mat-drawer>
 
-            <mat-drawer-content class="mat-darawer-content">
+            <mat-drawer-content class="mat-darawer-content" #panelArea>
                 <div class="panels-grid" *ngIf="panels.length; else noPanels"
-                    [style.--panel-cols]="panelColumns">
-                    <article class="panel ph-panel" *ngFor="let panel of panels; trackBy: trackByParameterId"
+                    [style.grid-template-columns]="'repeat(' + panelColumns + ', minmax(0, 1fr))'"
+                    [style.grid-template-rows]="'repeat(' + gridRows + ', minmax(0, 1fr))'">
+                    <article class="panel ph-panel" *ngFor="let panel of pagedPanels; trackBy: trackByParameterId"
                         [class.is-loading]="panel.loading">
                         <header class="panel-top">
                             <div class="panel-title">
@@ -110,9 +148,9 @@
 
                 <ng-template #noPanels>
                     <div class="panels-empty-state">
-                        <p class="empty-title">Choose what to look at</p>
-                        <p class="empty-sub">1. Set the <strong>From</strong> and <strong>To</strong> time above (or pick
-                            a quick range).<br>2. Add the parameters you want.<br>3. Press <strong>Load data</strong>.</p>
+                        <p class="empty-title">This preset has no parameters yet</p>
+                        <p class="empty-sub">Add the parameters you want to review, then press <strong>Save</strong> to
+                            keep them in the preset.</p>
                         <button type="button" class="ph-btn ph-btn--primary" (click)="parametersDrawer.open()">
                             <mat-icon>add</mat-icon>Add parameters
                         </button>

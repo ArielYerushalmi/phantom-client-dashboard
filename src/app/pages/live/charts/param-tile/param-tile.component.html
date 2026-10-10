@@ -13,8 +13,11 @@
     <!-- Quantity: value, units, and where it sits on its defined range -->
     <ng-container *ngIf="!discrete">
         <div class="tile-reading">
-            <span class="tile-value telemetry-value">{{ value !== null ? value : '—' }}</span>
+            <span class="tile-value telemetry-value" #valueEl></span>
             <span class="tile-units">{{ parameter.units }}</span>
+            <span class="tile-delta" *ngIf="delta" [ngClass]="'is-' + delta" aria-hidden="true">
+                <svg viewBox="0 0 8 8"><path d="M4 1.5 7 6.5H1z" /></svg>
+            </span>
         </div>
         <div class="tile-scale" *ngIf="ranged; else noRange">
             <div class="scale-track">
@@ -36,7 +39,7 @@
     <!-- State: ON/OFF and how long it has held -->
     <ng-container *ngIf="discrete">
         <div class="tile-reading">
-            <span class="tile-state" [class.is-on]="value >= 1">{{ stateText }}</span>
+            <span class="tile-state" #stateEl [class.is-on]="value >= 1">{{ stateText }}</span>
             <span class="tile-units">{{ heldFor }}</span>
         </div>
         <div class="tile-scale tile-scale--none">{{ faultFlag ? 'ON indicates a fault' : (parameter.description || 'State') }}</div>
@@ -45,7 +48,7 @@
     <div class="tile-trend">
         <svg viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true">
             <line class="trend-base" x1="0" y1="31.5" x2="120" y2="31.5" />
-            <path class="trend-line" *ngIf="trendPath" [attr.d]="trendPath" vector-effect="non-scaling-stroke" />
+            <path class="trend-line" #trendEl *ngIf="trendPath" [attr.d]="trendPath" vector-effect="non-scaling-stroke" />
         </svg>
     </div>
 </article>

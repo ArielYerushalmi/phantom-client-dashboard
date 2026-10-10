@@ -16,7 +16,6 @@ export class PresetManagerComponent implements OnInit {
   @Input() IsLive: boolean;
   @Output() createPresetEvent = new EventEmitter<string>();
   @Output() presetEvent = new EventEmitter<DashboardRO>();
-  @Output() goToFilterPage: EventEmitter<void> = new EventEmitter<void>();
 
   public toggledDashboards: boolean[] = [];
   private readonly MAX_PRESETNAME_LEN = 16;
@@ -124,10 +123,6 @@ export class PresetManagerComponent implements OnInit {
   toggle(index) {
     // toggle based on index
     this.toggledDashboards[index] = !this.toggledDashboards[index];
-  }
-
-  onGotoFilterPage() {
-    this.goToFilterPage.emit();
   }
 
 }

@@ -82,9 +82,9 @@ export class ArchiveFilterComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Start with the last hour filled in, so the bar shows what's available right away.
+    // Start with the last hour loaded, so an opened preset shows data right away.
     this.fillRange(60);
-    this.onFieldsChanged();
+    this.checkRange(true);
   }
 
   ngOnDestroy(): void {

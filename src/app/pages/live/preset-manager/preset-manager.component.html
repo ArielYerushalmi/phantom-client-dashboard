@@ -46,12 +46,9 @@
 
     <header class="presets-head">
         <div class="presets-title">
-            <button type="button" class="ph-btn ph-btn--ghost back-btn" *ngIf="!IsLive" (click)="onGotoFilterPage()">
-                <mat-icon>arrow_back</mat-icon>Back
-            </button>
             <span class="ph-eyebrow">{{ IsLive ? 'Live' : 'Archive' }} presets</span>
             <h1 class="presets-heading">Choose a preset</h1>
-            <p class="presets-sub">A preset is a saved set of parameters. Open one to start watching, or create a new one.</p>
+            <p class="presets-sub">A preset is a saved set of parameters. {{ IsLive ? 'Open one to start watching' : 'Open one to review recorded flights' }}, or create a new one.</p>
         </div>
 
         <form class="create" (ngSubmit)="createPreset()" autocomplete="off">
