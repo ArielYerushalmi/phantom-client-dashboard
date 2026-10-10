@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Subject, Subscription, of } from 'rxjs';
+import { catchError, debounceTime, map, switchMap } from 'rxjs/operators';
 import { ArchiveService } from 'src/app/common/services/archive-service/archive.service';
 
 export interface IArchiveRange {
@@ -9,106 +10,139 @@ export interface IArchiveRange {
   totalFrames: number;
 }
 
-interface IQuickPreset {
+interface IQuickRange {
   label: string;
-  hours: number;
+  minutes: number;
 }
 
+/** What the archive holds for the range currently typed into the fields. */
+type PreviewState = 'checking' | 'ready' | 'empty' | 'invalid' | 'error';
+
 /**
- * Compact range-setup step for the Archive scrubber. This used to be the
- * whole "filter form" page (pick start/end, browse saved dashboards, hit
- * Confirm) that the operator had to fill in before seeing any data. Now it
- * is just the coarse-range picker the scrubber needs to know what span of
- * time to scale itself against - it collapses to a one-line strip once a
- * range with data has been confirmed, and can be reopened to change it.
- *
- * The old "browse saved dashboards" panel that used to live here was a
- * Live-page concept (saved chart-grid layouts) that doesn't map onto
- * scrubbing through time, so it isn't reused here.
+ * Archive query bar: choose a start and end time, see how much recorded data
+ * that range holds, then load it. Quick ranges fill the fields and load in
+ * one click. Emits the range to load; fetching the parameter data is the
+ * dashboard's job.
  */
 @Component({
   selector: 'app-archive-filter',
   templateUrl: './archive-filter.component.html',
   styleUrls: ['./archive-filter.component.scss']
 })
-export class ArchiveFilterComponent implements OnDestroy {
+export class ArchiveFilterComponent implements OnInit, OnDestroy {
 
-  @Output() rangeConfirmed = new EventEmitter<IArchiveRange>();
+  @Output() load = new EventEmitter<IArchiveRange>();
 
-  readonly quickPresets: IQuickPreset[] = [
-    { label: '1h', hours: 1 },
-    { label: '6h', hours: 6 },
-    { label: '24h', hours: 24 },
-    { label: '7d', hours: 24 * 7 },
+  readonly quickRanges: IQuickRange[] = [
+    { label: 'Last 15 min', minutes: 15 },
+    { label: 'Last hour', minutes: 60 },
+    { label: 'Last 6 h', minutes: 6 * 60 },
+    { label: 'Last 24 h', minutes: 24 * 60 },
   ];
 
-  expanded: boolean = true;
-  inputStartTime: string = '';
-  inputEndTime: string = '';
-  isTimeValid: boolean = true;
-  isLoading: boolean = false;
-  loadError: boolean = false;
-  noDataInRange: boolean = false;
+  inputStartTime = '';
+  inputEndTime = '';
 
-  confirmedRange: IArchiveRange | null = null;
+  previewState: PreviewState = 'checking';
+  previewFrames = 0;
 
-  private getLengthSubscription: Subscription;
+  /** null = the fields don't form a valid range; it also cancels any count still in flight. */
+  private readonly rangeChanges = new Subject<{ start: Date; end: Date; loadWhenReady: boolean } | null>();
+  private previewSubscription: Subscription;
 
-  constructor(private readonly archiveService: ArchiveService) {
-    this.applyPreset(this.quickPresets[2]);
+  constructor(private readonly archiveService: ArchiveService) { }
+
+  ngOnInit(): void {
+    this.previewSubscription = this.rangeChanges.pipe(
+      debounceTime(300),
+      switchMap((request) => {
+        if (!request) {
+          return of(null);
+        }
+        const { start, end, loadWhenReady } = request;
+        this.previewState = 'checking';
+        return this.archiveService.getLength(start, end).pipe(
+          map((frames: number) => ({ frames, start, end, loadWhenReady, failed: false })),
+          catchError((error: HttpErrorResponse) => {
+            console.log(error.error?.message ?? 'archive service is down!');
+            return of({ frames: 0, start, end, loadWhenReady, failed: true });
+          })
+        );
+      })
+    ).subscribe((result) => {
+      if (!result) {
+        this.previewState = 'invalid';
+        return;
+      }
+      const { frames, start, end, loadWhenReady, failed } = result;
+      this.previewFrames = frames;
+      this.previewState = failed ? 'error' : frames > 0 ? 'ready' : 'empty';
+      if (loadWhenReady && this.previewState === 'ready') {
+        this.load.emit({ startTime: start, endTime: end, totalFrames: frames });
+      }
+    });
+
+    // Start with the last hour filled in, so the bar shows what's available right away.
+    this.fillRange(60);
+    this.onFieldsChanged();
   }
 
   ngOnDestroy(): void {
-    this.getLengthSubscription?.unsubscribe();
+    this.previewSubscription?.unsubscribe();
   }
 
-  applyPreset(preset: IQuickPreset): void {
-    const end = new Date();
-    const start = new Date(end.getTime() - preset.hours * 60 * 60 * 1000);
-    this.inputStartTime = this.toDateTimeLocal(start);
-    this.inputEndTime = this.toDateTimeLocal(end);
-    this.onConfirm();
+  get canLoad(): boolean {
+    return this.previewState === 'ready';
   }
 
-  onConfirm(): void {
-    const startTime = new Date(this.inputStartTime);
-    const endTime = new Date(this.inputEndTime);
+  /** Quick ranges are a single action: fill the fields and load. */
+  applyQuickRange(range: IQuickRange): void {
+    this.fillRange(range.minutes);
+    this.checkRange(true);
+  }
 
-    if (!this.inputStartTime || !this.inputEndTime || isNaN(startTime.getTime()) || isNaN(endTime.getTime()) || startTime >= endTime) {
-      this.isTimeValid = false;
+  onFieldsChanged(): void {
+    this.checkRange(false);
+  }
+
+  onLoad(): void {
+    const range = this.parsedRange();
+    if (range && this.canLoad) {
+      this.load.emit({ startTime: range.start, endTime: range.end, totalFrames: this.previewFrames });
+    }
+  }
+
+  private checkRange(loadWhenReady: boolean): void {
+    const range = this.parsedRange();
+    if (!range) {
+      this.previewState = 'invalid';
+      this.rangeChanges.next(null);
       return;
     }
-    this.isTimeValid = true;
-    this.loadError = false;
-    this.noDataInRange = false;
-    this.isLoading = true;
-
-    this.getLengthSubscription?.unsubscribe();
-    this.getLengthSubscription = this.archiveService.getLength(startTime, endTime).subscribe(
-      (totalFrames: number) => {
-        this.isLoading = false;
-        if (!totalFrames) {
-          this.noDataInRange = true;
-          return;
-        }
-        this.confirmedRange = { startTime, endTime, totalFrames };
-        this.expanded = false;
-        this.rangeConfirmed.emit(this.confirmedRange);
-      },
-      (error: HttpErrorResponse) => {
-        this.isLoading = false;
-        this.loadError = true;
-        console.log(error.error?.message ?? 'archive service is down!');
-      }
-    );
+    // Not loadable until this range's own count comes back.
+    this.previewState = 'checking';
+    this.rangeChanges.next({ ...range, loadWhenReady });
   }
 
-  onChangeRange(): void {
-    this.expanded = true;
+  private parsedRange(): { start: Date; end: Date } | null {
+    const start = new Date(this.inputStartTime);
+    const end = new Date(this.inputEndTime);
+    if (!this.inputStartTime || !this.inputEndTime || isNaN(start.getTime()) || isNaN(end.getTime()) || start >= end) {
+      return null;
+    }
+    return { start, end };
+  }
+
+  private fillRange(minutes: number): void {
+    const end = new Date();
+    end.setMilliseconds(0);
+    const start = new Date(end.getTime() - minutes * 60 * 1000);
+    this.inputStartTime = this.toDateTimeLocal(start);
+    this.inputEndTime = this.toDateTimeLocal(end);
   }
 
   private toDateTimeLocal(date: Date): string {
     const pad = (n: number) => n.toString().padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   }
 }

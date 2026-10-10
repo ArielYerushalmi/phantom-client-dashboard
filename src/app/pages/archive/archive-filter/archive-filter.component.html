@@ -1,45 +1,32 @@
-<div class="range-bar">
+<form class="query" (ngSubmit)="onLoad()" aria-label="Archive time range">
+    <label class="field">
+        <span class="field-label">From</span>
+        <input class="ph-input" type="datetime-local" step="1" name="start" [(ngModel)]="inputStartTime"
+            (ngModelChange)="onFieldsChanged()" [class.is-invalid]="previewState === 'invalid'" required>
+    </label>
+    <span class="query-arrow" aria-hidden="true">→</span>
+    <label class="field">
+        <span class="field-label">To</span>
+        <input class="ph-input" type="datetime-local" step="1" name="end" [(ngModel)]="inputEndTime"
+            (ngModelChange)="onFieldsChanged()" [class.is-invalid]="previewState === 'invalid'" required>
+    </label>
 
-    <div class="range-summary" *ngIf="!expanded && confirmedRange">
-        <span class="ph-eyebrow">Range</span>
-        <span class="range-summary-value telemetry-value">
-            {{ confirmedRange.startTime | date:'MMM d, HH:mm' }}
-            <span class="range-arrow">→</span>
-            {{ confirmedRange.endTime | date:'MMM d, HH:mm' }}
-        </span>
-        <span class="range-summary-count telemetry-value">{{ confirmedRange.totalFrames | number }} frames</span>
-        <button type="button" class="ph-btn ph-btn--ghost change-btn" (click)="onChangeRange()">Change</button>
+    <div class="quick" role="group" aria-label="Quick ranges">
+        <button type="button" class="quick-btn" *ngFor="let range of quickRanges"
+            (click)="applyQuickRange(range)">{{ range.label }}</button>
     </div>
 
-    <div class="range-form" *ngIf="expanded">
-        <div class="range-form-fields">
-            <label class="field">
-                <span class="ph-eyebrow">Start</span>
-                <input class="ph-input" type="datetime-local" [(ngModel)]="inputStartTime"
-                    [class.is-invalid]="!isTimeValid">
-            </label>
-            <label class="field">
-                <span class="ph-eyebrow">End</span>
-                <input class="ph-input" type="datetime-local" [(ngModel)]="inputEndTime"
-                    [class.is-invalid]="!isTimeValid">
-            </label>
-
-            <div class="range-presets" role="group" aria-label="Quick range">
-                <button type="button" class="preset-chip" *ngFor="let preset of quickPresets"
-                    (click)="applyPreset(preset)">{{ preset.label }}</button>
-            </div>
-
-            <button type="button" class="ph-btn ph-btn--primary load-btn" [disabled]="isLoading" (click)="onConfirm()">
-                <span class="spinner" *ngIf="isLoading" aria-hidden="true"></span>
-                {{ isLoading ? 'Loading' : 'Load range' }}
-            </button>
-        </div>
-
-        <div class="range-message error" *ngIf="!isTimeValid">Start time must be before the end time.</div>
-        <div class="range-message error" *ngIf="loadError">Archive service is unavailable. Try again later.</div>
-        <div class="range-message warning" *ngIf="noDataInRange">
-            No frames in that range. The archive has gaps; try a wider or different window.
-        </div>
+    <div class="preview" [ngClass]="'preview--' + previewState" role="status" aria-live="polite">
+        <ng-container [ngSwitch]="previewState">
+            <span *ngSwitchCase="'checking'">Checking archive…</span>
+            <span *ngSwitchCase="'ready'"><strong class="telemetry-value">{{ previewFrames | number }}</strong> frames recorded</span>
+            <span *ngSwitchCase="'empty'">No recorded data in this range</span>
+            <span *ngSwitchCase="'invalid'">"From" must be before "To"</span>
+            <span *ngSwitchCase="'error'">Archive service unavailable</span>
+        </ng-container>
     </div>
 
-</div>
+    <button type="submit" class="ph-btn ph-btn--primary load-btn" [disabled]="!canLoad">
+        <mat-icon>download</mat-icon>Load data
+    </button>
+</form>

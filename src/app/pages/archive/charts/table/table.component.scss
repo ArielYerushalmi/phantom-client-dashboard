@@ -1,10 +1,47 @@
 :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: 100%;
+}
+
+.table-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--ph-line-strong) transparent;
+}
+
+.table-pager {
+    flex: 0 0 auto;
+    border-top: 1px solid var(--ph-line);
+    background: transparent;
+    color: var(--ph-text-mid);
+    font-family: var(--ph-font-ui);
+    font-size: 0.72rem;
+
+    ::ng-deep .mat-paginator-container {
+        min-height: 34px;
+        padding: 0 4px;
+    }
+
+    ::ng-deep .mat-icon-button {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        color: var(--ph-text-mid);
+    }
+
+    ::ng-deep .mat-paginator-icon {
+        width: 20px;
+        fill: currentColor;
+    }
+
+    ::ng-deep .mat-button-disabled {
+        color: var(--ph-text-lo) !important;
+        opacity: 0.4;
+    }
 }
 
 .mat-table {

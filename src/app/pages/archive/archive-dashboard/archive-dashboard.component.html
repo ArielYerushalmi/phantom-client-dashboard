@@ -1,63 +1,36 @@
 <div class="archive-shell">
 
     <header class="archive-head">
-        <div class="archive-title">
-            <span class="ph-eyebrow">Archive · Debrief</span>
-            <h1 class="archive-heading">Flight playback</h1>
-        </div>
-        <app-archive-filter class="range-bar" (rangeConfirmed)="onRangeConfirmed($event)"></app-archive-filter>
+        <h1 class="archive-heading">Flight archive</h1>
+        <button type="button" class="ph-btn drawer-toggle-btn" (click)="parametersDrawer?.toggle()">
+            <mat-icon>tune</mat-icon>
+            Parameters
+            <span class="count telemetry-value">{{ panels.length }}</span>
+        </button>
     </header>
 
-    <section class="scrubber-row" *ngIf="range; else noRangeHint">
-        <div class="scrubber-toolbar">
-            <div class="playhead-readout">
-                <span class="ph-eyebrow">Playhead</span>
-                <span class="scrub-readout telemetry-value">
-                    <span class="scrub-date">{{ scrubTime | date:'yyyy-MM-dd' }}</span>
-                    {{ scrubTime | date:'HH:mm:ss' }}
-                </span>
-            </div>
+    <app-archive-filter (load)="onLoad($event)"></app-archive-filter>
 
-            <label class="window-select">
-                <span class="ph-eyebrow">Window</span>
-                <select class="ph-input" [(ngModel)]="windowMs" (ngModelChange)="onWindowChange()">
-                    <option *ngFor="let opt of windowOptions" [ngValue]="opt.ms">{{ opt.label }}</option>
-                </select>
-            </label>
+    <div class="loaded-line" *ngIf="range" role="status">
+        <span class="loaded-label">Showing</span>
+        <span class="telemetry-value">{{ range.startTime | date:'MMM d, HH:mm:ss' }}</span>
+        <span class="loaded-arrow">→</span>
+        <span class="telemetry-value">{{ range.endTime | date:'MMM d, HH:mm:ss' }}</span>
+        <span class="loaded-sep">·</span>
+        <span><span class="telemetry-value">{{ range.totalFrames | number }}</span> frames</span>
+        <span class="loaded-warn" *ngIf="isTruncated">
+            Range is larger than one load ({{ maxFrames | number }} frames per parameter)<ng-container *ngIf="shownUntil">,
+                showing up to {{ shownUntil | date:'MMM d, HH:mm:ss' }}</ng-container>. Narrow the range to see the rest.
+        </span>
+    </div>
 
-            <button type="button" class="ph-btn drawer-toggle-btn" (click)="parametersDrawer?.toggle()">
-                <mat-icon>tune</mat-icon>
-                Parameters
-                <span class="count telemetry-value">{{ panels.length }}</span>
-            </button>
-        </div>
-
-        <app-archive-scrubber [rangeStart]="range.startTime" [rangeEnd]="range.endTime" [value]="scrubTime"
-            [windowMs]="windowMs" (scrub)="onScrub($event)">
-        </app-archive-scrubber>
-    </section>
-
-    <ng-template #noRangeHint>
-        <div class="no-range-hint">
-            <svg class="no-range-art" viewBox="0 0 160 40" aria-hidden="true">
-                <line x1="4" y1="20" x2="156" y2="20" />
-                <line class="no-range-tick" *ngFor="let x of [4, 29, 54, 79, 104, 129, 154]" [attr.x1]="x" y1="12"
-                    [attr.x2]="x" y2="28" />
-                <circle cx="54" cy="20" r="5" />
-            </svg>
-            <p class="no-range-title">Choose a time range to load the flight record</p>
-            <p class="no-range-sub">Use a quick range or set start and end above. The scrubber and parameter panels
-                appear once frames are found.</p>
-        </div>
-    </ng-template>
-
-    <div class="dashboard-body" *ngIf="range">
+    <div class="dashboard-body">
         <mat-drawer-container class="mat-drawer-container" [hasBackdrop]="true">
             <mat-drawer #parametersDrawer mode="over" class="param-drawer" position="end">
                 <div class="param-drawer-head">
                     <div>
                         <span class="ph-eyebrow">Parameters</span>
-                        <p class="param-drawer-sub">{{ panels.length }} of {{ parameters.length }} on screen</p>
+                        <p class="param-drawer-sub">{{ panels.length }} of {{ parameters.length }} selected</p>
                     </div>
                     <button type="button" class="ph-btn ph-btn--ghost ph-btn--icon" (click)="parametersDrawer.close()"
                         aria-label="Close parameter list">
@@ -85,12 +58,12 @@
                 <div class="panels-grid" *ngIf="panels.length; else noPanels"
                     [style.grid-template-columns]="'repeat(' + panelColumns + ', minmax(0, 1fr))'"
                     [style.grid-template-rows]="'repeat(' + panelRows + ', minmax(0, 1fr))'">
-                    <article class="panel ph-panel ph-enter" *ngFor="let panel of panels; let i = index; trackBy: trackByParameterId"
-                        [style.animation-delay.ms]="i * 50" [class.is-loading]="panel.loading">
+                    <article class="panel ph-panel" *ngFor="let panel of panels; trackBy: trackByParameterId"
+                        [class.is-loading]="panel.loading">
                         <header class="panel-top">
                             <div class="panel-title">
-                                <span class="panel-name">{{ panel.parameter.parameterName }}</span>
-                                <span class="panel-units telemetry-value" *ngIf="panel.parameter.units">{{ panel.parameter.units }}</span>
+                                <span class="panel-name" [title]="panel.parameter.parameterName">{{ panel.label }}</span>
+                                <span class="panel-units" *ngIf="panel.parameter.units">{{ panel.parameter.units }}</span>
                             </div>
                             <div class="panel-actions">
                                 <div class="segmented" role="group" aria-label="View">
@@ -102,31 +75,29 @@
                                         (click)="onChangeChartType(panel, ChartType.TABLE)">Table</button>
                                 </div>
                                 <button type="button" class="ph-btn ph-btn--ghost ph-btn--icon remove-btn"
-                                    (click)="onRemovePanel(panel)" [attr.aria-label]="'Remove ' + panel.parameter.parameterName">
+                                    (click)="onRemovePanel(panel)" [attr.aria-label]="'Remove ' + panel.label">
                                     <mat-icon>close</mat-icon>
                                 </button>
                             </div>
                         </header>
 
-                        <div class="panel-readout">
-                            <ng-container *ngIf="panel.nearest as n; else noReadout">
-                                <span class="readout-value telemetry-value">{{ n.value }}</span>
-                                <span class="readout-time telemetry-value">@ {{ n.time | date:'HH:mm:ss' }}</span>
-                            </ng-container>
-                            <ng-template #noReadout>
-                                <span class="readout-skeleton ph-skeleton" *ngIf="panel.loading"></span>
-                                <span class="readout-empty" *ngIf="!panel.loading">No sample at this instant</span>
-                            </ng-template>
-                            <span class="panel-sync" *ngIf="panel.loading" aria-label="Loading"></span>
-                        </div>
+                        <dl class="panel-stats" *ngIf="panel.stats as s">
+                            <div><dt>Min</dt><dd class="telemetry-value">{{ s.min }}</dd></div>
+                            <div><dt>Avg</dt><dd class="telemetry-value">{{ s.avg }}</dd></div>
+                            <div><dt>Max</dt><dd class="telemetry-value">{{ s.max }}</dd></div>
+                            <div><dt>Last</dt><dd class="telemetry-value">{{ s.last }}</dd></div>
+                            <div class="stat-count"><dt>Samples</dt><dd class="telemetry-value">{{ panel.frames.length | number }}</dd></div>
+                        </dl>
 
                         <div class="panel-body">
-                            <div class="panel-skeleton" *ngIf="panel.loading && panel.frames.length===0" aria-hidden="true">
+                            <span class="panel-sync" *ngIf="panel.loading" aria-label="Loading"></span>
+                            <div class="panel-empty" *ngIf="!range">Load a time range to see this parameter.</div>
+                            <div class="panel-skeleton" *ngIf="range && panel.loading && panel.frames.length===0" aria-hidden="true">
                                 <span class="ph-skeleton" *ngFor="let h of [38, 52, 44, 70, 61, 80, 58, 66, 49, 73]"
                                     [style.height.%]="h"></span>
                             </div>
-                            <div class="panel-empty" *ngIf="!panel.loading && !panel.error && panel.frames.length===0">
-                                No frames in this window. Widen the window or move the playhead.
+                            <div class="panel-empty" *ngIf="range && !panel.loading && !panel.error && panel.frames.length===0">
+                                No data for this parameter in the selected range.
                             </div>
                             <div class="panel-empty error" *ngIf="panel.error">
                                 Archive service is unavailable.
@@ -140,9 +111,9 @@
 
                 <ng-template #noPanels>
                     <div class="panels-empty-state">
-                        <p class="no-range-title">Nothing on the bench yet</p>
-                        <p class="no-range-sub">Add the parameters you want to replay. Each gets its own panel, synced
-                            to the playhead.</p>
+                        <p class="empty-title">Choose what to look at</p>
+                        <p class="empty-sub">1. Set the <strong>From</strong> and <strong>To</strong> time above (or pick
+                            a quick range).<br>2. Add the parameters you want.<br>3. Press <strong>Load data</strong>.</p>
                         <button type="button" class="ph-btn ph-btn--primary" (click)="parametersDrawer.open()">
                             <mat-icon>add</mat-icon>Add parameters
                         </button>

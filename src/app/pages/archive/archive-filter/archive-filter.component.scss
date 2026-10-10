@@ -2,63 +2,17 @@
     display: block;
 }
 
-.range-bar {
-    width: 100%;
-    box-sizing: border-box;
-}
-
-// Collapsed: one line describing what's loaded.
-.range-summary {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem 0.9rem;
-    min-height: 44px;
-    padding: 0.35rem 0.4rem 0.35rem 0.9rem;
-    border: 1px solid var(--ph-line);
-    border-radius: var(--ph-r-md);
-    background: var(--ph-bg-1);
-    box-shadow: var(--ph-highlight);
-    animation: ph-rise var(--ph-dur) var(--ph-ease-spring);
-}
-
-.range-summary-value {
-    font-size: 0.82rem;
-    color: var(--ph-text-hi);
-}
-
-.range-arrow {
-    margin: 0 0.3rem;
-    color: var(--ph-text-lo);
-}
-
-.range-summary-count {
-    margin-left: auto;
-    padding: 2px 8px;
-    border-radius: var(--ph-r-xs);
-    background: var(--ph-accent-soft);
-    color: var(--ph-accent-strong);
-    font-size: 0.7rem;
-}
-
-// Expanded: fields, quick ranges and the load action on one row.
-.range-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.75rem 0.9rem;
-    border: 1px solid var(--ph-line);
-    border-radius: var(--ph-r-md);
-    background: var(--ph-bg-1);
-    box-shadow: var(--ph-highlight);
-    animation: ph-rise var(--ph-dur) var(--ph-ease-spring);
-}
-
-.range-form-fields {
+// One row: From -> To, quick ranges, what the range holds, Load.
+.query {
     display: flex;
     align-items: flex-end;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.6rem 0.75rem;
+    margin: 0;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--ph-line);
+    border-radius: var(--ph-r-sm);
+    background: var(--ph-bg-1);
 }
 
 .field {
@@ -68,18 +22,29 @@
     margin: 0;
 
     .ph-input {
-        width: 13.5rem;
+        width: 14.5rem;
         font-family: var(--ph-font-mono);
-        font-size: 0.78rem;
+        font-size: 0.82rem;
     }
 
     .ph-input.is-invalid {
         border-color: var(--ph-warning);
-        box-shadow: 0 0 0 3px var(--ph-warning-soft);
     }
 }
 
-.range-presets {
+.field-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ph-text-mid);
+}
+
+.query-arrow {
+    align-self: flex-end;
+    padding-bottom: 0.45rem;
+    color: var(--ph-text-lo);
+}
+
+.quick {
     display: flex;
     gap: 2px;
     padding: 2px;
@@ -88,65 +53,63 @@
     background: var(--ph-bg-0);
 }
 
-.preset-chip {
+.quick-btn {
     height: 28px;
     padding: 0 0.65rem;
     border: 0;
     border-radius: 4px;
     background: transparent;
     color: var(--ph-text-mid);
-    font-family: var(--ph-font-mono);
-    font-size: 0.7rem;
+    font-family: var(--ph-font-ui);
+    font-size: 0.76rem;
+    white-space: nowrap;
     cursor: pointer;
-    transition: background-color var(--ph-dur) var(--ph-ease-out), color var(--ph-dur) var(--ph-ease-out),
-        transform var(--ph-dur-fast) var(--ph-ease-out);
+    transition: background-color var(--ph-dur-fast) var(--ph-ease-out), color var(--ph-dur-fast) var(--ph-ease-out);
 
     &:hover {
         background: var(--ph-bg-3);
         color: var(--ph-text-hi);
     }
+}
 
-    &:active {
-        transform: scale(0.96);
+// What the archive holds for the typed range, before loading it.
+.preview {
+    align-self: center;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 12rem;
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--ph-text-mid);
+    white-space: nowrap;
+
+    &::before {
+        content: "";
+        flex: 0 0 auto;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--ph-text-lo);
     }
+
+    strong {
+        font-weight: 600;
+        color: var(--ph-text-hi);
+    }
+
+    &--ready::before { background: var(--ph-nominal); }
+    &--empty { color: var(--ph-caution); }
+    &--empty::before { background: var(--ph-caution); }
+    &--invalid,
+    &--error { color: var(--ph-warning); }
+    &--invalid::before,
+    &--error::before { background: var(--ph-warning); }
 }
 
 .load-btn {
     height: 34px;
-    margin-left: auto;
-    min-width: 7.5rem;
-}
-
-.spinner {
-    width: 12px;
-    height: 12px;
-    border: 2px solid rgba(6, 19, 22, 0.25);
-    border-top-color: #ffffff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.range-message {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.78rem;
-    animation: ph-rise var(--ph-dur) var(--ph-ease-out);
-
-    &::before {
-        content: "";
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: currentColor;
-    }
-
-    &.error { color: var(--ph-warning); }
-    &.warning { color: var(--ph-caution); }
+    min-width: 8.5rem;
 }
 
 @media (max-width: 720px) {
@@ -155,8 +118,15 @@
         width: 100%;
     }
 
+    .query-arrow {
+        display: none;
+    }
+
+    .preview {
+        margin-left: 0;
+    }
+
     .load-btn {
         width: 100%;
-        margin-left: 0;
     }
 }

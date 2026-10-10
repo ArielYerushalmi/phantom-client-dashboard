@@ -1,3 +1,4 @@
+<div class="table-scroll">
 <table mat-table [dataSource]="dataSource" class="mat-table">
 
     <!-- Time Column -->
@@ -15,3 +16,5 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
+</div>
+<mat-paginator class="table-pager" [pageSize]="50" [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>

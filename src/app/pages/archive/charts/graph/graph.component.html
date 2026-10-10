@@ -1,8 +1,9 @@
-<ngx-charts-area-chart class="graph"
+<ngx-charts-line-chart class="graph"
     [results]="graphValues"
 
     [scheme]="colorScheme"
     [gradient]="gradient"
+    [rangeFillOpacity]="0.18"
     [xAxis]="showXAxis"
     [yAxis]="showYAxis"
     [legend]="showLegend"
@@ -14,6 +15,6 @@
     [roundDomains]="true"
 
     [autoScale]="true"
-    [animations]="true"
+    [animations]="false"
     [xAxisTickFormatting]="formatTime">
-</ngx-charts-area-chart>
+</ngx-charts-line-chart>

@@ -1,42 +1,39 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material/sidenav';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { ParameterRO } from 'src/app/common/dtos/parameter/parameter.ro';
 import { ChartType } from 'src/app/common/enums/chartType.enum';
 import { IFrame } from 'src/app/common/interfaces/archive/archive-frame';
 import { IArchiveSettings } from 'src/app/common/interfaces/archive/telemetry-archive-settings';
 import { ArchiveService } from 'src/app/common/services/archive-service/archive.service';
 import { DashboardService } from 'src/app/common/services/dashboard-service/dashboard.service';
+import { paramLabel } from '../../live/charts/param-status';
 import { IArchiveRange } from '../archive-filter/archive-filter.component';
 
-interface IWindowOption {
-  label: string;
-  ms: number;
+interface IRangeStats {
+  min: number;
+  max: number;
+  avg: number;
+  last: number;
 }
 
 interface IParameterPanel {
   parameter: ParameterRO;
+  label: string;
   chartType: ChartType;
   frames: IFrame[];
-  nearest: IFrame | null;
+  stats: IRangeStats | null;
   loading: boolean;
   error: boolean;
-  scrubSubject: Subject<Date>;
-  subscription: Subscription;
+  subscription: Subscription | null;
 }
 
 /**
- * Main Archive view: a DVR-style timeline scrubber replaces the old
- * filter-form-then-static-grid flow. The operator confirms a coarse time
- * range (via ArchiveFilterComponent, now a compact range-setup strip), then
- * drags/clicks the scrubber to move a playhead through that range. Each
- * selected parameter gets its own small window of frames fetched "around"
- * the playhead (skipFrames/startTime/endTime derived from scrub position),
- * refetched as the playhead moves - debounced so dragging doesn't spam the
- * backend, and raced safely via switchMap so a slow stale request can never
- * clobber a fresher one.
+ * Archive: pick a start and end time, load it, and every selected parameter
+ * is shown across that whole range - a chart over time plus min / avg / max /
+ * last for the range. Parameters can be chosen before or after loading;
+ * adding one to a loaded range fetches it for the same range.
  */
 @Component({
   selector: 'app-archive-dashboard',
@@ -45,50 +42,24 @@ interface IParameterPanel {
 })
 export class ArchiveDashboardComponent implements OnInit, OnDestroy {
 
-  private static readonly FRAME_CAP = 500;
-  private static readonly SCRUB_DEBOUNCE_MS = 180;
+  /**
+   * Most frames fetched per parameter. The archive API has no server-side
+   * downsampling, so very long ranges are truncated and the page says so.
+   */
+  static readonly MAX_FRAMES = 5000;
+  readonly maxFrames = ArchiveDashboardComponent.MAX_FRAMES;
 
+  /** The range currently loaded into the panels; null until the first load. */
   range: IArchiveRange | null = null;
-  scrubTime: Date | null = null;
 
   parameters: ParameterRO[] = [];
   parametersLoadError: boolean = false;
 
   panels: IParameterPanel[] = [];
 
-  /**
-   * Panels share the available space in a near-square grid (wider than tall,
-   * to suit landscape screens) so every replayed parameter stays on screen
-   * without scrolling: 2 -> 2x1, 4 -> 3x2, 6 -> 3x2, 9 -> 4x3, 16 -> 5x4.
-   */
-  get panelColumns(): number {
-    const n = this.panels.length;
-    return Math.max(1, Math.min(n, Math.round(Math.sqrt(n * 1.6))));
-  }
-
-  get panelRows(): number {
-    return Math.max(1, Math.ceil(this.panels.length / this.panelColumns));
-  }
-
-  readonly windowOptions: IWindowOption[] = [
-    { label: '10s window', ms: 10 * 1000 },
-    { label: '30s window', ms: 30 * 1000 },
-    { label: '1m window', ms: 60 * 1000 },
-    { label: '5m window', ms: 5 * 60 * 1000 },
-    { label: '15m window', ms: 15 * 60 * 1000 },
-    { label: '1h window', ms: 60 * 60 * 1000 },
-  ];
-  windowMs: number = this.windowOptions[2].ms;
-
   readonly ChartType = ChartType;
 
-  // Looked up via ViewChild rather than a template ref: the toggle button sits in
-  // the scrubber row's *ngIf, a sibling of the drawer's own *ngIf block, and
-  // template refs don't resolve across structural-directive scopes.
   @ViewChild('parametersDrawer') parametersDrawer?: MatDrawer;
-
-  private readonly scrubSubject = new Subject<Date>();
-  private scrubSubscription: Subscription;
 
   constructor(private readonly dashboardService: DashboardService, private readonly archiveService: ArchiveService) { }
 
@@ -100,35 +71,44 @@ export class ArchiveDashboardComponent implements OnInit, OnDestroy {
       console.log(error.error?.message ?? 'dashboard service is down!');
       this.parametersLoadError = true;
     });
-
-    this.scrubSubscription = this.scrubSubject.pipe(
-      debounceTime(ArchiveDashboardComponent.SCRUB_DEBOUNCE_MS),
-      distinctUntilChanged((a: Date, b: Date) => a.getTime() === b.getTime())
-    ).subscribe((t: Date) => this.fetchAllPanels(t));
   }
 
   ngOnDestroy(): void {
-    this.scrubSubscription?.unsubscribe();
     this.panels.forEach(panel => panel.subscription?.unsubscribe());
   }
 
-  onRangeConfirmed(range: IArchiveRange): void {
+  /**
+   * Panels share the available space in a near-square grid (wider than tall,
+   * to suit landscape screens) so every parameter stays on screen without
+   * scrolling: 2 -> 2x1, 4 -> 3x2, 6 -> 3x2, 9 -> 4x3, 16 -> 5x4.
+   */
+  get panelColumns(): number {
+    const n = this.panels.length;
+    return Math.max(1, Math.min(n, Math.round(Math.sqrt(n * 1.6))));
+  }
+
+  get panelRows(): number {
+    return Math.max(1, Math.ceil(this.panels.length / this.panelColumns));
+  }
+
+  /** The loaded range holds more frames than one request returns. */
+  get isTruncated(): boolean {
+    return !!this.range && this.range.totalFrames > this.maxFrames;
+  }
+
+  /** Time of the last frame actually shown, when the range was truncated. */
+  get shownUntil(): Date | null {
+    const times = this.panels
+      .filter(p => p.frames.length > 0)
+      .map(p => new Date(p.frames[p.frames.length - 1].time).getTime());
+    return times.length ? new Date(Math.max(...times)) : null;
+  }
+
+  onLoad(range: IArchiveRange): void {
     this.range = range;
-    this.scrubTime = range.startTime;
-    this.fetchAllPanels(range.startTime);
-  }
-
-  // Called continuously while dragging/clicking the scrubber. Updates the
-  // playhead position instantly (cheap, local) and pushes into the debounced
-  // subject that actually triggers backend fetches.
-  onScrub(t: Date): void {
-    this.scrubTime = t;
-    this.scrubSubject.next(t);
-  }
-
-  onWindowChange(): void {
-    if (this.scrubTime) {
-      this.fetchAllPanels(this.scrubTime);
+    this.panels.forEach(panel => this.fetchPanel(panel));
+    if (this.panels.length === 0) {
+      this.parametersDrawer?.open();
     }
   }
 
@@ -143,10 +123,19 @@ export class ArchiveDashboardComponent implements OnInit, OnDestroy {
       this.panels.splice(index, 1);
       return;
     }
-    const panel = this.createPanel(parameter);
+    const panel: IParameterPanel = {
+      parameter,
+      label: paramLabel(parameter.parameterName),
+      chartType: ChartType.GRAPH,
+      frames: [],
+      stats: null,
+      loading: false,
+      error: false,
+      subscription: null
+    };
     this.panels.push(panel);
-    if (this.scrubTime) {
-      panel.scrubSubject.next(this.scrubTime);
+    if (this.range) {
+      this.fetchPanel(panel);
     }
   }
 
@@ -162,76 +151,40 @@ export class ArchiveDashboardComponent implements OnInit, OnDestroy {
     return panel.parameter.id;
   }
 
-  private fetchAllPanels(t: Date): void {
-    this.panels.forEach(panel => panel.scrubSubject.next(t));
+  private fetchPanel(panel: IParameterPanel): void {
+    panel.subscription?.unsubscribe();
+    panel.loading = true;
+    panel.error = false;
+    const { startTime, endTime } = this.range;
+    panel.subscription = this.archiveService
+      .getFrames(panel.parameter.parameterName, this.maxFrames, 0, startTime, endTime)
+      .subscribe(
+        (data: IArchiveSettings) => {
+          panel.loading = false;
+          panel.frames = data?.values ?? [];
+          panel.stats = this.statsFor(panel.frames);
+        },
+        () => {
+          panel.loading = false;
+          panel.error = true;
+          panel.frames = [];
+          panel.stats = null;
+        }
+      );
   }
 
-  private createPanel(parameter: ParameterRO): IParameterPanel {
-    const scrubSubject = new Subject<Date>();
-    const panel: IParameterPanel = {
-      parameter,
-      chartType: ChartType.GRAPH,
-      frames: [],
-      nearest: null,
-      loading: false,
-      error: false,
-      scrubSubject,
-      subscription: null
-    };
-
-    panel.subscription = scrubSubject.pipe(
-      switchMap((t: Date) => {
-        panel.loading = true;
-        panel.error = false;
-        const { startTime, endTime } = this.windowFor(t);
-        return this.archiveService.getFrames(parameter.parameterName, ArchiveDashboardComponent.FRAME_CAP, 0, startTime, endTime);
-      })
-    ).subscribe(
-      (data: IArchiveSettings) => {
-        panel.loading = false;
-        panel.frames = data?.values ?? [];
-        panel.nearest = this.findNearest(panel.frames, this.scrubTime);
-      },
-      () => {
-        panel.loading = false;
-        panel.error = true;
-        panel.frames = [];
-        panel.nearest = null;
-      }
-    );
-
-    return panel;
-  }
-
-  // Translates a scrub position into the GetTime call's time window: a fixed
-  // duration centered on the playhead, clamped to the confirmed coarse
-  // range. skipFrames stays 0 because the window is already time-scoped;
-  // numberOfFrames is capped as a safety net for densely-sampled parameters.
-  private windowFor(t: Date): { startTime: Date; endTime: Date } {
-    const half = this.windowMs / 2;
-    let startMs = t.getTime() - half;
-    let endMs = t.getTime() + half;
-    if (this.range) {
-      startMs = Math.max(startMs, this.range.startTime.getTime());
-      endMs = Math.min(endMs, this.range.endTime.getTime());
+  private statsFor(frames: IFrame[]): IRangeStats | null {
+    if (!frames.length) {
+      return null;
     }
-    if (startMs >= endMs) {
-      endMs = startMs + 1000;
-    }
-    return { startTime: new Date(startMs), endTime: new Date(endMs) };
-  }
-
-  private findNearest(frames: IFrame[], t: Date | null): IFrame | null {
-    if (!frames?.length || !t) { return null; }
-    let best = frames[0];
-    let bestDiff = Math.abs(new Date(best.time).getTime() - t.getTime());
+    let min = Infinity;
+    let max = -Infinity;
+    let sum = 0;
     for (const f of frames) {
-      const diff = Math.abs(new Date(f.time).getTime() - t.getTime());
-      if (diff < bestDiff) {
-        best = f;
-        bestDiff = diff;
-      }
+      min = Math.min(min, f.value);
+      max = Math.max(max, f.value);
+      sum += f.value;
     }
-    return best;
+    return { min, max, avg: Math.round((sum / frames.length) * 10) / 10, last: frames[frames.length - 1].value };
   }
 }
