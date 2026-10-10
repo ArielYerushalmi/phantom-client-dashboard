@@ -54,6 +54,17 @@ export const SENSOR_DEFINITIONS: SensorDefinition[] = [
 export class SensorAlertService implements OnDestroy {
   private readonly url = 'ws://127.0.0.1:4444';
   private readonly maxBackoffMs = 15000;
+  /**
+   * Sensors can flap on/off every second. A clear only takes effect once the
+   * sensor has stayed off this long, so a flapping alarm reads as one steady
+   * lamp instead of flickering (and restarting its timer) every frame.
+   */
+  private readonly clearHoldMs = 3000;
+  /** Minimum gap between pop-ups for the same alarm; the lamps carry the live state. */
+  private readonly toastCooldownMs = 30000;
+
+  private readonly clearTimers = new Map<SensorKind, any>();
+  private readonly lastToastAt = new Map<SensorKind, number>();
 
   private socket: WebSocket | null = null;
   private reconnectTimer: any;
@@ -99,6 +110,8 @@ export class SensorAlertService implements OnDestroy {
   ngOnDestroy(): void {
     this.started = false;
     clearTimeout(this.reconnectTimer);
+    this.clearTimers.forEach((timer) => clearTimeout(timer));
+    this.clearTimers.clear();
     this.socket?.close();
   }
 
@@ -146,23 +159,44 @@ export class SensorAlertService implements OnDestroy {
       return;
     }
 
-    const next = this.statesSubject.value.map((s) => {
-      if (s.kind !== kind || s.active === active) {
-        return s;
-      }
-      return {
-        ...s,
-        active,
-        since: active ? new Date() : null,
-        acknowledged: active ? s.severity === 'advisory' : true
-      };
-    });
-    this.statesSubject.next(next);
+    const current = this.statesSubject.value.find((s) => s.kind === kind);
 
-    const changed = next.find((s) => s.kind === kind);
-    if (changed && active) {
-      this.notify(changed);
+    if (active) {
+      // Back on inside the hold window: the same alarm is still running.
+      clearTimeout(this.clearTimers.get(kind));
+      this.clearTimers.delete(kind);
+      if (current.active) {
+        return;
+      }
+      this.patch(kind, (s) => ({ ...s, active: true, since: new Date(), acknowledged: s.severity === 'advisory' }));
+      this.maybeNotify(current);
+      return;
     }
+
+    if (!current.active || this.clearTimers.has(kind)) {
+      return;
+    }
+    this.clearTimers.set(kind, setTimeout(() => {
+      this.clearTimers.delete(kind);
+      this.patch(kind, (s) => ({ ...s, active: false, since: null, acknowledged: true }));
+    }, this.clearHoldMs));
+  }
+
+  private patch(kind: SensorKind, update: (state: SensorState) => SensorState): void {
+    this.statesSubject.next(this.statesSubject.value.map((s) => (s.kind === kind ? update(s) : s)));
+  }
+
+  /** Advisories (e.g. Can fire) live on their lamp only; warnings/cautions pop up, rate-limited per alarm. */
+  private maybeNotify(state: SensorState): void {
+    if (state.severity === 'advisory') {
+      return;
+    }
+    const now = Date.now();
+    if (now - (this.lastToastAt.get(state.kind) ?? 0) < this.toastCooldownMs) {
+      return;
+    }
+    this.lastToastAt.set(state.kind, now);
+    this.notify(state);
   }
 
   private notify(state: SensorState): void {

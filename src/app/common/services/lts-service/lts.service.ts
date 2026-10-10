@@ -107,8 +107,11 @@ export class LtsService {
   }
 
   unsubscribe() {
+    // Closing the socket is enough: LTS tears down its pipeline consumer when the
+    // client disconnects and re-arms it on the next connection. Calling /Stop here
+    // stopped LTS's HttpListener, and once restarted it never accepts another
+    // socket - so live data only worked on the first visit after LTS started.
     this.httpUnsubscribe();
-    this.stop();
     this._subscription = null;
   }
 
