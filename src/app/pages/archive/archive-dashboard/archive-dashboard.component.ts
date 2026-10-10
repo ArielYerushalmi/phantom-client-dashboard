@@ -78,17 +78,12 @@ export class ArchiveDashboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Panels share the available space in a near-square grid (wider than tall,
-   * to suit landscape screens) so every parameter stays on screen without
-   * scrolling: 2 -> 2x1, 4 -> 3x2, 6 -> 3x2, 9 -> 4x3, 16 -> 5x4.
+   * Archive panels are for reading detail, so they keep a readable size
+   * (two columns, a minimum height set in the stylesheet) rather than
+   * shrinking to fit any number into the window; extra panels scroll.
    */
   get panelColumns(): number {
-    const n = this.panels.length;
-    return Math.max(1, Math.min(n, Math.round(Math.sqrt(n * 1.6))));
-  }
-
-  get panelRows(): number {
-    return Math.max(1, Math.ceil(this.panels.length / this.panelColumns));
+    return Math.max(1, Math.min(this.panels.length, 2));
   }
 
   /** The loaded range holds more frames than one request returns. */

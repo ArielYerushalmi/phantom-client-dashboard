@@ -56,8 +56,7 @@
 
             <mat-drawer-content class="mat-darawer-content">
                 <div class="panels-grid" *ngIf="panels.length; else noPanels"
-                    [style.grid-template-columns]="'repeat(' + panelColumns + ', minmax(0, 1fr))'"
-                    [style.grid-template-rows]="'repeat(' + panelRows + ', minmax(0, 1fr))'">
+                    [style.--panel-cols]="panelColumns">
                     <article class="panel ph-panel" *ngFor="let panel of panels; trackBy: trackByParameterId"
                         [class.is-loading]="panel.loading">
                         <header class="panel-top">

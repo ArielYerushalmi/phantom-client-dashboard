@@ -250,21 +250,34 @@ app-archive-filter {
 
 .mat-darawer-content {
     height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     background-color: transparent;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ph-line-strong) transparent;
 }
 
 // ---------------------------------------------------------------------------
 // Panels
 // ---------------------------------------------------------------------------
 
-// Fills the drawer content exactly; columns/rows are set inline from the
-// panel count so all panels share the window instead of scrolling.
+// Rows stretch to fill the window when few panels are open, but never drop
+// below a height where the chart and table stay readable; past that the
+// panel area scrolls (the query bar above stays put).
 .panels-grid {
+    --panel-min-height: 400px;
     display: grid;
-    height: 100%;
-    gap: 0.6rem;
+    grid-template-columns: repeat(var(--panel-cols, 2), minmax(0, 1fr));
+    grid-auto-rows: minmax(var(--panel-min-height), 1fr);
+    min-height: 100%;
+    gap: 0.75rem;
     box-sizing: border-box;
+}
+
+@media (max-width: 1000px) {
+    .panels-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 .panel {
@@ -419,6 +432,9 @@ app-archive-filter {
     min-height: 0;
     position: relative;
     display: flex;
+    // The body fills whatever height the grid row gives it; without this a
+    // 50-row table page would stretch its row (and the chart beside it).
+    contain: size;
     // Room for the last x-axis tick label, which ngx-charts centres on the edge.
     padding: 0.35rem 1.25rem 0.25rem 0;
     transition: opacity var(--ph-dur) var(--ph-ease-out);
