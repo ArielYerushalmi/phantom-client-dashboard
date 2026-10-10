@@ -124,16 +124,10 @@
     margin-left: -0.5rem;
 }
 
-.toolbar-title {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-}
-
 .toolbar-name {
+    min-width: 0;
     margin: 0;
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     font-weight: 600;
     letter-spacing: -0.015em;
     line-height: 1.15;
@@ -141,39 +135,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.live-badge {
-    --tone: var(--ph-text-lo);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    height: 22px;
-    padding: 0 0.55rem;
-    border: 1px solid currentColor;
-    border-radius: var(--ph-r-xs);
-    color: var(--tone);
-    font-family: var(--ph-font-mono);
-    font-size: 0.62rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    transition: color var(--ph-dur) var(--ph-ease-out);
-
-    &--live { --tone: var(--ph-nominal); }
-    &--connecting, &--reconnecting { --tone: var(--ph-caution); }
-    &--lost { --tone: var(--ph-warning); }
-}
-
-.live-badge-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-}
-
-.live-badge--live .live-badge-dot {
-    animation: ph-pulse 1.4s var(--ph-ease-out) infinite;
 }
 
 // Situation summary: counts an operator scans before reading individual tiles.
@@ -191,24 +152,32 @@
     flex-direction: column;
     justify-content: center;
     gap: 1px;
-    padding: 0.3rem 0.85rem;
+    min-width: 7.5rem;
+    padding: 0.35rem 1rem;
 
     & + & {
         border-left: 1px solid var(--ph-line);
     }
 
     dt {
-        font-size: 0.64rem;
+        font-size: 0.7rem;
         font-weight: 500;
-        color: var(--ph-text-lo);
+        color: var(--ph-text-mid);
         white-space: nowrap;
     }
 
     dd {
         margin: 0;
-        font-size: 0.9rem;
+        font-size: 1.05rem;
+        font-weight: 500;
         line-height: 1.2;
         color: var(--ph-text-hi);
+    }
+
+    .summary-of {
+        font-size: 0.8rem;
+        font-weight: 400;
+        color: var(--ph-text-lo);
     }
 
     &.is-alarm {
@@ -482,17 +451,13 @@
         display: none;
     }
 
-    .live-badge {
-        display: none;
-    }
-
     .tile-grid {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     }
 }
 
 @media (max-width: 1280px) {
-    .summary-item:nth-child(4) {
+    .summary-item:nth-child(3) {
         display: none;
     }
 }

@@ -18,6 +18,7 @@
         </div>
         <div class="tile-scale" *ngIf="ranged; else noRange">
             <div class="scale-track">
+                <span class="scale-fill" [style.transform]="'scaleX(' + markerPct / 100 + ')'"></span>
                 <span class="scale-rail" [style.transform]="'translateX(' + markerPct + '%)'">
                     <span class="scale-marker"></span>
                 </span>

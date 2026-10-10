@@ -38,10 +38,6 @@ export class SafetyAnnunciatorComponent implements OnInit, OnDestroy {
     clearInterval(this.ticker);
   }
 
-  get activeCount(): number {
-    return this.states.filter((s) => s.active).length;
-  }
-
   elapsed(state: SensorState): string {
     if (!state.since) {
       return '';

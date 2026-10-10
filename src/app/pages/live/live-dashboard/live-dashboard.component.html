@@ -29,23 +29,12 @@
                 <span class="hide-sm">Presets</span>
             </button>
 
-            <div class="toolbar-title">
-                <span class="ph-eyebrow">Live preset</span>
-                <h1 class="toolbar-name">{{ dashboard.name }}</h1>
-            </div>
-
-            <span class="live-badge" [ngClass]="'live-badge--' + link.phase">
-                <span class="live-badge-dot"></span>{{ link.phase === 'live' ? 'Live' : link.phase === 'lost' ? 'Frozen' : 'Standby' }}
-            </span>
+            <h1 class="toolbar-name">{{ dashboard.name }}</h1>
 
             <dl class="summary" aria-label="Situation summary">
-                <div class="summary-item">
-                    <dt>Parameters</dt>
-                    <dd class="telemetry-value">{{ watchedItems.length }}</dd>
-                </div>
                 <div class="summary-item" [class.is-alarm]="alarmCount > 0">
                     <dt>Out of limits</dt>
-                    <dd class="telemetry-value">{{ alarmCount }}</dd>
+                    <dd class="telemetry-value">{{ alarmCount }}<span class="summary-of"> / {{ watchedItems.length }}</span></dd>
                 </div>
                 <div class="summary-item" [class.is-stale]="staleCount > 0">
                     <dt>Not updating</dt>

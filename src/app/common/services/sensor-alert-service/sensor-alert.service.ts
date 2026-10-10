@@ -1,5 +1,4 @@
 import { Injectable, NgZone, OnDestroy } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -60,11 +59,8 @@ export class SensorAlertService implements OnDestroy {
    * lamp instead of flickering (and restarting its timer) every frame.
    */
   private readonly clearHoldMs = 3000;
-  /** Minimum gap between pop-ups for the same alarm; the lamps carry the live state. */
-  private readonly toastCooldownMs = 30000;
 
   private readonly clearTimers = new Map<SensorKind, any>();
-  private readonly lastToastAt = new Map<SensorKind, number>();
 
   private socket: WebSocket | null = null;
   private reconnectTimer: any;
@@ -88,7 +84,7 @@ export class SensorAlertService implements OnDestroy {
     }))
   );
 
-  constructor(private readonly zone: NgZone, private readonly toastr: ToastrService) { }
+  constructor(private readonly zone: NgZone) { }
 
   /** Idempotent - safe to call from every consumer. */
   start(): void {
@@ -169,7 +165,6 @@ export class SensorAlertService implements OnDestroy {
         return;
       }
       this.patch(kind, (s) => ({ ...s, active: true, since: new Date(), acknowledged: s.severity === 'advisory' }));
-      this.maybeNotify(current);
       return;
     }
 
@@ -184,30 +179,6 @@ export class SensorAlertService implements OnDestroy {
 
   private patch(kind: SensorKind, update: (state: SensorState) => SensorState): void {
     this.statesSubject.next(this.statesSubject.value.map((s) => (s.kind === kind ? update(s) : s)));
-  }
-
-  /** Advisories (e.g. Can fire) live on their lamp only; warnings/cautions pop up, rate-limited per alarm. */
-  private maybeNotify(state: SensorState): void {
-    if (state.severity === 'advisory') {
-      return;
-    }
-    const now = Date.now();
-    if (now - (this.lastToastAt.get(state.kind) ?? 0) < this.toastCooldownMs) {
-      return;
-    }
-    this.lastToastAt.set(state.kind, now);
-    this.notify(state);
-  }
-
-  private notify(state: SensorState): void {
-    const title = state.label.toUpperCase();
-    if (state.severity === 'warning') {
-      this.toastr.error(state.detail, title, { timeOut: 8000, progressBar: true });
-    } else if (state.severity === 'caution') {
-      this.toastr.warning(state.detail, title, { timeOut: 6000, progressBar: true });
-    } else {
-      this.toastr.success(state.detail, title, { timeOut: 4000 });
-    }
   }
 
   /** Newtonsoft serialises enums as ints by default; accept names too in case a StringEnumConverter is added. */
