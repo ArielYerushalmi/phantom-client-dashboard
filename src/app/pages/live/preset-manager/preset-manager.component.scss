@@ -281,7 +281,7 @@
 
     &:hover {
         background: var(--ph-accent);
-        color: #061316;
+        color: #ffffff;
 
         .open-btn-icon {
             background: rgba(6, 19, 22, 0.14);
@@ -300,7 +300,7 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: rgba(86, 182, 198, 0.16);
+    background: rgba(76, 141, 217, 0.16);
     transition: transform var(--ph-dur) var(--ph-ease-spring), background-color var(--ph-dur) var(--ph-ease-out);
 
     svg {

@@ -19,11 +19,7 @@
     padding: clamp(1.5rem, 4vw, 3.5rem);
     overflow: hidden;
     border-right: 1px solid var(--ph-line);
-    background-image:
-        radial-gradient(70% 60% at 30% 70%, rgba(86, 182, 198, 0.1), transparent 70%),
-        linear-gradient(var(--ph-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--ph-line) 1px, transparent 1px);
-    background-size: 100% 100%, 40px 40px, 40px 40px;
+    background: var(--ph-bg-1);
 }
 
 .auth-brand-top {
@@ -74,7 +70,6 @@
     vector-effect: non-scaling-stroke;
     stroke-dasharray: 600;
     stroke-dashoffset: 600;
-    filter: drop-shadow(0 0 6px rgba(86, 182, 198, 0.6));
     animation: auth-draw 2.4s var(--ph-ease-out) 0.3s forwards;
 }
 

@@ -113,7 +113,6 @@
     height: 2px;
     border-radius: 2px 2px 0 0;
     background: var(--ph-accent);
-    box-shadow: 0 0 12px var(--ph-accent);
     transform: scaleX(0);
     transition: transform var(--ph-dur-slow) var(--ph-ease-spring);
   }
@@ -192,7 +191,6 @@
   &.is-lit {
     background: var(--lamp-bg);
     border-color: transparent;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 0 18px -2px var(--lamp-bg);
   }
 
   &.is-flashing {

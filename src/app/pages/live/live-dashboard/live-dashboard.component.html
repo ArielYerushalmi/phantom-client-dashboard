@@ -38,6 +38,25 @@
                 <span class="live-badge-dot"></span>{{ link.phase === 'live' ? 'Live' : link.phase === 'lost' ? 'Frozen' : 'Standby' }}
             </span>
 
+            <dl class="summary" aria-label="Situation summary">
+                <div class="summary-item">
+                    <dt>Parameters</dt>
+                    <dd class="telemetry-value">{{ watchedItems.length }}</dd>
+                </div>
+                <div class="summary-item" [class.is-alarm]="alarmCount > 0">
+                    <dt>Out of limits</dt>
+                    <dd class="telemetry-value">{{ alarmCount }}</dd>
+                </div>
+                <div class="summary-item" [class.is-stale]="staleCount > 0">
+                    <dt>Not updating</dt>
+                    <dd class="telemetry-value">{{ staleCount }}</dd>
+                </div>
+                <div class="summary-item">
+                    <dt>Last frame</dt>
+                    <dd class="telemetry-value">{{ lastFrameAt ? (lastFrameAt | date:'HH:mm:ss') : '—' }}</dd>
+                </div>
+            </dl>
+
             <div class="toolbar-actions">
                 <button type="button" class="ph-btn" (click)="drawer.toggle()" [attr.aria-expanded]="drawer.opened">
                     <mat-icon>tune</mat-icon>
@@ -90,32 +109,39 @@
             </mat-drawer>
 
             <mat-drawer-content class="session-content">
-                <div class="instrument-panel">
+                <div class="board ph-scroll">
                     <div class="empty-state" *ngIf="watchedItems.length === 0">
-                        <svg class="empty-state-art" viewBox="0 0 120 64" aria-hidden="true">
-                            <path d="M2 48 C 22 48, 26 20, 44 20 S 70 44, 86 32 S 108 12, 118 14" />
-                            <line x1="2" y1="58" x2="118" y2="58" />
-                        </svg>
                         <p class="empty-state-title">No parameters on this preset yet</p>
-                        <p class="empty-state-hint">Pick the readouts you want to watch. The first one you add becomes
-                            the focus instrument.</p>
+                        <p class="empty-state-hint">Add the parameters you want to monitor. Each one gets its own
+                            tile on the board.</p>
                         <button type="button" class="ph-btn ph-btn--primary" (click)="drawer.open()">
                             <mat-icon>add</mat-icon>Add parameters
                         </button>
                     </div>
 
-                    <ng-container *ngIf="focusedItem">
-                        <div class="focus-slot ph-panel" [class.is-stale]="link.phase === 'lost'">
-                            <app-live-focus [entity]="focusedItem.chart"></app-live-focus>
+                    <section class="board-section" *ngIf="quantityItems.length > 0" aria-labelledby="flight-heading">
+                        <h2 class="board-heading" id="flight-heading">Flight parameters
+                            <span class="telemetry-value">{{ quantityItems.length }}</span>
+                            <span class="board-note">Trends show the last 60 s</span></h2>
+                        <div class="tile-grid">
+                            <app-param-tile *ngFor="let item of quantityItems; trackBy: trackByWatched"
+                                [parameter]="item.chart.parameter" [reading]="readingFor(item)" [now]="now"
+                                [frozen]="link.phase === 'lost'" (remove)="onRemove(item.chart.parameter)">
+                            </app-param-tile>
                         </div>
-                        <div class="strip ph-scroll" *ngIf="stripItems.length > 0">
-                            <app-live-strip-item class="ph-enter" *ngFor="let stripItem of stripItems; let i = index; trackBy: trackByWatched"
-                                [style.animation-delay.ms]="i * 40" [entity]="stripItem.chart"
-                                (focus)="promoteToFocus(stripItem.chart.parameter.parameterName)"
-                                (remove)="onRemove(stripItem.chart.parameter)">
-                            </app-live-strip-item>
+                    </section>
+
+                    <section class="board-section" *ngIf="stateItems.length > 0" aria-labelledby="states-heading">
+                        <h2 class="board-heading" id="states-heading">System states
+                            <span class="telemetry-value">{{ stateItems.length }}</span>
+                            <span class="board-note">Trends show the last 60 s</span></h2>
+                        <div class="tile-grid">
+                            <app-param-tile *ngFor="let item of stateItems; trackBy: trackByWatched"
+                                [parameter]="item.chart.parameter" [reading]="readingFor(item)" [now]="now"
+                                [frozen]="link.phase === 'lost'" (remove)="onRemove(item.chart.parameter)">
+                            </app-param-tile>
                         </div>
-                    </ng-container>
+                    </section>
                 </div>
             </mat-drawer-content>
         </mat-drawer-container>

@@ -28,7 +28,7 @@ export class GraphComponent implements OnChanges, OnDestroy {
   showXAxisLabel: boolean = false;
   showYAxisLabel: boolean = false;
   colorScheme = {
-    domain: ['#56b6c6']
+    domain: ['#4c8dd9']
   }
 
   constructor(private readonly hostRef: ElementRef<HTMLElement>) { }

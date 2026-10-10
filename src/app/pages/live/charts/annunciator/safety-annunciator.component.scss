@@ -66,13 +66,12 @@
     align-items: center;
     gap: 0.75rem;
     min-width: 0;
-    height: 56px;
+    height: 48px;
     padding: 0 0.85rem;
     overflow: hidden;
     border: 1px solid var(--ph-line);
     border-radius: var(--ph-r-sm);
     background: var(--ph-bg-1);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), inset 0 -8px 16px -12px rgba(0, 0, 0, 0.8);
     color: var(--ph-text-lo);
     text-align: left;
     cursor: default;
@@ -103,10 +102,8 @@
 
     &.is-active {
         border-color: var(--tone);
-        background: linear-gradient(90deg, var(--tone-soft), transparent 85%), var(--ph-bg-1);
-        box-shadow: 0 0 0 1px var(--tone-soft), 0 0 24px -6px var(--tone);
+        background: var(--tone-soft);
         color: var(--ph-text-hi);
-        animation: lamp-latch var(--ph-dur-slow) var(--ph-ease-spring);
 
         &::before {
             opacity: 1;
@@ -115,9 +112,9 @@
         }
 
         .lamp-code {
-            color: var(--tone);
+            background: var(--tone);
             border-color: var(--tone);
-            text-shadow: 0 0 10px var(--tone);
+            color: #fff;
         }
 
         .lamp-state {
@@ -125,27 +122,13 @@
         }
     }
 
-    // Unacknowledged: flash plus a scan sweep, and clickable to acknowledge.
+    // Unacknowledged: flashes until the operator clicks to acknowledge.
     &.is-unack {
         cursor: pointer;
-        animation: lamp-latch var(--ph-dur-slow) var(--ph-ease-spring), lamp-flash 1s steps(1, end) infinite;
-
-        &::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, var(--tone-soft), transparent);
-            transform: translateX(-100%);
-            animation: lamp-scan 1.6s var(--ph-ease-out) infinite;
-            pointer-events: none;
-        }
+        animation: lamp-flash 1s steps(1, end) infinite;
 
         &:hover {
-            transform: translateY(-1px);
-        }
-
-        &:active {
-            transform: scale(0.98);
+            border-color: var(--ph-text-hi);
         }
     }
 
@@ -193,23 +176,15 @@
     color: var(--ph-text-lo);
 }
 
-@keyframes lamp-latch {
-    from {
-        transform: scale(0.97);
-        box-shadow: 0 0 0 0 var(--tone), 0 0 48px 4px var(--tone);
-    }
-}
-
 @keyframes lamp-flash {
     50% {
-        border-color: var(--ph-line);
-        box-shadow: none;
+        background: var(--ph-bg-1);
     }
 }
 
-@keyframes lamp-scan {
-    to {
-        transform: translateX(100%);
+@media (prefers-reduced-motion: reduce) {
+    .lamp.is-unack {
+        animation: none;
     }
 }
 

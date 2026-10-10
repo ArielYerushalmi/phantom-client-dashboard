@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DashboardService } from 'src/app/common/services/dashboard-service/dashboard.service';
 import { IChartGridsterItem } from '../../../common/interfaces/gridster/chart-gridster-item.interface';
 import { ParameterRO } from 'src/app/common/dtos/parameter/parameter.ro';
@@ -14,6 +14,8 @@ import { updateDashboardDTO } from 'src/app/common/dtos/dashboard/update-dashboa
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { ParamReading, TREND_POINTS } from '../charts/param-tile/param-tile.component';
+import { isDiscrete, paramStatus } from '../charts/param-status';
 
 @Component({
   selector: 'app-live-dashboard',
@@ -33,10 +35,12 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
    * and are only ever written as 1/1/0/0 for newly-added parameters.
    */
   watchedItems: IChartGridsterItem[] = [];
-  dashboardItemMap = new Map<string, EventEmitter<number>>();
 
-  /** parameterName of the item currently shown in the large focus panel, or null when nothing is watched. */
-  focusedParameterName: string | null = null;
+  /** Latest reading per watched parameter name; the single source for every tile and the summary. */
+  readings: { [parameterName: string]: ParamReading } = {};
+  /** One shared clock so every tile ages its data against the same instant. */
+  now: number = Date.now();
+  lastFrameAt: number | null = null;
 
   dashboards: DashboardRO[] = [];
   parameters: ParameterRO[] = [];
@@ -57,6 +61,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   private liveMessageSubscription: Subscription;
   private connectionStateSubscription: Subscription;
   private linkStateSubscription: Subscription;
+  private clockTimer: any;
 
   constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly liveDataWebSocket: LtsService, private readonly toastr: ToastrService) { }
 
@@ -74,6 +79,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     this.linkStateSubscription = this.liveDataWebSocket.linkState.subscribe((state: LiveLinkState) => {
       this.link = state;
     });
+    this.clockTimer = setInterval(() => this.now = Date.now(), 1000);
   };
 
   /** Parameters matching the drawer's filter box (case-insensitive, name or units). */
@@ -98,17 +104,35 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     this.liveDataWebSocket.retry();
   }
 
-  /** The single parameter shown large in the focus panel, or null when nothing is watched. */
-  get focusedItem(): IChartGridsterItem | null {
-    if (!this.focusedParameterName) {
-      return null;
-    }
-    return this.watchedItems.find((item) => item.chart.parameter.parameterName === this.focusedParameterName) ?? null;
+  /** Quantities (speed, altitude, ...) in preset order. */
+  get quantityItems(): IChartGridsterItem[] {
+    return this.watchedItems.filter((item) => !isDiscrete(item.chart.parameter));
   }
 
-  /** Every watched parameter other than the focused one - rendered as the compact strip. */
-  get stripItems(): IChartGridsterItem[] {
-    return this.watchedItems.filter((item) => item.chart.parameter.parameterName !== this.focusedParameterName);
+  /** ON/OFF states (armed, autopilot, ...) in preset order. */
+  get stateItems(): IChartGridsterItem[] {
+    return this.watchedItems.filter((item) => isDiscrete(item.chart.parameter));
+  }
+
+  readingFor(item: IChartGridsterItem): ParamReading {
+    return this.readings[item.chart.parameter.parameterName];
+  }
+
+  /** Parameters out of range or showing a fault. */
+  get alarmCount(): number {
+    return this.countStatus('alarm');
+  }
+
+  /** Parameters that have stopped updating. */
+  get staleCount(): number {
+    return this.countStatus('stale');
+  }
+
+  private countStatus(status: string): number {
+    return this.watchedItems.filter((item) => {
+      const r = this.readingFor(item);
+      return r && paramStatus(item.chart.parameter, r.value, r.lastUpdate, this.now) === status;
+    }).length;
   }
 
   async onParameterSelected(parameter: ParameterRO) {
@@ -125,15 +149,12 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     { cols = 1, rows = 1, x = 0, y = 0 }: { cols?: number, rows?: number, x?: number, y?: number } = {}): void {
     // Every parameter watched on this page is driven off the same LiveData (value + time)
     // shape - regardless of whatever chart type an older saved preset had recorded for it -
-    // so the focus/strip readouts always have both a number and a timeseries to draw from.
+    // so every tile has both a number and a timeseries to draw from.
     let itemToAdd: IChartEntity = this.presetsUtils.initGridsterItem(parameter, ChartType.GRAPH);
 
     if (!this.presetsUtils.isParameterExists(parameter, this.watchedItems)) {
       this.watchedItems.push({ cols, rows, x, y, chart: itemToAdd });
-      this.dashboardItemMap.set(itemToAdd.parameter.parameterName, itemToAdd.dataEvent);
-      if (!this.focusedParameterName) {
-        this.focusedParameterName = parameter.parameterName;
-      }
+      this.readings[parameter.parameterName] = { value: null, lastUpdate: null, changedAt: null, history: [] };
     };
   };
 
@@ -142,21 +163,9 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     if (index != -1) {
       this.watchedItems.splice(index, 1);
     };
-    // Without this, the map keeps a growing set of stale EventEmitters for parameters
-    // that are no longer on the dashboard, and handleLiveMessage keeps emitting into them.
-    this.dashboardItemMap.delete(parameter.parameterName);
-
-    if (this.focusedParameterName === parameter.parameterName) {
-      // Promote whatever's left at the front of the strip; null (empty state) if nothing remains.
-      this.focusedParameterName = this.watchedItems[0]?.chart.parameter.parameterName ?? null;
-    }
+    delete this.readings[parameter.parameterName];
 
     await this.syncSubscription();
-  };
-
-  /** Swaps a compact strip item into the large focus slot. */
-  promoteToFocus(parameterName: string): void {
-    this.focusedParameterName = parameterName;
   };
 
   async loadPresetByIndex(): Promise<void> {
@@ -168,16 +177,25 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     await this.syncSubscription();
   };
 
-  handleLiveMessage(gridsterItemData: FrameParameter[]) {
-    gridsterItemData.forEach(item => {
-      var dataEvent = this.dashboardItemMap.get(item.Name);
-      let index: number = this.presetsUtils.findItemByName(this.watchedItems, item.Name);
-      if (index != -1) {
-        let chartType: ChartType = this.watchedItems[index].chart.chartType;
-        let dataToEmit: any = this.presetsUtils.structureDataToType(item.Data, chartType);
-        dataEvent.emit(dataToEmit);
-      };
+  handleLiveMessage(frame: FrameParameter[]) {
+    const t = Date.now();
+    frame.forEach(item => {
+      const reading = this.readings[item.Name];
+      if (!reading) {
+        return;
+      }
+      if (reading.value !== item.Data) {
+        reading.changedAt = t;
+      }
+      reading.value = item.Data;
+      reading.lastUpdate = t;
+      reading.history.push(item.Data);
+      if (reading.history.length > TREND_POINTS) {
+        reading.history.shift();
+      }
     });
+    this.lastFrameAt = t;
+    this.now = t;
   };
 
   refreshToggle() {
@@ -251,12 +269,13 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   onGotoPresetManager() {
     this.dashboard = null;
     this.watchedItems = [];
-    this.focusedParameterName = null;
-    this.dashboardItemMap.clear();
+    this.readings = {};
+    this.lastFrameAt = null;
     this.liveDataWebSocket.clearSubscription();
   };
 
   ngOnDestroy(): void {
+    clearInterval(this.clockTimer);
     this.liveMessageSubscription?.unsubscribe();
     this.connectionStateSubscription?.unsubscribe();
     this.linkStateSubscription?.unsubscribe();

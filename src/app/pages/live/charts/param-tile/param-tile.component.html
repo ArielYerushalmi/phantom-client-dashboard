@@ -1,0 +1,50 @@
+<article class="tile" [ngClass]="'tile--' + status" [class.is-frozen]="frozen"
+    [attr.aria-label]="label + ': ' + (discrete ? stateText : (value ?? 'no data') + ' ' + (parameter.units || ''))">
+    <header class="tile-head">
+        <h3 class="tile-label" [title]="parameter.parameterName + (parameter.description ? ' · ' + parameter.description : '')">
+            {{ label }}</h3>
+        <span class="tile-status" *ngIf="statusText">{{ statusText }}</span>
+        <button type="button" class="tile-remove" (click)="onRemove($event)"
+            [attr.aria-label]="'Remove ' + label" title="Remove from preset">
+            <mat-icon>close</mat-icon>
+        </button>
+    </header>
+
+    <!-- Quantity: value, units, and where it sits on its defined range -->
+    <ng-container *ngIf="!discrete">
+        <div class="tile-reading">
+            <span class="tile-value telemetry-value">{{ value !== null ? value : '—' }}</span>
+            <span class="tile-units">{{ parameter.units }}</span>
+        </div>
+        <div class="tile-scale" *ngIf="ranged; else noRange">
+            <div class="scale-track">
+                <span class="scale-rail" [style.transform]="'translateX(' + markerPct + '%)'">
+                    <span class="scale-marker"></span>
+                </span>
+            </div>
+            <div class="scale-labels telemetry-value">
+                <span>{{ parameter.minimum }}</span>
+                <span>{{ parameter.maximum }}</span>
+            </div>
+        </div>
+        <ng-template #noRange>
+            <div class="tile-scale tile-scale--none">No range defined</div>
+        </ng-template>
+    </ng-container>
+
+    <!-- State: ON/OFF and how long it has held -->
+    <ng-container *ngIf="discrete">
+        <div class="tile-reading">
+            <span class="tile-state" [class.is-on]="value >= 1">{{ stateText }}</span>
+            <span class="tile-units">{{ heldFor }}</span>
+        </div>
+        <div class="tile-scale tile-scale--none">{{ faultFlag ? 'ON indicates a fault' : (parameter.description || 'State') }}</div>
+    </ng-container>
+
+    <div class="tile-trend">
+        <svg viewBox="0 0 120 32" preserveAspectRatio="none" aria-hidden="true">
+            <line class="trend-base" x1="0" y1="31.5" x2="120" y2="31.5" />
+            <path class="trend-line" *ngIf="trendPath" [attr.d]="trendPath" vector-effect="non-scaling-stroke" />
+        </svg>
+    </div>
+</article>

@@ -1,0 +1,264 @@
+:host {
+    display: block;
+    min-width: 0;
+}
+
+.tile {
+    --tone: var(--ph-text-hi);
+    position: relative;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 0.6rem 0.75rem 0.55rem;
+    border: 1px solid var(--ph-line);
+    border-left: 3px solid var(--ph-line);
+    border-radius: var(--ph-r-sm);
+    background: var(--ph-bg-1);
+    transition: border-color var(--ph-dur) var(--ph-ease-out), opacity var(--ph-dur) var(--ph-ease-out);
+
+    &:hover .tile-remove,
+    &:focus-within .tile-remove {
+        opacity: 1;
+    }
+
+    // Out of range / fault: the only state that gets red, always paired with a text label.
+    &--alarm {
+        --tone: var(--ph-warning);
+        border-color: rgba(236, 77, 77, 0.45);
+        border-left-color: var(--ph-warning);
+        background: linear-gradient(var(--ph-warning-soft), var(--ph-warning-soft)), var(--ph-bg-1);
+
+        .tile-value,
+        .tile-state {
+            color: var(--ph-warning);
+        }
+
+        .tile-status {
+            background: var(--ph-warning);
+            border-color: var(--ph-warning);
+            color: #fff;
+        }
+    }
+
+    // Data stopped arriving: the number may no longer be true.
+    &--stale {
+        --tone: var(--ph-text-lo);
+        border-left-color: var(--ph-caution);
+
+        .tile-value,
+        .tile-state {
+            color: var(--ph-text-lo);
+        }
+
+        .tile-status {
+            border-color: var(--ph-caution);
+            color: var(--ph-caution);
+        }
+    }
+
+    &--waiting {
+        .tile-value,
+        .tile-state {
+            color: var(--ph-text-lo);
+        }
+    }
+
+    &.is-frozen {
+        opacity: 0.6;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Header
+// ---------------------------------------------------------------------------
+
+.tile-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 22px;
+}
+
+.tile-label {
+    min-width: 0;
+    margin: 0 auto 0 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.25;
+    color: var(--ph-text-hi);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tile-status {
+    flex: 0 0 auto;
+    padding: 1px 6px;
+    border: 1px solid var(--ph-line-strong);
+    border-radius: var(--ph-r-xs);
+    color: var(--ph-text-mid);
+    font-size: 0.66rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.tile-remove {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    margin: -2px -4px 0 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--ph-r-xs);
+    background: transparent;
+    color: var(--ph-text-lo);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--ph-dur-fast) var(--ph-ease-out), color var(--ph-dur-fast) var(--ph-ease-out);
+
+    .mat-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+    }
+
+    &:hover {
+        background: var(--ph-bg-3);
+        color: var(--ph-text-hi);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Reading
+// ---------------------------------------------------------------------------
+
+.tile-reading {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.tile-value,
+.tile-state {
+    font-size: 1.55rem;
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--ph-text-hi);
+}
+
+.tile-state {
+    font-family: var(--ph-font-ui);
+    font-weight: 600;
+    color: var(--ph-text-lo);
+
+    &.is-on {
+        color: var(--ph-text-hi);
+    }
+}
+
+.tile-units {
+    font-size: 0.75rem;
+    color: var(--ph-text-mid);
+    white-space: nowrap;
+}
+
+// ---------------------------------------------------------------------------
+// Range scale: track from minimum to maximum with a marker at the value
+// ---------------------------------------------------------------------------
+
+.tile-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 22px;
+
+    &--none {
+        justify-content: center;
+        font-size: 0.68rem;
+        color: var(--ph-text-lo);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.scale-track {
+    position: relative;
+    height: 6px;
+    border-radius: 1px;
+    background: var(--ph-bg-3);
+}
+
+// Full-width rail translated by the value's percentage, so the marker moves on
+// transform alone.
+.scale-rail {
+    position: absolute;
+    inset: 0;
+    transition: transform 300ms var(--ph-ease-out);
+}
+
+.scale-marker {
+    position: absolute;
+    left: -1.5px;
+    top: -3px;
+    width: 3px;
+    height: 12px;
+    border-radius: 1px;
+    background: var(--tone);
+}
+
+.scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.6rem;
+    color: var(--ph-text-lo);
+}
+
+// ---------------------------------------------------------------------------
+// Trend
+// ---------------------------------------------------------------------------
+
+.tile-trend {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 2px;
+    min-height: 0;
+
+    svg {
+        display: block;
+        width: 100%;
+        height: 32px;
+        overflow: visible;
+    }
+}
+
+.trend-base {
+    stroke: var(--ph-line-strong);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.trend-line {
+    fill: none;
+    stroke: var(--ph-text-mid);
+    stroke-width: 1.25;
+    stroke-linejoin: round;
+}
+
+.tile--alarm .trend-line {
+    stroke: var(--ph-warning);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scale-rail {
+        transition: none;
+    }
+}

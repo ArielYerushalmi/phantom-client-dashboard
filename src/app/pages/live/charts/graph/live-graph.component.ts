@@ -20,7 +20,7 @@ export class ChartsTryComponent implements OnInit, OnDestroy {
   showXAxisLabel: boolean = false;
   showYAxisLabel: boolean = true;
   colorScheme = {
-    domain: ['#56b6c6']
+    domain: ['#4c8dd9']
   }
 
 

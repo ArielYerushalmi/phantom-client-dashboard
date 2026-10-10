@@ -12,12 +12,6 @@
     box-sizing: border-box;
     overflow: hidden;
     background-color: var(--ph-bg-0);
-    background-image:
-        radial-gradient(120% 60% at 50% -10%, rgba(86, 182, 198, 0.05), transparent 60%),
-        linear-gradient(var(--ph-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--ph-line) 1px, transparent 1px);
-    background-size: 100% 100%, 32px 32px, 32px 32px;
-    background-position: 0 0, -1px -1px, -1px -1px;
 }
 
 // ---------------------------------------------------------------------------
@@ -154,7 +148,6 @@
     circle {
         fill: var(--ph-accent);
         stroke: none;
-        filter: drop-shadow(0 0 6px var(--ph-accent));
         animation: art-sweep 3.2s var(--ph-ease-spring) infinite alternate;
     }
 }
@@ -280,7 +273,7 @@
         top: 1.5px;
         width: 4px;
         height: 8px;
-        border: solid #061316;
+        border: solid #ffffff;
         border-width: 0 2px 2px 0;
         transform: rotate(45deg) scale(0);
         transition: transform var(--ph-dur) var(--ph-ease-spring);
