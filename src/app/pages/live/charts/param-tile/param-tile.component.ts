@@ -35,6 +35,8 @@ export class ParamTileComponent {
   @Input() now: number;
   /** The live link is down: show the last values, clearly marked as not current. */
   @Input() frozen = false;
+  /** Short tile (many parameters on a small screen): keep value and range, drop secondary text. */
+  @Input() compact = false;
   @Output() remove = new EventEmitter<void>();
 
   get label(): string { return paramLabel(this.parameter.parameterName); }

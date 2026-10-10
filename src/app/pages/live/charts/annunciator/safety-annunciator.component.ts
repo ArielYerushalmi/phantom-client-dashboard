@@ -8,8 +8,9 @@ import {
 
 /**
  * Cockpit-style annunciator panel for the sensors-service safety stream:
- * one lamp per sensor (crash, loss of control, engine, can-fire). Warnings
- * flash until the operator acknowledges them by clicking the lamp.
+ * one lamp per sensor (crash, loss of control, engine, can-fire). A lamp is
+ * lit, with its cause and duration, exactly while the sensor is active -
+ * nothing for the operator to click or dismiss.
  */
 @Component({
   selector: 'app-safety-annunciator',
@@ -46,12 +47,6 @@ export class SafetyAnnunciatorComponent implements OnInit, OnDestroy {
     const m = Math.floor(total / 60).toString().padStart(2, '0');
     const s = (total % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
-  }
-
-  onLampClick(state: SensorState): void {
-    if (state.active && !state.acknowledged) {
-      this.sensorAlerts.acknowledge(state.kind);
-    }
   }
 
   trackByKind(_: number, state: SensorState): number {

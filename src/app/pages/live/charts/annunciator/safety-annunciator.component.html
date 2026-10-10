@@ -6,20 +6,17 @@
         </span>
     </div>
 
-    <button type="button" class="lamp" *ngFor="let state of states; trackBy: trackByKind"
-        [ngClass]="'lamp--' + state.severity" [class.is-active]="state.active"
-        [class.is-unack]="state.active && !state.acknowledged" [class.is-stale]="link !== 'online'"
-        (click)="onLampClick(state)"
-        [attr.aria-label]="state.label + (state.active ? ' active' : ' normal')"
+    <div class="lamp" *ngFor="let state of states; trackBy: trackByKind" role="status"
+        [ngClass]="'lamp--' + state.severity" [class.is-active]="state.active" [class.is-stale]="link !== 'online'"
+        [attr.aria-label]="state.label + (state.active ? ' active: ' + state.detail : ' normal')"
         [attr.title]="state.detail">
         <span class="lamp-indicator" aria-hidden="true"></span>
         <span class="lamp-body">
             <span class="lamp-label">{{ state.label }}</span>
             <span class="lamp-state" *ngIf="state.active">
-                <span class="telemetry-value">{{ elapsed(state) }}</span>
-                {{ state.acknowledged ? state.detail : 'Click to acknowledge' }}
+                <span class="telemetry-value">{{ elapsed(state) }}</span>{{ state.detail }}
             </span>
             <span class="lamp-state" *ngIf="!state.active">Normal</span>
         </span>
-    </button>
+    </div>
 </section>

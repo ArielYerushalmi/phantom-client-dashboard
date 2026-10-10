@@ -56,6 +56,20 @@ export class ArchiveDashboardComponent implements OnInit, OnDestroy {
 
   panels: IParameterPanel[] = [];
 
+  /**
+   * Panels share the available space in a near-square grid (wider than tall,
+   * to suit landscape screens) so every replayed parameter stays on screen
+   * without scrolling: 2 -> 2x1, 4 -> 3x2, 6 -> 3x2, 9 -> 4x3, 16 -> 5x4.
+   */
+  get panelColumns(): number {
+    const n = this.panels.length;
+    return Math.max(1, Math.min(n, Math.round(Math.sqrt(n * 1.6))));
+  }
+
+  get panelRows(): number {
+    return Math.max(1, Math.ceil(this.panels.length / this.panelColumns));
+  }
+
   readonly windowOptions: IWindowOption[] = [
     { label: '10s window', ms: 10 * 1000 },
     { label: '30s window', ms: 30 * 1000 },

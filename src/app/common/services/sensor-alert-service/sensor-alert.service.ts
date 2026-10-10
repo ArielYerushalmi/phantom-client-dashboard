@@ -11,7 +11,7 @@ export enum SensorKind {
 }
 
 /**
- * warning  - red, flashing until acknowledged; immediate crew action.
+ * warning  - red; immediate crew action.
  * caution  - amber, steady; awareness required.
  * advisory - green; a positive state (e.g. firing solution available).
  */
@@ -29,8 +29,6 @@ export interface SensorState extends SensorDefinition {
   active: boolean;
   /** When the current active period started; null while inactive. */
   since: Date | null;
-  /** Warnings stay visually urgent until the operator acknowledges them. */
-  acknowledged: boolean;
 }
 
 export type SensorLinkState = 'connecting' | 'online' | 'offline';
@@ -68,19 +66,18 @@ export class SensorAlertService implements OnDestroy {
   private started = false;
 
   private readonly statesSubject = new BehaviorSubject<SensorState[]>(
-    SENSOR_DEFINITIONS.map((def) => ({ ...def, active: false, since: null, acknowledged: true }))
+    SENSOR_DEFINITIONS.map((def) => ({ ...def, active: false, since: null }))
   );
   private readonly linkSubject = new BehaviorSubject<SensorLinkState>('offline');
 
   readonly states$: Observable<SensorState[]> = this.statesSubject.asObservable();
   readonly link$: Observable<SensorLinkState> = this.linkSubject.asObservable();
 
-  /** Most severe active, unacknowledged-or-active level - drives the master warning/caution lamps. */
-  readonly master$: Observable<{ warning: boolean; caution: boolean; unacknowledged: boolean }> = this.states$.pipe(
+  /** Whether any warning / caution is active - drives the master warning/caution lamps. */
+  readonly master$: Observable<{ warning: boolean; caution: boolean }> = this.states$.pipe(
     map((states) => ({
       warning: states.some((s) => s.active && s.severity === 'warning'),
-      caution: states.some((s) => s.active && s.severity === 'caution'),
-      unacknowledged: states.some((s) => s.active && !s.acknowledged)
+      caution: states.some((s) => s.active && s.severity === 'caution')
     }))
   );
 
@@ -93,14 +90,6 @@ export class SensorAlertService implements OnDestroy {
     }
     this.started = true;
     this.connect();
-  }
-
-  acknowledgeAll(): void {
-    this.statesSubject.next(this.statesSubject.value.map((s) => ({ ...s, acknowledged: true })));
-  }
-
-  acknowledge(kind: SensorKind): void {
-    this.statesSubject.next(this.statesSubject.value.map((s) => (s.kind === kind ? { ...s, acknowledged: true } : s)));
   }
 
   ngOnDestroy(): void {
@@ -164,7 +153,7 @@ export class SensorAlertService implements OnDestroy {
       if (current.active) {
         return;
       }
-      this.patch(kind, (s) => ({ ...s, active: true, since: new Date(), acknowledged: s.severity === 'advisory' }));
+      this.patch(kind, (s) => ({ ...s, active: true, since: new Date() }));
       return;
     }
 
@@ -173,7 +162,7 @@ export class SensorAlertService implements OnDestroy {
     }
     this.clearTimers.set(kind, setTimeout(() => {
       this.clearTimers.delete(kind);
-      this.patch(kind, (s) => ({ ...s, active: false, since: null, acknowledged: true }));
+      this.patch(kind, (s) => ({ ...s, active: false, since: null }));
     }, this.clearHoldMs));
   }
 

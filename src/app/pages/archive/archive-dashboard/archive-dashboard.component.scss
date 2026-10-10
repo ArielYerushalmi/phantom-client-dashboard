@@ -303,7 +303,7 @@
 
 .mat-darawer-content {
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
     background-color: transparent;
 }
 
@@ -311,17 +311,19 @@
 // Panels
 // ---------------------------------------------------------------------------
 
+// Fills the drawer content exactly; columns/rows are set inline from the
+// panel count so all panels share the window instead of scrolling.
 .panels-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 0.75rem;
-    padding: 2px 2px 1.25rem;
+    height: 100%;
+    gap: 0.6rem;
+    box-sizing: border-box;
 }
 
 .panel {
     display: flex;
     flex-direction: column;
-    height: 330px;
+    min-height: 0;
     overflow: hidden;
     transition: border-color var(--ph-dur) var(--ph-ease-out), transform var(--ph-dur) var(--ph-ease-spring);
 
@@ -510,10 +512,6 @@ app-archive-chart {
 @media (max-width: 900px) {
     .archive-shell {
         padding: 0.75rem;
-    }
-
-    .panels-grid {
-        grid-template-columns: 1fr;
     }
 
     .drawer-toggle-btn {

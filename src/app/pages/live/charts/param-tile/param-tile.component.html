@@ -1,4 +1,4 @@
-<article class="tile" [ngClass]="'tile--' + status" [class.is-frozen]="frozen"
+<article class="tile" [ngClass]="'tile--' + status" [class.is-frozen]="frozen" [class.is-compact]="compact"
     [attr.aria-label]="label + ': ' + (discrete ? stateText : (value ?? 'no data') + ' ' + (parameter.units || ''))">
     <header class="tile-head">
         <h3 class="tile-label" [title]="parameter.parameterName + (parameter.description ? ' · ' + parameter.description : '')">

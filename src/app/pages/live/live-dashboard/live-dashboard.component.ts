@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DashboardService } from 'src/app/common/services/dashboard-service/dashboard.service';
 import { IChartGridsterItem } from '../../../common/interfaces/gridster/chart-gridster-item.interface';
 import { ParameterRO } from 'src/app/common/dtos/parameter/parameter.ro';
@@ -16,6 +16,18 @@ import { Subscription } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { ParamReading, TREND_POINTS } from '../charts/param-tile/param-tile.component';
 import { isDiscrete, paramStatus } from '../charts/param-status';
+
+/** Board sizing, in px. Must match the board/section/grid spacing in the stylesheet. */
+const BOARD = {
+  gap: 8,             // .tile-grid gap
+  heading: 26,        // section heading + its gap to the grid
+  sectionGap: 14,     // gap between sections
+  floorTileWidth: 150, // narrowest tile allowed when squeezing to fit
+  maxTileWidth: 320,  // wider than this reads as stretched
+  minRow: 96,         // prefer more columns over rows shorter than this
+  maxRow: 220,        // few parameters: don't blow tiles up to fill the screen
+  compactRow: 128     // below this, tiles drop secondary detail
+};
 
 @Component({
   selector: 'app-live-dashboard',
@@ -42,6 +54,25 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   now: number = Date.now();
   lastFrameAt: number | null = null;
 
+  /** Board grid, sized so every watched parameter fits the window without scrolling. */
+  boardCols = 6;
+  boardRowHeight = BOARD.maxRow;
+  boardCompact = false;
+  private boardSize = { width: 0, height: 0 };
+  private boardObserver?: ResizeObserver;
+
+  @ViewChild('board') set boardElement(ref: ElementRef<HTMLElement> | undefined) {
+    this.boardObserver?.disconnect();
+    if (!ref) {
+      return;
+    }
+    this.boardObserver = new ResizeObserver(([entry]) => this.zone.run(() => {
+      this.boardSize = { width: entry.contentRect.width, height: entry.contentRect.height };
+      this.layoutBoard();
+    }));
+    this.boardObserver.observe(ref.nativeElement);
+  }
+
   dashboards: DashboardRO[] = [];
   parameters: ParameterRO[] = [];
   isRefresh: boolean = true;
@@ -63,7 +94,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
   private linkStateSubscription: Subscription;
   private clockTimer: any;
 
-  constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly liveDataWebSocket: LtsService, private readonly toastr: ToastrService) { }
+  constructor(private readonly dashboardservice: DashboardService, private readonly presetsUtils: PresetsUtilsService, private readonly liveDataWebSocket: LtsService, private readonly toastr: ToastrService, private readonly zone: NgZone) { }
 
   async ngOnInit() {
     this.loadParameters();
@@ -128,6 +159,47 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     return this.countStatus('stale');
   }
 
+  /**
+   * Picks the column count giving the largest tiles that still let both
+   * sections fit the board's height, so nothing ever needs scrolling. If no
+   * count keeps rows at a comfortable height, uses the most columns allowed
+   * and lets tiles go compact.
+   */
+  private layoutBoard(): void {
+    const { width, height } = this.boardSize;
+    const quantities = this.quantityItems.length;
+    const states = this.stateItems.length;
+    if (!width || !height || quantities + states === 0) {
+      return;
+    }
+    const sections = (quantities > 0 ? 1 : 0) + (states > 0 ? 1 : 0);
+    const chrome = sections * BOARD.heading + (sections - 1) * BOARD.sectionGap;
+    const colsFor = (tileWidth: number) => Math.max(1, Math.floor((width + BOARD.gap) / (tileWidth + BOARD.gap)));
+    const rowHeightFor = (cols: number) => {
+      const rows = Math.ceil(quantities / cols) + Math.ceil(states / cols);
+      return (height - chrome - (rows - sections) * BOARD.gap) / rows;
+    };
+
+    const maxCols = colsFor(BOARD.floorTileWidth);
+    let cols = maxCols;
+    let bestArea = 0;
+    for (let c = 1; c <= maxCols; c++) {
+      const tileWidth = (width - (c - 1) * BOARD.gap) / c;
+      const rowHeight = Math.min(BOARD.maxRow, rowHeightFor(c));
+      if (tileWidth > BOARD.maxTileWidth || rowHeight < BOARD.minRow) {
+        continue;
+      }
+      if (tileWidth * rowHeight > bestArea) {
+        bestArea = tileWidth * rowHeight;
+        cols = c;
+      }
+    }
+
+    this.boardCols = cols;
+    this.boardRowHeight = Math.floor(Math.min(BOARD.maxRow, rowHeightFor(cols)));
+    this.boardCompact = this.boardRowHeight < BOARD.compactRow;
+  }
+
   private countStatus(status: string): number {
     return this.watchedItems.filter((item) => {
       const r = this.readingFor(item);
@@ -155,6 +227,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
     if (!this.presetsUtils.isParameterExists(parameter, this.watchedItems)) {
       this.watchedItems.push({ cols, rows, x, y, chart: itemToAdd });
       this.readings[parameter.parameterName] = { value: null, lastUpdate: null, changedAt: null, history: [] };
+      this.layoutBoard();
     };
   };
 
@@ -164,6 +237,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
       this.watchedItems.splice(index, 1);
     };
     delete this.readings[parameter.parameterName];
+    this.layoutBoard();
 
     await this.syncSubscription();
   };
@@ -276,6 +350,7 @@ export class LiveDashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearInterval(this.clockTimer);
+    this.boardObserver?.disconnect();
     this.liveMessageSubscription?.unsubscribe();
     this.connectionStateSubscription?.unsubscribe();
     this.linkStateSubscription?.unsubscribe();

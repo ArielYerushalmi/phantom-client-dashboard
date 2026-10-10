@@ -33,7 +33,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   username: string = "";
   link: LiveLinkState = { phase: "idle", attempt: 0, maxAttempts: 5, retryInMs: 0 };
-  master = { warning: false, caution: false, unacknowledged: false };
+  master = { warning: false, caution: false };
   utcTime: string = "--:--:--";
 
   private readonly subscriptions = new Subscription();
@@ -85,7 +85,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   onMasterClick(): void {
-    this.sensorAlerts.acknowledgeAll();
     if (this.channels.some((c) => c.path === "/live")) {
       this.router.navigateByUrl("/live");
     }

@@ -18,7 +18,6 @@
     justify-content: center;
     gap: 4px;
     padding: 0 0.9rem;
-    border-right: 1px solid var(--ph-line);
 }
 
 .annunciator-title {
@@ -62,18 +61,9 @@
     min-width: 0;
     height: 54px;
     padding: 0 0.9rem;
-    border: 0;
     border-left: 1px solid var(--ph-line);
-    background: transparent;
     color: var(--ph-text-mid);
-    font-family: var(--ph-font-ui);
-    text-align: left;
-    cursor: default;
     transition: background-color var(--ph-dur) var(--ph-ease-out);
-
-    &:first-of-type {
-        border-left: 0;
-    }
 
     &--warning { --tone: var(--ph-warning); --tone-soft: var(--ph-warning-soft); }
     &--caution { --tone: var(--ph-caution); --tone-soft: var(--ph-caution-soft); }
@@ -95,17 +85,6 @@
 
         .lamp-state .telemetry-value {
             color: var(--tone);
-        }
-    }
-
-    // Unacknowledged: flashes until the operator clicks it.
-    &.is-unack {
-        cursor: pointer;
-        animation: lamp-flash 1s steps(1, end) infinite;
-
-        &:hover {
-            background: var(--tone-soft);
-            animation: none;
         }
     }
 
@@ -151,18 +130,6 @@
     }
 }
 
-@keyframes lamp-flash {
-    50% {
-        background: transparent;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .lamp.is-unack {
-        animation: none;
-    }
-}
-
 @media (max-width: 1100px) {
     .annunciator {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -174,11 +141,11 @@
         align-items: center;
         justify-content: space-between;
         padding: 0.5rem 0.9rem;
-        border-right: 0;
         border-bottom: 1px solid var(--ph-line);
     }
 
-    .lamp:nth-of-type(odd) {
+    // Lamps are children 2-5; 2 and 4 start a row in the two-column layout.
+    .lamp:nth-child(even) {
         border-left: 0;
     }
 }

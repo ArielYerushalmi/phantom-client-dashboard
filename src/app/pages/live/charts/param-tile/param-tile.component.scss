@@ -10,6 +10,7 @@
     grid-template-rows: auto auto auto 1fr;
     gap: 0.4rem;
     height: 100%;
+    overflow: hidden;
     padding: 0.6rem 0.75rem 0.55rem;
     border: 1px solid var(--ph-line);
     border-left: 3px solid var(--ph-line);
@@ -239,18 +240,40 @@
 // Trend
 // ---------------------------------------------------------------------------
 
+// Takes whatever height the tile has left, so the trend grows on big screens
+// and shrinks rather than overflowing on small ones.
 .tile-trend {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 2px;
+    position: relative;
     min-height: 0;
+    overflow: hidden;
 
     svg {
+        position: absolute;
+        inset: 0;
         display: block;
         width: 100%;
-        height: 26px;
+        height: 100%;
         overflow: visible;
+    }
+}
+
+// Short tiles: tighter type, no secondary text, so value and range stay readable.
+.tile.is-compact {
+    gap: 0.25rem;
+    padding: 0.4rem 0.6rem 0.4rem;
+
+    .tile-value,
+    .tile-state {
+        font-size: 1.4rem;
+    }
+
+    .scale-labels,
+    .tile-scale--none {
+        display: none;
+    }
+
+    .tile-scale {
+        min-height: 0;
     }
 }
 

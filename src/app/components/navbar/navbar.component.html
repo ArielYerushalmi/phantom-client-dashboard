@@ -18,14 +18,12 @@
 
   <div class="instruments">
     <button type="button" class="master master--warning" [class.is-lit]="master.warning"
-      [class.is-flashing]="master.warning && master.unacknowledged" (click)="onMasterClick()"
-      [attr.aria-pressed]="master.warning" title="Master warning - click to acknowledge and open Live">
+      (click)="onMasterClick()" [attr.aria-pressed]="master.warning" title="Master warning - open Live">
       <span class="master-top">Master</span>
       <span class="master-bottom">Warn</span>
     </button>
     <button type="button" class="master master--caution" [class.is-lit]="master.caution"
-      [class.is-flashing]="master.caution && master.unacknowledged" (click)="onMasterClick()"
-      [attr.aria-pressed]="master.caution" title="Master caution - click to acknowledge and open Live">
+      (click)="onMasterClick()" [attr.aria-pressed]="master.caution" title="Master caution - open Live">
       <span class="master-top">Master</span>
       <span class="master-bottom">Caut</span>
     </button>

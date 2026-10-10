@@ -98,7 +98,7 @@
             </mat-drawer>
 
             <mat-drawer-content class="session-content">
-                <div class="board ph-scroll">
+                <div class="board" #board>
                     <div class="empty-state" *ngIf="watchedItems.length === 0">
                         <p class="empty-state-title">No parameters on this preset yet</p>
                         <p class="empty-state-hint">Add the parameters you want to monitor. Each one gets its own
@@ -112,10 +112,12 @@
                         <h2 class="board-heading" id="flight-heading">Flight parameters
                             <span class="telemetry-value">{{ quantityItems.length }}</span>
                             <span class="board-note">Trends show the last 60 s</span></h2>
-                        <div class="tile-grid">
+                        <div class="tile-grid" [style.grid-template-columns]="'repeat(' + boardCols + ', minmax(0, 1fr))'"
+                            [style.grid-auto-rows.px]="boardRowHeight">
                             <app-param-tile *ngFor="let item of quantityItems; trackBy: trackByWatched"
                                 [parameter]="item.chart.parameter" [reading]="readingFor(item)" [now]="now"
-                                [frozen]="link.phase === 'lost'" (remove)="onRemove(item.chart.parameter)">
+                                [compact]="boardCompact" [frozen]="link.phase === 'lost'"
+                                (remove)="onRemove(item.chart.parameter)">
                             </app-param-tile>
                         </div>
                     </section>
@@ -124,10 +126,12 @@
                         <h2 class="board-heading" id="states-heading">System states
                             <span class="telemetry-value">{{ stateItems.length }}</span>
                             <span class="board-note">Trends show the last 60 s</span></h2>
-                        <div class="tile-grid">
+                        <div class="tile-grid" [style.grid-template-columns]="'repeat(' + boardCols + ', minmax(0, 1fr))'"
+                            [style.grid-auto-rows.px]="boardRowHeight">
                             <app-param-tile *ngFor="let item of stateItems; trackBy: trackByWatched"
                                 [parameter]="item.chart.parameter" [reading]="readingFor(item)" [now]="now"
-                                [frozen]="link.phase === 'lost'" (remove)="onRemove(item.chart.parameter)">
+                                [compact]="boardCompact" [frozen]="link.phase === 'lost'"
+                                (remove)="onRemove(item.chart.parameter)">
                             </app-param-tile>
                         </div>
                     </section>

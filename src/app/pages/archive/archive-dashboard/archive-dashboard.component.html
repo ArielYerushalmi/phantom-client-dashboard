@@ -81,8 +81,10 @@
                 </div>
             </mat-drawer>
 
-            <mat-drawer-content class="mat-darawer-content ph-scroll">
-                <div class="panels-grid" *ngIf="panels.length; else noPanels">
+            <mat-drawer-content class="mat-darawer-content">
+                <div class="panels-grid" *ngIf="panels.length; else noPanels"
+                    [style.grid-template-columns]="'repeat(' + panelColumns + ', minmax(0, 1fr))'"
+                    [style.grid-template-rows]="'repeat(' + panelRows + ', minmax(0, 1fr))'">
                     <article class="panel ph-panel ph-enter" *ngFor="let panel of panels; let i = index; trackBy: trackByParameterId"
                         [style.animation-delay.ms]="i * 50" [class.is-loading]="panel.loading">
                         <header class="panel-top">
